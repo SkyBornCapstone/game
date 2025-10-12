@@ -1,0 +1,12 @@
+name: build
+on: [push, pull_request]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v5
+
+            - name: No-op
+              run: echo "CI is set up!"
