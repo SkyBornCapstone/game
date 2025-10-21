@@ -1,65 +1,92 @@
-using System;
 using UnityEngine;
+using System;
 
-public class ShipPhysics : MonoBehaviour
+[DisallowMultipleComponent]
+public class ShipController : MonoBehaviour
 {
-    // Physics Properties
-    public float baseMass = 1000f;     // kg
-    public float baseThrust = 0f;
-    public float gravity = 9.81f;      // m/s²
+    [Header("Ship Properties")]
+    public float baseMass = 1000f;
+    public float gravity = 9.81f;
+    public float rotationalDamping = 0.98f;
+    public float linearDamping = 0.995f;
 
-    // Dynamic Variables
+    [Header("Runtime State")]
     public float currentMass;
-    public float currentThrust;
     public float verticalVelocity;
+    public Vector3 velocity;
+    public Vector3 angularVelocity; // pitch/yaw/roll velocity
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private ShipEngine[] engines;
+
     void Start()
     {
         currentMass = baseMass;
-        currentThrust = baseThrust;
+        engines = GetComponentsInChildren<ShipEngine>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         ApplyCustomPhysics(Time.deltaTime);
     }
 
-
     void ApplyCustomPhysics(float deltaTime)
     {
+        // Collect forces & torques
+        Vector3 totalForce = Vector3.zero;
+        Vector3 totalTorque = Vector3.zero;
+
+        foreach (var engine in engines)
+        {
+            Vector3 thrust = engine.GetWorldThrustForce();
+            totalForce += thrust;
+
+            // Torque = r × F
+            Vector3 leverArm = engine.GetRelativePosition(transform);
+            Vector3 torque = Vector3.Cross(leverArm, thrust);
+            totalTorque += torque;
+        }
+
+        // Gravity
+        Vector3 gravityForce = Vector3.down * currentMass * gravity;
+        totalForce += gravityForce;
+
+        // Split lift component
+        float totalThrustY = Vector3.Dot(totalForce, Vector3.up);
         float weightForce = currentMass * gravity;
-        float netForce = currentThrust - weightForce;
+        float netForce = totalThrustY - weightForce;
+
         float liftRatio = netForce / weightForce;
-        float accelerationFactor = liftRatio * liftRatio * liftRatio;
-        float acceleration = currentMass * (float)Math.Log(1 + accelerationFactor);
+        float accelFactor = liftRatio * liftRatio * liftRatio;
+        float liftAcceleration = (float)Math.Log(1 + Math.Abs(accelFactor)) * Mathf.Sign(liftRatio);
 
-        verticalVelocity += acceleration * deltaTime;
+        // Apply lift only to vertical velocity
+        verticalVelocity += liftAcceleration * deltaTime;
 
-        transform.position += Vector3.up * verticalVelocity * deltaTime;
+        // Compute linear & rotational motion
+        // Horizontal acceleration = remaining horizontal force / mass
+        Vector3 horizontalForce = totalForce - Vector3.up * totalThrustY;
+        Vector3 horizontalAcceleration = horizontalForce / currentMass;
+
+        // Combine vertical + horizontal velocity
+        velocity += (horizontalAcceleration + Vector3.up * liftAcceleration) * deltaTime;
+
+        // Apply damping
+        velocity *= linearDamping;
+        verticalVelocity *= linearDamping;
+
+        // Update position 
+        transform.position += velocity * deltaTime;
+
+        // Simplified rotational inertia approximation:
+        Vector3 angularAcceleration = totalTorque / (currentMass * 0.1f);
+        angularVelocity += angularAcceleration * deltaTime;
+        angularVelocity *= rotationalDamping;
+
+        // Apply rotation
+        transform.Rotate(angularVelocity * Mathf.Rad2Deg * deltaTime, Space.Self);
     }
 
-
-
-    // Modifiers
-    public void AddThrust(float extraThrust)
-    {
-        currentThrust += extraThrust;
-    }
-    
-    public void RemoveThrust(float thrust)
-    {
-        currentThrust = Mathf.Max(0, currentThrust - thrust);
-    }
-
-    public void AddMass(float extraMass)
-    {
-        currentMass += extraMass;
-    }
-
-    public void RemoveMass(float mass)
-    {
-        currentMass = Mathf.Max(baseMass, currentMass - mass);
-    }
+    //Modifiers
+    public void AddMass(float extraMass) => currentMass += extraMass;
+    public void RemoveMass(float extraMass) => currentMass = Mathf.Max(baseMass, currentMass - extraMass);
 }
