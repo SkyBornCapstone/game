@@ -20,7 +20,7 @@ public class ShipEngine : MonoBehaviour
 
     public Vector3 GetWorldThrustForce()
     {
-        return transform.TransformDirection(localThrustDirection.normalized) * (maxThrust * currentThrottle);
+        return localThrustDirection.normalized * (maxThrust * currentThrottle);
     }
 
     public Vector3 GetRelativePosition(Transform shipRoot)
