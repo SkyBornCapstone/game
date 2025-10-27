@@ -14,7 +14,8 @@ public class ShipController : MonoBehaviour
     public float currentMass;
     public float verticalVelocity;
     public Vector3 velocity;
-    public Vector3 angularVelocity; // pitch/yaw/roll velocity
+    public Vector3 angularVelocity;
+    public float turnSensitivity = 0.05f;
 
     private ShipEngine[] engines;
 
@@ -50,6 +51,10 @@ public class ShipController : MonoBehaviour
         Vector3 forwardThrust = transform.forward * (leftForce + rightForce);
         totalForce += forwardThrust;
 
+        // Turning based on left/right force difference
+        float turnTorque = (leftForce - rightForce) * turnSensitivity;
+        angularVelocity.y += turnTorque * deltaTime;
+
         // Custom lift calculation
         float totalThrustY = Vector3.Dot(totalForce, Vector3.up);
         float weightForce = currentMass * gravity;
@@ -69,8 +74,12 @@ public class ShipController : MonoBehaviour
 
         // Apply damping
         velocity *= linearDamping;
+        angularVelocity *= rotationalDamping;
 
-        // Update position 
+        // Update rotation
+        transform.Rotate(Vector3.up, angularVelocity.y * deltaTime);
+
+        // Update position
         transform.position += velocity * deltaTime;
     }
 
