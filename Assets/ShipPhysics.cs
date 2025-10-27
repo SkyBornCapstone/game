@@ -52,8 +52,11 @@ public class ShipController : MonoBehaviour
         totalForce += forwardThrust;
 
         // Turning based on left/right force difference
-        float turnTorque = (leftForce - rightForce) * turnSensitivity;
-        angularVelocity.y += turnTorque * deltaTime;
+        float turnForce = (leftForce - rightForce) * turnSensitivity;
+        angularVelocity.y += turnForce * deltaTime;
+
+        // Roll to the side a bit when turning
+        angularVelocity.z += turnForce * -0.2f * deltaTime;
 
         // Custom lift calculation
         float totalThrustY = Vector3.Dot(totalForce, Vector3.up);
@@ -78,6 +81,7 @@ public class ShipController : MonoBehaviour
 
         // Update rotation
         transform.Rotate(Vector3.up, angularVelocity.y * deltaTime);
+        transform.Rotate(Vector3.forward, angularVelocity.z * deltaTime);
 
         // Update position
         transform.position += velocity * deltaTime;
