@@ -345,7 +345,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 1670945988362273293}
   _networkObjectCache: {fileID: 0}
   _initializationSettings:
-    TargetTransform: {fileID: 2668498128630795038}
+    TargetTransform: {fileID: 5917816713105013}
     DetachOnStart: 0
     AttachOnStop: 0
   _controllerMovementSettings:
