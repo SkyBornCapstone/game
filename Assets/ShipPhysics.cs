@@ -31,26 +31,22 @@ public class ShipController : MonoBehaviour
 
     void ApplyCustomPhysics(float deltaTime)
     {
-        // Collect forces & torques
         Vector3 totalForce = Vector3.zero;
-        Vector3 totalTorque = Vector3.zero;
+
+        float leftForce;
+        float rightForce;
 
         foreach (var engine in engines)
         {
             Vector3 thrust = engine.GetWorldThrustForce();
             totalForce += thrust;
-
-            // Torque = r × F
-            Vector3 leverArm = engine.GetRelativePosition(transform);
-            Vector3 torque = Vector3.Cross(leverArm, thrust);
-            totalTorque += torque;
+            if (engine.engineID == "L")
+                leftForce = thrust.magnitude;
+            else if (engine.engineID == "RiRght")
+                rightForce = thrust.magnitude;
         }
 
-        // Gravity
-        Vector3 gravityForce = Vector3.down * currentMass * gravity;
-        totalForce += gravityForce;
-
-        // Split lift component
+        // Custom lift calculation
         float totalThrustY = Vector3.Dot(totalForce, Vector3.up);
         float weightForce = currentMass * gravity;
         float netForce = totalThrustY - weightForce;
@@ -59,31 +55,19 @@ public class ShipController : MonoBehaviour
         float accelFactor = liftRatio * liftRatio * liftRatio;
         float liftAcceleration = (float)Math.Log(1 + Math.Abs(accelFactor)) * Mathf.Sign(liftRatio);
 
-        // Apply lift only to vertical velocity
         verticalVelocity += liftAcceleration * deltaTime;
 
-        // Compute linear & rotational motion
-        // Horizontal acceleration = remaining horizontal force / mass
         Vector3 horizontalForce = totalForce - Vector3.up * totalThrustY;
         Vector3 horizontalAcceleration = horizontalForce / currentMass;
 
         // Combine vertical + horizontal velocity
-        velocity += (horizontalAcceleration + Vector3.up * liftAcceleration) * deltaTime;
+        velocity += (horizontalAcceleration + Vector3.up * verticalVelocity) * deltaTime;
 
         // Apply damping
         velocity *= linearDamping;
-        verticalVelocity *= linearDamping;
 
         // Update position 
         transform.position += velocity * deltaTime;
-
-        // Simplified rotational inertia approximation:
-        Vector3 angularAcceleration = totalTorque / (currentMass * 0.1f);
-        angularVelocity += angularAcceleration * deltaTime;
-        angularVelocity *= rotationalDamping;
-
-        // Apply rotation
-        transform.Rotate(angularVelocity * Mathf.Rad2Deg * deltaTime, Space.Self);
     }
 
     //Modifiers

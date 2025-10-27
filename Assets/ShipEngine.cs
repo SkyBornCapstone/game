@@ -10,6 +10,7 @@ public class ShipEngine : MonoBehaviour
     public float throttleResponse = 2f;
 
     private float currentThrottle;
+    public string engineID;
 
     void Update()
     {

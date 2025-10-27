@@ -164,8 +164,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxThrust: 10000
-  throttle: 0.919
-  localThrustDirection: {x: 0, y: 1, z: 0}
+  throttle: 0
+  localThrustDirection: {x: 0, y: 0, z: 1}
   throttleResponse: 2
 --- !u!1 &579786208
 GameObject:
@@ -212,8 +212,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxThrust: 10000
-  throttle: 1
-  localThrustDirection: {x: 0, y: 1, z: 0}
+  throttle: 0
+  localThrustDirection: {x: 0, y: 0, z: 1}
   throttleResponse: 2
 --- !u!1 &863968849
 GameObject:
