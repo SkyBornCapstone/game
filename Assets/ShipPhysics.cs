@@ -9,6 +9,8 @@ public class ShipController : MonoBehaviour
     public float gravity = 9.81f;
     public float rotationalDamping = 0.98f;
     public float linearDamping = 0.995f;
+    public float levelStrength = 10f;
+    public bool autoLevel = true;
 
     [Header("Runtime State")]
     public float currentMass;
@@ -58,6 +60,14 @@ public class ShipController : MonoBehaviour
         // Roll to the side a bit when turning
         angularVelocity.z += turnForce * -0.2f * deltaTime;
 
+        // Auto-leveling to keep ship level (front-to-back)
+        if (autoLevel)
+        {
+            float currentPitch = transform.eulerAngles.x;
+            float levelTorque = -currentPitch * levelStrength;
+            angularVelocity.x += levelTorque * deltaTime;
+        }
+
         // Custom lift calculation
         float totalThrustY = Vector3.Dot(totalForce, Vector3.up);
         float weightForce = currentMass * gravity;
@@ -80,6 +90,7 @@ public class ShipController : MonoBehaviour
         angularVelocity *= rotationalDamping;
 
         // Update rotation
+        transform.Rotate(Vector3.right, angularVelocity.x * deltaTime);
         transform.Rotate(Vector3.up, angularVelocity.y * deltaTime);
         transform.Rotate(Vector3.forward, angularVelocity.z * deltaTime);
 
