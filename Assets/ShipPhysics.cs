@@ -33,18 +33,22 @@ public class ShipController : MonoBehaviour
     {
         Vector3 totalForce = Vector3.zero;
 
-        float leftForce;
-        float rightForce;
+        float leftForce = 0f;
+        float rightForce = 0f;
 
         foreach (var engine in engines)
         {
             Vector3 thrust = engine.GetWorldThrustForce();
-            totalForce += thrust;
             if (engine.engineID == "L")
                 leftForce = thrust.magnitude;
-            else if (engine.engineID == "RiRght")
+            else if (engine.engineID == "R")
                 rightForce = thrust.magnitude;
+            else
+                totalForce += thrust;
         }
+        // Transform left and right forces into forward thrust
+        Vector3 forwardThrust = transform.forward * (leftForce + rightForce);
+        totalForce += forwardThrust;
 
         // Custom lift calculation
         float totalThrustY = Vector3.Dot(totalForce, Vector3.up);
