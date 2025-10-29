@@ -1,0 +1,10 @@
+﻿fileFormatVersion: 2
+guid: 19a3c7a7a1664257b4145c0e9def6f15
+timeCreated: 1737734724
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Runtime/Hierarchy/PredictedTickPool.cs
+  uploadId: 806284

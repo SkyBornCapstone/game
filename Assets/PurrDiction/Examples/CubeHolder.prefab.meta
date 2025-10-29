@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: eb91489127ad82e4cbc003840e08c8f8
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Examples/CubeHolder.prefab
+  uploadId: 806284

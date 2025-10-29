@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 76be3880e8c8c934b89b22ded8d8af89
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Documentation/BestPractices.pdf
+  uploadId: 806284

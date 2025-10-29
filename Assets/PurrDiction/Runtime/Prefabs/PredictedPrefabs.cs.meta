@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 0fd6605d666f95f479712408e07522e5
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {fileID: 2800000, guid: 658192e6cc577404aa3ef45f4dc7e01a, type: 3}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Runtime/Prefabs/PredictedPrefabs.cs
+  uploadId: 806284

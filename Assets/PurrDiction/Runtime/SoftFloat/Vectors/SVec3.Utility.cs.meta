@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 5bf59c5230d6b45468f01cbc5a5311b5
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Runtime/SoftFloat/Vectors/SVec3.Utility.cs
+  uploadId: 806284

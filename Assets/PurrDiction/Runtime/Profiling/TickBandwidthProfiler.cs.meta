@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 8aefd4485ed55e24393d5bb566e3d853
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Runtime/Profiling/TickBandwidthProfiler.cs
+  uploadId: 806284

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0eae00088ff8d4443b0d1664cc6523f1
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Codegen/Purrdiction.Codegen.asmdef
+  uploadId: 806284

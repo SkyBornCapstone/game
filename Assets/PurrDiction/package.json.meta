@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: cee0929a2c3118b499214fa7638ce468
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/package.json
+  uploadId: 806284
