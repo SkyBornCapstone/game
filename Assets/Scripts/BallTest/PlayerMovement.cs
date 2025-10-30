@@ -1,4 +1,6 @@
+using System;
 using PurrNet.Prediction;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -8,8 +10,10 @@ public class PlayerMovement : PredictedIdentity<PlayerMovement.Input, PlayerMove
     [SerializeField] private PredictedRigidbody predictedRigidbody;
     [SerializeField] private float moveForce = 5; 
     [SerializeField] private float jumpForce = 10;
+    [SerializeField] private float knockbackForce = 4;
     [SerializeField] private float groundCheckDistance = 0.51f;
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private PlayerHealth playerHealth;
 
     protected override void LateAwake()
     {
@@ -19,6 +23,26 @@ public class PlayerMovement : PredictedIdentity<PlayerMovement.Input, PlayerMove
         {
             PlayerCamera.Instance.SetTarget(predictedTransform.graphics);
         }
+    }
+
+    private void OnEnable()
+    {
+        predictedRigidbody.onCollisionEnter += OnCollisionStart;
+    }
+
+    private void OnDisable()
+    {
+        predictedRigidbody.onCollisionEnter -= OnCollisionStart;
+    }
+
+    private void OnCollisionStart(GameObject other, PhysicsCollision physicsEvent)
+    {
+        if (!other.TryGetComponent(out PlayerMovement otherPlayer))
+            return;
+        
+        var dir = (transform.position - otherPlayer.transform.position).normalized;
+        predictedRigidbody.AddForce(dir * knockbackForce, ForceMode.Impulse);
+        playerHealth.HitOtherPlayer();
     }
 
     protected override void Simulate(Input input, ref State state, float delta)
