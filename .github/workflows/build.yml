@@ -3,8 +3,11 @@ on: [push, pull_request]
 
 jobs:
   test:
-    name: Test my project 🧪
+    name: Test project
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      checks: write
     steps:
       # Checkout
       - name: Checkout repository
@@ -48,8 +51,11 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           
   build:
-    name: Build my project ✨
+    name: Build project
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      checks: write
     steps:
       # Checkout
       - name: Checkout repository
