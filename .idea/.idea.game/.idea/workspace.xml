@@ -5,10 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d13875-1266-4230-841b-b4a9068c74c6" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/Tests.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/DefaultPrefabObjects.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/DefaultPrefabObjects.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FishNet/CodeGenerating/cecil-0.11.4/Mono.Cecil.sln.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FishNet/Runtime/Transporting/Transports/Tugboat/LiteNetLib/LiteNetLib.csproj.meta" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/.editorconfig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.game/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.game/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,6 +26,17 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock://C:/Programming/Unity/game/Assets/DefaultPrefabObjects.asset" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Programming/Unity/game/Assets/DefaultPrefabObjects.asset" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/DefaultPrefabObjects.asset" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Settings/PC_RPAsset.asset" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock://C:/Programming/Unity/game/Assets/Settings/PC_RPAsset.asset" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Programming/Unity/game/Assets/Settings/UniversalRenderPipelineGlobalSettings.asset" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Settings/UniversalRenderPipelineGlobalSettings.asset" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Tests.meta" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock://C:/Programming/Unity/game/ProjectSettings/GraphicsSettings.asset" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Programming/Unity/game/ProjectSettings/GraphicsSettings.asset" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Programming/Unity/game/ProjectSettings/ProjectSettings.asset" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/9623598fabb641f2b6ad29ba2e520af234800/4b/bc420b7c/Animator.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/9623598fabb641f2b6ad29ba2e520af234800/a4/e053a146/HumanBodyBones.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/bfba0ef6d92a4cdfa99d9dc4f3db57522b000/44/7306d887/ForceMode.cs" root0="FORCE_HIGHLIGHTING" />
@@ -43,27 +53,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Attach to Unity Editor.Attach to Unity Editor &amp; Play.executor&quot;: &quot;Debug&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.7338129&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;setup-unity-ci&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Attach to Unity Editor.Attach to Unity Editor & Play.executor": "Debug",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "XThreadsFramesViewSplitterKey": "0.7338129",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "setup-unity-ci",
+    "junie.onboarding.icon.badge.shown": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.sourceCode",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor &amp; Play">
     <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.0.59f2\Editor\Unity.exe" />
@@ -138,7 +148,7 @@
       <workItem from="1761942214937" duration="6772000" />
       <workItem from="1762027509657" duration="3662000" />
       <workItem from="1762113567282" duration="321000" />
-      <workItem from="1762114032885" duration="1845000" />
+      <workItem from="1762114032885" duration="2603000" />
     </task>
     <task id="LOCAL-00001" summary="idea stuff">
       <option name="closed" value="true" />
@@ -212,7 +222,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762115435432</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Update dirty branch">
+      <option name="closed" value="true" />
+      <created>1762116495555</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1762116495555</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -248,7 +266,8 @@
     <MESSAGE value="Setup ragdoll character" />
     <MESSAGE value="Setup github actions to automatically build and test Unity project" />
     <MESSAGE value="Update permissions" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update permissions" />
+    <MESSAGE value="Update dirty branch" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update dirty branch" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
