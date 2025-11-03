@@ -1,41 +1,38 @@
 # Contributing Guide
-How to set up, code, test, review, and release so contributions meet our Definition
-of Done.
+1. Clone Repo
+2. Create new branch
+3. Implement feature
+4. Create PR
+5. Merge PR into Main
 ## Code of Conduct
-Reference the project/community behavior expectations and reporting process.
+- n/a for now
 ## Getting Started
-List prerequisites, setup steps, environment variables/secrets handling, and how to
-run the app locally.
+- Unity 6
 ## Branching & Workflow
-Describe the workflow (e.g., trunk-based or GitFlow), default branch, branch
-naming, and when to rebase vs. merge.
+- Each feature requires a new branch
+- Once work is done on that feature create a PR and wait for review
+- Once merged delete branch
 ## Issues & Planning
-Explain how to file issues, required templates/labels, estimation, and
-triage/assignment practices.
+- 
 ## Commit Messages
-State the convention (e.g., Conventional Commits), include examples, and how to
-reference issues.
+- Commit messages must have subject line and body, seperated by blank space.
+- Sumbject line not more than 50 characters
+- Body should explain major changes
 ## Code Style, Linting & Formatting
-Name the formatter/linter, config file locations, and the exact commands to
-check/fix locally.
+- Roslyn Analyzers / StyleCop Analyzers
 ## Testing
-Define required test types, how to run tests, expected coverage thresholds, and
-when new/updated tests are mandatory.
+- Testing to will be built out in future
 ## Pull Requests & Reviews
-Outline PR requirements (template, checklist, size limits), reviewer expectations,
-approval rules, and required status checks.
+- NO ONE COMMITS TO MAIN BRANCH
+- Every PR must be approved before merge
 ## CI/CD
-Link to pipeline definitions, list mandatory jobs, how to view logs/re-run jobs,
-and what must pass before merge/release.
+To Be Built out fully, will be github actions.
 ## Security & Secrets
-State how to report vulnerabilities, prohibited patterns (hard-coded secrets),
-dependency update policy, and scanning tools.
+This section will be updated when we get ready for launch. For now people with access to the repo have permission to make prs.
 ## Documentation Expectations
-Specify what must be updated (README, docs/, API refs, CHANGELOG) and
-docstring/comment standards.
+Code should be self-documenting. All major mechanic systems should be documented in the readME file to ensure that all team members understand code structure and function.
 ## Release Process
 Describe versioning scheme, tagging, changelog generation, packaging/publishing
 steps, and rollback process.
 ## Support & Contact
-Provide maintainer contact channel, expected response windows, and where to ask
-questions.
+For now Discord is the best method of contact, those working on the project have access to the discord.
