@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 416248695753f3847bf7182821b04185
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Runtime/PhysicsEvents/Predicted2DPhysics.cs
+  uploadId: 806284

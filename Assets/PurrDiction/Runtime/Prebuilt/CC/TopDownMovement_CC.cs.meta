@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 853ebe6816069ab449c3eaa7b32a1a4b
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Runtime/Prebuilt/CC/TopDownMovement_CC.cs
+  uploadId: 806284

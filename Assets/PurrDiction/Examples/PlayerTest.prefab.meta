@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 14ef4fb9c3d76ce4686663df0c0f2555
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Examples/PlayerTest.prefab
+  uploadId: 806284

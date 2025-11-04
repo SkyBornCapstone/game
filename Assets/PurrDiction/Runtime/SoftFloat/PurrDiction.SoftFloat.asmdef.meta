@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: eec24cbd8ed01ce448a7b125d2cf8254
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Runtime/SoftFloat/PurrDiction.SoftFloat.asmdef
+  uploadId: 806284

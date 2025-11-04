@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: fc60b73ac1ef58a4789e1910a51e1e03
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Runtime/FixedPoint/LICENSE.txt
+  uploadId: 806284

@@ -1,0 +1,10 @@
+﻿fileFormatVersion: 2
+guid: 92b6561eb0b04da7915e9526b5a9d5f2
+timeCreated: 1760437016
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Runtime/FixedPoint/FPVec3.Utility.cs
+  uploadId: 806284

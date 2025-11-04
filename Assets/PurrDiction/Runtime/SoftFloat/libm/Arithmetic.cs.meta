@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 40939afc47244194792dd0464a2915fa
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Runtime/SoftFloat/libm/Arithmetic.cs
+  uploadId: 806284

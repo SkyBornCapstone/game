@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 5fe83bbdbb5396d46a02d9ba2e4705e6
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Runtime/Prebuilt/Rigidbody/TopDownPlayer_Rigidbody.prefab
+  uploadId: 806284

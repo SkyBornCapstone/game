@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 7a966dc979c23514d9834f5b294c1fba
+AssetOrigin:
+  serializedVersion: 1
+  productId: 329734
+  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
+  packageVersion: v1.2.0
+  assetPath: Assets/PurrDiction/Codegen/FPProcessor.cs
+  uploadId: 806284
