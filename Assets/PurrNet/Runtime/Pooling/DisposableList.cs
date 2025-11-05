@@ -2,14 +2,20 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using PurrNet.Packing;
 
 namespace PurrNet.Pooling
 {
-    public struct DisposableList<T> : IList<T>, IDisposable, IReadOnlyList<T>
+    public struct DisposableList<T> : IList<T>, IDisposable, IReadOnlyList<T>, IDuplicate<DisposableList<T>>
     {
         private bool _shouldDispose;
 
         public List<T> list { get; private set; }
+
+        public DisposableList<T> Duplicate()
+        {
+            return Create(this);
+        }
 
         public override string ToString()
         {

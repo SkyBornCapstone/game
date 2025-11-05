@@ -302,7 +302,7 @@ namespace PurrNet
                     if (signature.runLocally && isServer)
                         break;
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
                     Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
 #endif
                     SendToServer(packet, signature.channel);
@@ -325,7 +325,7 @@ namespace PurrNet
 
                             if (signature.excludeOwner && !IsNotOwnerPredicate(player))
                                 continue;
-#if UNITY_EDITOR
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
                             Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment,
                                 this);
 #endif
@@ -335,7 +335,7 @@ namespace PurrNet
                     }
                     else
                     {
-#if UNITY_EDITOR
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
                         Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
 #endif
                         SendToServer(packet, signature.channel);
@@ -343,7 +343,7 @@ namespace PurrNet
                     break;
                 }
                 case RPCType.TargetRPC:
-#if UNITY_EDITOR
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
                     Statistics.SentRPC(_myType, signature.type, signature.rpcName, packet.data.segment, this);
 #endif
                     if (isServer)
@@ -369,7 +369,7 @@ namespace PurrNet
         [UsedByIL]
         public bool ValidateReceivingRPC(RPCInfo info, RPCSignature signature, IRpc data, bool asServer)
         {
-#if UNITY_EDITOR
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
             _myType ??= GetType();
             Statistics.ReceivedRPC(_myType, signature.type, signature.rpcName, data.rpcData.segment, this);
 #endif

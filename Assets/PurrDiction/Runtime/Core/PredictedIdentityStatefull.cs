@@ -1,6 +1,5 @@
 ﻿using System;
 using JetBrains.Annotations;
-using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Prediction.Profiler;
@@ -48,7 +47,7 @@ namespace PurrNet.Prediction
             return currentState.ToString();
         }
 
-        private Interpolated<FULL_STATE<STATE>> _interpolatedState;
+        private InterpolatedWithDispose<FULL_STATE<STATE>> _interpolatedState;
         private History<FULL_STATE<STATE>> _stateHistory;
 
         protected TickManager tickModule { get; private set; }
@@ -114,7 +113,7 @@ namespace PurrNet.Prediction
             var interpolationBuffer = (int)Mathf.Max(world.tickRate / (float)10, 2);
 
             if (_interpolatedState == null)
-                _interpolatedState = new Interpolated<FULL_STATE<STATE>>(FULLInterpolate, 1f / world.tickRate, copy, interpolationBuffer);
+                _interpolatedState = new InterpolatedWithDispose<FULL_STATE<STATE>>(FULLInterpolate, 1f / world.tickRate, copy, interpolationBuffer);
             else _interpolatedState.Teleport(copy);
 
             if (_stateHistory == null)
@@ -182,10 +181,7 @@ namespace PurrNet.Prediction
         internal override void Rollback(ulong tick)
         {
             if (!_stateHistory.Read(tick, out var state))
-            {
-                PurrLogger.LogError($"Failed to rollback to tick {tick}, state not found.");
                 return;
-            }
 
             fullPredictedState.Dispose();
             fullPredictedState = state.DeepCopy();
@@ -199,6 +195,32 @@ namespace PurrNet.Prediction
         protected DeltaKey<STATE> stateKey => new (id);
 
         private DeltaKey<PredictedIdentityState, STATE> internalKey => new (id);
+
+        internal override void WriteFirstState(ulong tick, BitPacker packer)
+        {
+            var savedState = fullPredictedState;
+
+            if (tick > 0 && _stateHistory.TryGet(tick, out var state))
+                savedState = state;
+
+            Packer<PredictedIdentityState>.Write(packer, savedState.prediction);
+            Packer<STATE>.Write(packer, savedState.state);
+        }
+
+        internal override void ReadFirstState(ulong tick, BitPacker packer)
+        {
+            PredictedIdentityState prediction = default;
+            STATE state = default;
+
+            Packer<PredictedIdentityState>.Read(packer, ref prediction);
+            Packer<STATE>.Read(packer, ref state);
+
+            _stateHistory.Write(tick, new FULL_STATE<STATE>
+            {
+                state = state,
+                prediction = prediction
+            });
+        }
 
         internal override bool WriteCurrentState(PlayerID target, BitPacker packer, DeltaModule deltaModule)
         {
@@ -302,5 +324,15 @@ namespace PurrNet.Prediction
             var scaled = offset.Scale(offset, t);
             return from.Add(from, scaled);
         }
+
+
+        internal override void ClearFuture(ulong stateTick)
+        {
+            _stateHistory.ClearFuture(stateTick);
+        }
+
+        public override void ReadFirstInput(ulong localTick, BitPacker packer) {}
+
+        public override void WriteFirstInput(ulong localTick, BitPacker packer) {}
     }
 }

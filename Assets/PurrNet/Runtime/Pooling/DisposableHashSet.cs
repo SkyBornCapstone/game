@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using PurrNet.Packing;
 
 namespace PurrNet.Pooling
 {
-    public struct DisposableHashSet<T> : ISet<T>, IDisposable
+    public struct DisposableHashSet<T> : ISet<T>, IDisposable, IDuplicate<DisposableHashSet<T>>
     {
         private HashSet<T> _set;
 
@@ -177,5 +178,10 @@ namespace PurrNet.Pooling
 
         public bool IsReadOnly => false;
         public bool isDisposed { get; private set; }
+
+        public DisposableHashSet<T> Duplicate()
+        {
+            return Create(this);
+        }
     }
 }

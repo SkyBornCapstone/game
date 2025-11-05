@@ -1,9 +1,2 @@
 fileFormatVersion: 2
 guid: f2e62faadd444c846a5a8717786336e0
-AssetOrigin:
-  serializedVersion: 1
-  productId: 329734
-  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
-  packageVersion: v1.2.0
-  assetPath: Assets/PurrDiction/Runtime/Prebuilt/Rigidbody/RigidbodyShooter.cs
-  uploadId: 806284

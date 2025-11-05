@@ -5,17 +5,9 @@ MonoImporter:
   serializedVersion: 2
   defaultReferences:
   - _graphics: {instanceID: 0}
-  - _interpolationSettings: {fileID: 11400000, guid: 4a8aa8e44e23cfd4a8d4387ef3f36173,
-      type: 2}
+  - _interpolationSettings: {fileID: 11400000, guid: 4a8aa8e44e23cfd4a8d4387ef3f36173, type: 2}
   executionOrder: 0
   icon: {fileID: 2800000, guid: 0443ad72b2b210e42b2b90a59968c8c2, type: 3}
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 329734
-  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
-  packageVersion: v1.2.0
-  assetPath: Assets/PurrDiction/Runtime/Transform/PredictedTransform.cs
-  uploadId: 806284

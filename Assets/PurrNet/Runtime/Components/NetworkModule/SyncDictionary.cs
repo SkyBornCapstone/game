@@ -348,38 +348,7 @@ namespace PurrNet
 
             if (_isDirty)
             {
-                foreach (var change in _pendingChanges)
-                {
-                    switch (change.operation)
-                    {
-                        case SyncDictionaryOperation.Added:
-                        case SyncDictionaryOperation.Set:
-                            if (isServer)
-                                SendSetToAll(change.key, change.value, change.operation == SyncDictionaryOperation.Added);
-                            else
-                                SendSetToServer(change.key, change.value, change.operation == SyncDictionaryOperation.Added);
-                            break;
-
-                        case SyncDictionaryOperation.Removed:
-                            if (isServer)
-                                SendRemoveToAll(change.key);
-                            else
-                                SendRemoveToServer(change.key);
-                            break;
-
-                        case SyncDictionaryOperation.Cleared:
-                            if (isServer)
-                                SendClearToAll();
-                            else
-                                SendClearToServer();
-                            break;
-                    }
-                }
-
-                _pendingChanges.Clear();
-                _lastSendTime = Time.time;
-                _wasLastDirty = true;
-                _isDirty = false;
+                Flush();
             }
             else if (_wasLastDirty)
             {
@@ -394,6 +363,43 @@ namespace PurrNet
             }
         }
 
+        private void Flush()
+        {
+            for (var i = 0; i < _pendingChanges.Count; i++)
+            {
+                var change = _pendingChanges[i];
+                switch (change.operation)
+                {
+                    case SyncDictionaryOperation.Added:
+                    case SyncDictionaryOperation.Set:
+                        if (isServer)
+                            SendSetToAll(change.key, change.value, change.operation == SyncDictionaryOperation.Added);
+                        else
+                            SendSetToServer(change.key, change.value, change.operation == SyncDictionaryOperation.Added);
+                        break;
+
+                    case SyncDictionaryOperation.Removed:
+                        if (isServer)
+                            SendRemoveToAll(change.key);
+                        else
+                            SendRemoveToServer(change.key);
+                        break;
+
+                    case SyncDictionaryOperation.Cleared:
+                        if (isServer)
+                            SendClearToAll();
+                        else
+                            SendClearToServer();
+                        break;
+                }
+            }
+
+            _pendingChanges.Clear();
+            _lastSendTime = Time.time;
+            _wasLastDirty = true;
+            _isDirty = false;
+        }
+        
         #region RPCs
 
         [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]

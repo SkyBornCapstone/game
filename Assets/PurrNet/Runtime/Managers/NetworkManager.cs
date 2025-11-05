@@ -1220,7 +1220,7 @@ namespace PurrNet
                 _isCleaningServer = false;
             }
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
             Statistics.MarkEndOfSampling();
 #endif
         }

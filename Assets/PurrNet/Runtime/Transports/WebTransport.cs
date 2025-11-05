@@ -136,6 +136,9 @@ namespace PurrNet.Transports
 
         private void SetupCloud()
         {
+            if (_automaticCloudSetups == null)
+                return;
+
             if (_automaticCloudSetups.adaptToEdgegap)
             {
                 var arbitrium = EdgegapUtils.GetArbitrium();
