@@ -1,0 +1,21 @@
+{
+    "name": "dev.purrnet.purrdiction",
+    "version": "1.2.1-beta.5",
+    "author": {
+        "name": "PurrNet Team",
+        "url": "https://purrnet.dev/"
+    },
+    "description": "An addon to PurrNet for CSP (client side prediction)",
+    "displayName": "Purrdiction",
+    "documentationUrl": "https://purrnet.gitbook.io/docs/systems-and-modules/client-side-prediction",
+    "hideInEditor": false,
+    "keywords": [
+        "purrnet",
+        "networking",
+        "multiplayer",
+        "prediction"
+    ],
+    "dependencies": {
+        "com.unity.nuget.mono-cecil": "1.11.4"
+    }
+}
