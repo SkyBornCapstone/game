@@ -29,6 +29,7 @@ namespace PurrNet
         [SerializeField, HideInInspector] private TimerState _state;
         [SerializeField, HideInInspector] private float _remaining;
         [SerializeField, HideInInspector] private float _lastReconcile;
+        [SerializeField, HideInInspector] private bool _manualUpdate;
 
         public float remaining => _remaining;
         public bool isRunning => _state == TimerState.Running;
@@ -42,17 +43,32 @@ namespace PurrNet
         public event Action onTimerPaused;
         public event Action onTimerResumed;
 
-        public SyncTimer(bool ownerAuth = false, float reconcileInterval = 3)
+        public SyncTimer(bool ownerAuth = false, float reconcileInterval = 3, bool manualUpdate = false)
         {
             _ownerAuth = ownerAuth;
             _reconcileInterval = reconcileInterval;
             _state = TimerState.Stopped;
+            
         }
 
         public void OnTick(float delta)
         {
-            if (_state != TimerState.Running) return;
+            if (!_manualUpdate) 
+                return;
 
+            Advance(delta);
+        }
+
+        /// <summary>
+        /// Used to manually advance the sync timer if the manual update has been set to true when initializing the timer
+        /// </summary>
+        /// <param name="delta">The delta to advance the timer by</param>
+        /// <param name="useRunningCheck">Only for special use cases, where you'd want to skip the synchronized check to see whether the timer is running or not</param>
+        public void Advance(float delta, bool useRunningCheck = true)
+        {
+            if (useRunningCheck && _state != TimerState.Running)
+                return;
+            
             int lastSecond = remainingInt;
             _remaining -= delta;
             if (lastSecond != remainingInt)

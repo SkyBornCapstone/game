@@ -5,10 +5,3 @@ DefaultImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 297320
-  packageName: 'PurrNet: Multiplayer Networking'
-  packageVersion: v1.16.0
-  assetPath: Assets/PurrNet/Documentation/NetworkingData.pdf
-  uploadId: 806278

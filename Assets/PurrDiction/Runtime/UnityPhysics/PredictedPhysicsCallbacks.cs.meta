@@ -1,9 +1,2 @@
 fileFormatVersion: 2
 guid: b199eaec503d014489345869ebf512b0
-AssetOrigin:
-  serializedVersion: 1
-  productId: 329734
-  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
-  packageVersion: v1.2.0
-  assetPath: Assets/PurrDiction/Runtime/UnityPhysics/PredictedPhysicsCallbacks.cs
-  uploadId: 806284

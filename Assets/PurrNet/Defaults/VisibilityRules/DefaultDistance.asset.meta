@@ -6,10 +6,3 @@ NativeFormatImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 297320
-  packageName: 'PurrNet: Multiplayer Networking'
-  packageVersion: v1.16.0
-  assetPath: Assets/PurrNet/Defaults/VisibilityRules/DefaultDistance.asset
-  uploadId: 806278

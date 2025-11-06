@@ -1,9 +1,2 @@
 fileFormatVersion: 2
 guid: a4ff0afb993b0f149b0d414e2d9bd15d
-AssetOrigin:
-  serializedVersion: 1
-  productId: 329734
-  packageName: 'PurrDiction: Client Side Prediction For PurrNet'
-  packageVersion: v1.2.0
-  assetPath: Assets/PurrDiction/Runtime/Prebuilt/Rigidbody/RigidbodyJump.cs
-  uploadId: 806284

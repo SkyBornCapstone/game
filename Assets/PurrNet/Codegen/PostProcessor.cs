@@ -120,9 +120,9 @@ namespace PurrNet.Codegen
             {
                 if (attribute.AttributeType.FullName == typeof(ServerRpcAttribute).FullName)
                 {
-                    if (attribute.ConstructorArguments.Count != 6)
+                    if (attribute.ConstructorArguments.Count != 7)
                     {
-                        Error(messages, "ServerRPC attribute must have 6 arguments", method);
+                        Error(messages, "ServerRPC attribute must have 7 arguments", method);
                         return null;
                     }
 
@@ -132,6 +132,7 @@ namespace PurrNet.Codegen
                     var compressionLevel = (CompressionLevel)attribute.ConstructorArguments[3].Value;
                     var asyncTimeoutInSec = (float)attribute.ConstructorArguments[4].Value;
                     var stripCode = (StripCodeModeOverride)attribute.ConstructorArguments[5].Value;
+                    var deltaPacked = (bool)attribute.ConstructorArguments[6].Value;
 
                     data = new RPCSignature
                     {
@@ -145,15 +146,16 @@ namespace PurrNet.Codegen
                         isStatic = method.IsStatic,
                         asyncTimeoutInSec = asyncTimeoutInSec,
                         compressionLevel = compressionLevel,
-                        stripCodeMode = stripCode
+                        stripCodeMode = stripCode,
+                        deltaPacked = deltaPacked
                     };
                     rpcCount++;
                 }
                 else if (attribute.AttributeType.FullName == typeof(ObserversRpcAttribute).FullName)
                 {
-                    if (attribute.ConstructorArguments.Count != 8)
+                    if (attribute.ConstructorArguments.Count != 9)
                     {
-                        Error(messages, "ObserversRPC attribute must have 8 arguments", method);
+                        Error(messages, "ObserversRPC attribute must have 9 arguments", method);
                         return null;
                     }
 
@@ -165,6 +167,7 @@ namespace PurrNet.Codegen
                     var excludeSender = (bool)attribute.ConstructorArguments[5].Value;
                     var compressionLevel = (CompressionLevel)attribute.ConstructorArguments[6].Value;
                     var asyncTimeoutInSec = (float)attribute.ConstructorArguments[7].Value;
+                    var deltaPacked = (bool)attribute.ConstructorArguments[8].Value;
 
                     data = new RPCSignature
                     {
@@ -178,15 +181,16 @@ namespace PurrNet.Codegen
                         excludeSender = excludeSender,
                         isStatic = method.IsStatic,
                         asyncTimeoutInSec = asyncTimeoutInSec,
-                        compressionLevel = compressionLevel
+                        compressionLevel = compressionLevel,
+                        deltaPacked = deltaPacked
                     };
                     rpcCount++;
                 }
                 else if (attribute.AttributeType.FullName == typeof(TargetRpcAttribute).FullName)
                 {
-                    if (attribute.ConstructorArguments.Count != 6)
+                    if (attribute.ConstructorArguments.Count != 7)
                     {
-                        Error(messages, "TargetRPC attribute must have 6 arguments", method);
+                        Error(messages, "TargetRPC attribute must have 7 arguments", method);
                         return null;
                     }
 
@@ -196,6 +200,7 @@ namespace PurrNet.Codegen
                     var requireServer = (bool)attribute.ConstructorArguments[3].Value;
                     var compressionLevel = (CompressionLevel)attribute.ConstructorArguments[4].Value;
                     var asyncTimeoutInSec = (float)attribute.ConstructorArguments[5].Value;
+                    var deltaPacked = (bool)attribute.ConstructorArguments[6].Value;
 
                     data = new RPCSignature
                     {
@@ -209,7 +214,8 @@ namespace PurrNet.Codegen
                         excludeSender = false,
                         isStatic = method.IsStatic,
                         asyncTimeoutInSec = asyncTimeoutInSec,
-                        compressionLevel = compressionLevel
+                        compressionLevel = compressionLevel,
+                        deltaPacked = deltaPacked
                     };
                     rpcCount++;
                 }
@@ -1894,6 +1900,7 @@ namespace PurrNet.Codegen
             code.Append(Instruction.Create(OpCodes.Ldc_R4, rpc.Signature.asyncTimeoutInSec));
             code.Append(Instruction.Create(OpCodes.Ldc_I4, (int)rpc.Signature.compressionLevel));
             code.Append(Instruction.Create(OpCodes.Ldc_I4, rpc.Signature.excludeSender ? 1 : 0));
+            code.Append(Instruction.Create(OpCodes.Ldc_I4, rpc.Signature.deltaPacked ? 1 : 0));
 
             if (rpc.Signature.type == RPCType.TargetRPC)
             {
@@ -3168,6 +3175,9 @@ namespace PurrNet.Codegen
                 return true;
 
             if (IsGeneric(typeReference, typeof(DisposableList<>)))
+                return true;
+
+            if (IsGeneric(typeReference, typeof(DisposableArray<>)))
                 return true;
 
             if (IsGeneric(typeReference, typeof(DisposableHashSet<>)))

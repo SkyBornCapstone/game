@@ -8,11 +8,20 @@ namespace PurrNet
         private static FirstElementMap<PlayerID, T> _allPlayers = new();
         public static IReadOnlyDictionary<PlayerID, T> allPlayers => _allPlayers.first;
 
+        private PlayerID? _oldRegisteredOwner;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Init() => _allPlayers = new FirstElementMap<PlayerID, T>();
+
+        protected override void OnSpawned()
+        {
+            if (owner != _oldRegisteredOwner)
+                OnOwnerChanged(_oldRegisteredOwner, owner, isServer);
+        }
+
         protected override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
         {
-            base.OnOwnerChanged(oldOwner, newOwner, asServer);
-
-            if (asServer && isHost)
+            if (_oldRegisteredOwner == newOwner)
                 return;
 
             if (oldOwner.HasValue)
@@ -20,6 +29,8 @@ namespace PurrNet
 
             if (newOwner.HasValue)
                 _allPlayers.AddItem(newOwner.Value, this as T);
+
+            _oldRegisteredOwner = newOwner;
         }
 
         protected override void OnDespawned(bool asServer)

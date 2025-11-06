@@ -22,6 +22,7 @@ namespace PurrNet.Codegen
         Queue,
         Stack,
         DisposableList,
+        DisposableArray,
         DisposableHashSet,
         DisposableDictionary
     }
@@ -31,10 +32,10 @@ namespace PurrNet.Codegen
         public static bool ValideType(TypeReference type)
         {
             // Check if the type itself is an interface
-            if (type.Resolve()?.IsInterface == true)
+            /*if (type.Resolve()?.IsInterface == true)
             {
                 return false;
-            }
+            }*/
 
             bool isDelegate = PostProcessor.InheritsFrom(type.Resolve(), typeof(Delegate).FullName);
 
@@ -50,7 +51,7 @@ namespace PurrNet.Codegen
                 // Recursively validate all generic arguments
                 foreach (var argument in genericInstance.GenericArguments)
                 {
-                    if (argument.ContainsGenericParameter || argument.Resolve()?.IsInterface == true ||
+                    if (argument.ContainsGenericParameter ||/* argument.Resolve()?.IsInterface == true ||*/
                         !ValideType(argument))
                     {
                         return false;
@@ -121,14 +122,10 @@ namespace PurrNet.Codegen
             if (hasDontPack)
                 return;
 
-            if (resolvedType.IsInterface)
-                return;
-
             var bitStreamType = assembly.MainModule.GetTypeDefinition(typeof(BitPacker)).Import(assembly.MainModule);
             var mainmodule = assembly.MainModule;
 
-
-            if (hashOnly)
+            if (resolvedType.IsInterface || hashOnly)
             {
                 assembly.MainModule.Types.Add(serializerClass);
                 HandleHashOnly(assembly, type, serializerClass);
@@ -396,6 +393,13 @@ namespace PurrNet.Codegen
                     genericRegisterDListMethod.GenericArguments.Add(stackType.GenericArguments[0]);
 
                     il.Emit(OpCodes.Call, genericRegisterDListMethod);
+                    break;
+                case HandledGenericTypes.DisposableArray when importedType is GenericInstanceType stackType:
+                    var registerDisposableArrayMethod =
+                        packCollectionsType.GetMethod("RegisterDisposableArray", true).Import(module);
+                    var genericRegisterDArrayMethod = new GenericInstanceMethod(registerDisposableArrayMethod);
+                    genericRegisterDArrayMethod.GenericArguments.Add(stackType.GenericArguments[0]);
+                    il.Emit(OpCodes.Call, genericRegisterDArrayMethod);
                     break;
                 case HandledGenericTypes.DisposableHashSet when importedType is GenericInstanceType stackType:
                     var registerDisposableHashSetMethod =
@@ -1028,6 +1032,13 @@ namespace PurrNet.Codegen
                 type = HandledGenericTypes.DisposableList;
                 return true;
             }
+
+            if (IsGeneric(typeDef, typeof(DisposableArray<>)))
+            {
+                type = HandledGenericTypes.DisposableArray;
+                return true;
+            }
+
 
             if (IsGeneric(typeDef, typeof(DisposableHashSet<>)))
             {
