@@ -50,6 +50,18 @@ jobs:
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Test results
+          path: artifacts
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Coverage results
+          path: ${{ steps.myTestStep.outputs.coveragePath }}
+          
   build:
     name: Build project
     runs-on: ubuntu-latest
