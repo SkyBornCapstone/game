@@ -10,13 +10,15 @@ namespace GameStates
 
         protected override void StateSimulate(ref State state, float delta)
         {
-            if (predictionManager.players.currentState.handledPlayers.Count >= requiredPlayers)
+            if (predictionManager.players.currentState.players.Count >= requiredPlayers)
                 machine.Next();
         }
 
         public struct State : IPredictedData<State>
         {
-            public void Dispose() { }
+            public void Dispose()
+            {
+            }
         }
     }
 }

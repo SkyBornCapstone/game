@@ -11,11 +11,11 @@ namespace Player
         [SerializeField] private float jumpForce = 7f;
         [SerializeField] private float groundCheckRadius = 0.2f;
         [SerializeField] private LayerMask groundLayer;
-    
+
         [SerializeField] private FirstPersonCamera camera;
         [SerializeField] private PredictedRigidbody predictedRigidbody;
         [SerializeField] private Animator animator;
-    
+
         private static readonly int VelocityXHash = Animator.StringToHash("Velocity X");
         private static readonly int VelocityZHash = Animator.StringToHash("Velocity Z");
         private static readonly int JumpHash = Animator.StringToHash("Jump");
@@ -29,14 +29,16 @@ namespace Player
 
         protected override void Simulate(MoveInput moveInput, ref MoveState moveState, float delta)
         {
-            Vector3 targetVel = (transform.forward * moveInput.moveDirection.y + transform.right * moveInput.moveDirection.x) * moveSpeed;
+            Vector3 targetVel =
+                (transform.forward * moveInput.moveDirection.y + transform.right * moveInput.moveDirection.x) *
+                moveSpeed;
             predictedRigidbody.AddForce(targetVel * acceleration);
-        
+
             var horizontal = new Vector3(predictedRigidbody.linearVelocity.x, 0, predictedRigidbody.linearVelocity.z);
             predictedRigidbody.AddForce(-horizontal * planarDamping);
             if (horizontal.magnitude > moveSpeed)
                 predictedRigidbody.velocity = new Vector3(targetVel.x, predictedRigidbody.velocity.y, targetVel.z);
-        
+
             // moveState.isWalking = horizontal.sqrMagnitude > 0.0001f;
             moveState.velocity = horizontal;
             var isGrounded = IsGrounded();
@@ -66,7 +68,7 @@ namespace Player
             Vector3 worldVelocity = viewState.velocity;
 
             Vector3 localVelocity = transform.InverseTransformDirection(worldVelocity);
-        
+
             float deltaTime = Time.deltaTime;
             animator.SetFloat(VelocityXHash, localVelocity.x, .1f, deltaTime);
             animator.SetFloat(VelocityZHash, localVelocity.z, .1f, deltaTime);
@@ -88,16 +90,18 @@ namespace Player
         }
 
         private static readonly Collider[] _groundCheckColliders = new Collider[16];
+
         private bool IsGrounded()
         {
-            var hit = Physics.OverlapSphereNonAlloc(transform.position, groundCheckRadius, _groundCheckColliders, groundLayer);
+            var hit = Physics.OverlapSphereNonAlloc(transform.position, groundCheckRadius, _groundCheckColliders,
+                groundLayer);
             return hit > 0;
         }
 
         protected override void GetFinalInput(ref MoveInput moveInput)
         {
             moveInput.moveDirection = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-            moveInput.cameraForward = camera.forward;
+            moveInput.cameraForward = camera.Forward;
         }
 
         protected override void SanitizeInput(ref MoveInput input)
@@ -117,8 +121,10 @@ namespace Player
             public Vector3 velocity;
             public bool jump;
             public bool isGrounded;
-        
-            public void Dispose() { }
+
+            public void Dispose()
+            {
+            }
         }
 
         public struct MoveInput : IPredictedData
@@ -126,8 +132,10 @@ namespace Player
             public Vector2 moveDirection;
             public Vector3? cameraForward;
             public bool jump;
-        
-            public void Dispose() { }
+
+            public void Dispose()
+            {
+            }
         }
     }
 }
