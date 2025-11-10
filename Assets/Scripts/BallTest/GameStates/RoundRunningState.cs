@@ -1,4 +1,3 @@
-using System;
 using PurrNet;
 using PurrNet.Pooling;
 using PurrNet.Prediction;
@@ -20,17 +19,17 @@ namespace GameStates
 
         public override void Enter()
         {
-            currentState.Players = DisposableList<PlayerID>.Create(predictionManager.players.currentState.handledPlayers);
+            currentState.Players = DisposableList<PlayerID>.Create(predictionManager.players.currentState.players);
         }
 
         private void OnPlayerDeath(PlayerID? owner)
         {
             if (machine.currentStateNode is not RoundRunningState runningState || runningState != this)
                 return;
-            
+
             if (!owner.HasValue)
                 return;
-            
+
             currentState.Players.Remove(owner.Value);
 
             if (currentState.Players.Count <= 1)

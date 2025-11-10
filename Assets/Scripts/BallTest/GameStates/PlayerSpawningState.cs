@@ -12,20 +12,21 @@ namespace GameStates
 
         public override void Enter()
         {
-            for (var i = 0; i < predictionManager.players.currentState.handledPlayers.Count; i++)
+            for (var i = 0; i < predictionManager.players.currentState.players.Count; i++)
             {
-                var player = predictionManager.players.currentState.handledPlayers[i];
+                var player = predictionManager.players.currentState.players[i];
                 var spawnPoint = spawnPoints[i];
                 predictionManager.hierarchy.Create(playerPrefab, spawnPoint.position, spawnPoint.rotation, player);
             }
-            
+
             machine.Next();
         }
 
         public struct State : IPredictedData<State>
         {
-            public void Dispose() { }
+            public void Dispose()
+            {
+            }
         }
-        
     }
 }
