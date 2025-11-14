@@ -9,13 +9,34 @@ namespace Ship
         private ShipEngine[] rightEngines;
         private ShipEngine[] upEngines;
 
-        [Header("Input Settings")]
+        [Header("Input Sensitivity")]
         [Range(0f, 1f)] public float forwardSensitivity = 1f;
         [Range(0f, 1f)] public float turnSensitivity = 1f;
         [Range(0f, 1f)] public float upSensitivity = 1f;
 
-        // Find and categorize all ship engines
-        void Start()
+        private ShipControls controls;
+
+        private float forwardInput;
+        private float turnInput;
+        private float upInput;
+
+        private void Awake()
+        {
+            // Set up the InputActions instance
+            controls = new ShipControls();
+
+            // Register callbacks
+            controls.Flight.Forward.performed += ctx => forwardInput = ctx.ReadValue<float>();
+            controls.Flight.Forward.canceled  += ctx => forwardInput = 0f;
+
+            controls.Flight.Turn.performed += ctx => turnInput = ctx.ReadValue<float>();
+            controls.Flight.Turn.canceled  += ctx => turnInput = 0f;
+
+            controls.Flight.Lift.performed += ctx => upInput = ctx.ReadValue<float>();
+            controls.Flight.Lift.canceled  += ctx => upInput = 0f;
+        }
+
+        private void Start()
         {
             ShipEngine[] allEngines = GetComponentsInChildren<ShipEngine>();
 
@@ -27,18 +48,9 @@ namespace Ship
             {
                 switch (engine.engineID)
                 {
-                    case "L":
-                        leftList.Add(engine);
-                        break;
-                    case "R":
-                        rightList.Add(engine);
-                        break;
-                    case "U":
-                        upList.Add(engine);
-                        break;
-                    default:
-                        // This shouldn't happen
-                        break;
+                    case "L": leftList.Add(engine); break;
+                    case "R": rightList.Add(engine); break;
+                    case "U": upList.Add(engine); break;
                 }
             }
 
@@ -47,27 +59,33 @@ namespace Ship
             upEngines = upList.ToArray();
         }
 
-        void Update()
+        private void OnEnable()
         {
-            // Read user inputs, idk if this works yet
-            float forwardInput = Input.GetAxis("Vertical");
-            float turnInput = Input.GetAxis("Horizontal");
-            float upInput = Input.GetAxis("UpDown");
+            controls.Enable();
+        }
 
-            // Modulate both left and right engines at the same rate to speed up/slow down
+        private void OnDisable()
+        {
+            controls.Disable();
+        }
+
+        private void Update()
+        {
+            // Forward throttle (affects both sides)
             float forwardThrottle = Mathf.Clamp01(forwardInput * forwardSensitivity);
 
-            // Turning by adjusting left/right engines
-            float leftThrottle = Mathf.Clamp01(turnInput * turnSensitivity);
-            float rightThrottle = Mathf.Clamp01(-turnInput * turnSensitivity);
+            // Turning (opposes sides)
+            float leftTurn = Mathf.Clamp01(turnInput * turnSensitivity);
+            float rightTurn = Mathf.Clamp01(-turnInput * turnSensitivity);
 
-            // Combine forward throttle with turning throttle
-            leftThrottle += forwardThrottle;
-            rightThrottle += forwardThrottle;
+            // Combined engine power
+            float leftThrottle = forwardThrottle + leftTurn;
+            float rightThrottle = forwardThrottle + rightTurn;
+
             SetThrottle(leftEngines, leftThrottle);
             SetThrottle(rightEngines, rightThrottle);
 
-            // Modulate up thrusters to move up/down
+            // Vertical thrust
             float upThrottle = Mathf.Clamp01(upInput * upSensitivity);
             SetThrottle(upEngines, upThrottle);
         }
