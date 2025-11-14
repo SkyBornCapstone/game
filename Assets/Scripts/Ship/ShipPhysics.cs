@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Ship
 {
     [DisallowMultipleComponent]
-    public class ShipController : MonoBehaviour
+    public class ShipPhysics : MonoBehaviour
     {
         [Header("Ship Properties")]
         public float baseMass = 1000f;

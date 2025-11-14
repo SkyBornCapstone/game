@@ -64,12 +64,12 @@ namespace Ship
             // Combine forward throttle with turning throttle
             leftThrottle += forwardThrottle;
             rightThrottle += forwardThrottle;
-            SetThrottle(leftThrusters, leftThrottle);
-            SetThrottle(rightThrusters, rightThrottle);
+            SetThrottle(leftEngines, leftThrottle);
+            SetThrottle(rightEngines, rightThrottle);
 
             // Modulate up thrusters to move up/down
             float upThrottle = Mathf.Clamp01(upInput * upSensitivity);
-            SetThrottle(upThrusters, upThrottle);
+            SetThrottle(upEngines, upThrottle);
         }
 
         private void SetThrottle(ShipEngine[] engines, float throttle)
