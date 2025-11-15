@@ -15,13 +15,19 @@ namespace Ship
         [Range(0f, 1f)] public float turnSensitivity = 1f;
         [Range(0f, 1f)] public float upSensitivity = 1f;
 
-            private InputSystem_Actions controls;
+        [Header("Interaction")]
+        public float interactDistance = 3f;
+        public LayerMask interactLayer = ~0;
 
-            [Header("Debug")]
-            public bool debugInput = false;
+        private InputSystem_Actions controls;
+
+        [Header("Debug")]
+        public bool debugInput = false;
 
         private Vector2 moveInput;
         private float upInput;
+
+        private bool isInteracting = false;
 
         private void Awake()
         {
@@ -49,6 +55,33 @@ namespace Ship
             {
                 upInput = 0f;
                 if (debugInput) Debug.Log("[ShipController] Jump canceled -> upInput=0");
+            };
+
+            // Interact: only grant control if player is properly interacting with the ShipController
+            controls.Player.Interact.performed += ctx =>
+            {
+                var cam = Camera.main;
+                if (cam == null)
+                {
+                    if (debugInput) Debug.LogWarning("[ShipController] No main camera found for Interact check.");
+                    return;
+                }
+
+                Ray ray = new Ray(cam.transform.position, cam.transform.forward);
+                if (Physics.Raycast(ray, out RaycastHit hit, interactDistance, interactLayer))
+                {
+                    // Allow interaction if the ray hit this object or a child collider
+                    if (hit.collider != null && (hit.collider.transform == transform || hit.collider.transform.IsChildOf(transform)))
+                    {
+                        isInteracting = true;
+                        if (debugInput) Debug.Log($"[ShipController] Interact started with {name} (within {interactDistance}m)");
+                    }
+                }
+            };
+            controls.Player.Interact.canceled += ctx =>
+            {
+                isInteracting = false;
+                if (debugInput) Debug.Log("[ShipController] Interact canceled");
             };
         }
 
@@ -118,6 +151,14 @@ namespace Ship
 
         private void Update()
         {
+            // Only apply player inputs to the ship if the player is interacting with it
+            if (!isInteracting)
+            {
+                if (debugInput)
+                    Debug.Log($"[ShipController] Not interacting; ignoring player input for {name}.");
+                return;
+            }
+
             // Treat throttle values as rate inputs in the range -1 to 1.
             // Positive = request increase, Negative = request decrease, Zero = hold.
             float forwardInput = moveInput.y * forwardSensitivity;
