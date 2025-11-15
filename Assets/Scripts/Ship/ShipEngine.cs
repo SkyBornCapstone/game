@@ -14,10 +14,11 @@ namespace Ship
         private float currentThrottle;
         public string engineID;
 
-        void Update()
+        void FixedUpdate()
         {
-            // Smooth throttle change for realism
-            currentThrottle = Mathf.MoveTowards(currentThrottle, throttle, throttleResponse * Time.deltaTime);
+            // Smooth throttle change for realism (use fixed delta for physics consistency)
+            float target = Mathf.Clamp01(throttle);
+            currentThrottle = Mathf.MoveTowards(currentThrottle, target, throttleResponse * Time.fixedDeltaTime);
         }
 
         public Vector3 GetWorldThrustForce()

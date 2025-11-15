@@ -54,7 +54,19 @@ namespace Ship
 
         private void Start()
         {
-            ShipEngine[] allEngines = GetComponentsInChildren<ShipEngine>();
+            ShipEngine[] allEngines = GetComponentsInChildren<ShipEngine>(true);
+
+            if (debugInput)
+            {
+                if (allEngines == null || allEngines.Length == 0)
+                    Debug.LogWarning("[ShipController] No ShipEngine components found in children (includeInactive=true).");
+                else
+                {
+                    Debug.Log($"[ShipController] Found {allEngines.Length} ShipEngine(s):");
+                    foreach (var e in allEngines)
+                        Debug.Log($"  - {e.name} (engineID='{e.engineID}')");
+                }
+            }
 
             var leftList = new System.Collections.Generic.List<ShipEngine>();
             var rightList = new System.Collections.Generic.List<ShipEngine>();
@@ -73,6 +85,9 @@ namespace Ship
             leftEngines = leftList.ToArray();
             rightEngines = rightList.ToArray();
             upEngines = upList.ToArray();
+
+            if (debugInput)
+                Debug.Log($"[ShipController] Engine groups -> Left:{leftEngines.Length} Right:{rightEngines.Length} Up:{upEngines.Length}");
         }
 
         private void OnEnable()
@@ -116,10 +131,18 @@ namespace Ship
 
         private void SetThrottle(ShipEngine[] engines, float throttle)
         {
+            if (engines == null || engines.Length == 0)
+            {
+                if (debugInput) Debug.Log("[ShipController] SetThrottle called with no engines.");
+                return;
+            }
+
             foreach (var engine in engines)
             {
                 if (engine != null)
                     engine.throttle = throttle;
+                else if (debugInput)
+                    Debug.Log("[ShipController] Encountered null engine while setting throttle.");
             }
         }
     }

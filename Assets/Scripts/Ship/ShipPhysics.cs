@@ -29,9 +29,9 @@ namespace Ship
             engines = GetComponentsInChildren<ShipEngine>();
         }
 
-        void Update()
+        void FixedUpdate()
         {
-            ApplyCustomPhysics(Time.deltaTime);
+            ApplyCustomPhysics(Time.fixedDeltaTime);
         }
 
         void ApplyCustomPhysics(float deltaTime)

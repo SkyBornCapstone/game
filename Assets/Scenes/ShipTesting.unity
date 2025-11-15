@@ -278,6 +278,7 @@ MonoBehaviour:
   forwardSensitivity: 1
   turnSensitivity: 1
   upSensitivity: 1
+  debugInput: 1
 --- !u!65 &75597858
 BoxCollider:
   m_ObjectHideFlags: 0
