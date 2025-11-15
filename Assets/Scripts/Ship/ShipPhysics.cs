@@ -26,7 +26,12 @@ namespace Ship
         void Start()
         {
             currentMass = baseMass;
-            engines = GetComponentsInChildren<ShipEngine>();
+            // Include inactive engines in case they're disabled in the hierarchy
+            engines = GetComponentsInChildren<ShipEngine>(true);
+            if (engines == null || engines.Length == 0)
+            {
+                Debug.LogWarning("[ShipPhysics] No ShipEngine components found as children (includeInactive=true). Physics will behave as if no thrust is available.");
+            }
         }
 
         void FixedUpdate()

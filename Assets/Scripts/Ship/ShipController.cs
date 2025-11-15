@@ -56,6 +56,17 @@ namespace Ship
         {
             ShipEngine[] allEngines = GetComponentsInChildren<ShipEngine>(true);
 
+            // Fallback: if no child engines, search the entire scene
+            if ((allEngines == null || allEngines.Length == 0))
+            {
+                var sceneEngines = UnityEngine.Resources.FindObjectsOfTypeAll<ShipEngine>();
+                if (sceneEngines != null && sceneEngines.Length > 0)
+                {
+                    Debug.LogWarning("[ShipController] No child ShipEngine components found; falling back to scene-wide search.");
+                    allEngines = sceneEngines;
+                }
+            }
+
             if (debugInput)
             {
                 if (allEngines == null || allEngines.Length == 0)
@@ -74,11 +85,16 @@ namespace Ship
 
             foreach (var engine in allEngines)
             {
-                switch (engine.engineID)
+                string id = (engine.engineID ?? string.Empty).Trim();
+                switch (id.ToUpperInvariant())
                 {
                     case "L": leftList.Add(engine); break;
                     case "R": rightList.Add(engine); break;
                     case "U": upList.Add(engine); break;
+                    default:
+                        if (debugInput)
+                            Debug.Log($"[ShipController] Unrecognized engineID '{engine.engineID}' on {engine.name}");
+                        break;
                 }
             }
 
