@@ -45,9 +45,9 @@ namespace Ship
             {
                 Vector3 thrust = engine.GetWorldThrustForce();
                 if (engine.engineID == "L")
-                    leftForce = thrust.magnitude;
+                    leftForce += thrust.magnitude;
                 else if (engine.engineID == "R")
-                    rightForce = thrust.magnitude;
+                    rightForce += thrust.magnitude;
                 else
                     totalForce += thrust;
             }

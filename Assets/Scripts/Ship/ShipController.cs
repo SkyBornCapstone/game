@@ -15,7 +15,10 @@ namespace Ship
         [Range(0f, 1f)] public float turnSensitivity = 1f;
         [Range(0f, 1f)] public float upSensitivity = 1f;
 
-        private InputSystem_Actions controls;
+            private InputSystem_Actions controls;
+
+            [Header("Debug")]
+            public bool debugInput = false;
 
         private Vector2 moveInput;
         private float upInput;
@@ -25,12 +28,28 @@ namespace Ship
             controls = new InputSystem_Actions();
 
             // Read Move vector2 input
-            controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-            controls.Player.Move.canceled  += ctx => moveInput = Vector2.zero;
+            controls.Player.Move.performed += ctx =>
+            {
+                moveInput = ctx.ReadValue<Vector2>();
+                if (debugInput) Debug.Log($"[ShipController] Move performed: {moveInput}");
+            };
+            controls.Player.Move.canceled  += ctx =>
+            {
+                moveInput = Vector2.zero;
+                if (debugInput) Debug.Log("[ShipController] Move canceled");
+            };
 
             // Optional: use Jump button for upward thrust
-            controls.Player.Jump.performed += ctx => upInput = 1f;
-            controls.Player.Jump.canceled  += ctx => upInput = 0f;
+            controls.Player.Jump.performed += ctx =>
+            {
+                upInput = 1f;
+                if (debugInput) Debug.Log("[ShipController] Jump performed -> upInput=1");
+            };
+            controls.Player.Jump.canceled  += ctx =>
+            {
+                upInput = 0f;
+                if (debugInput) Debug.Log("[ShipController] Jump canceled -> upInput=0");
+            };
         }
 
         private void Start()
@@ -78,12 +97,21 @@ namespace Ship
             float leftThrottle  = forwardThrottle + leftTurn;
             float rightThrottle = forwardThrottle + rightTurn;
 
+            // Ensure throttles remain in the expected 0..1 range
+            leftThrottle = Mathf.Clamp01(leftThrottle);
+            rightThrottle = Mathf.Clamp01(rightThrottle);
+
             SetThrottle(leftEngines, leftThrottle);
             SetThrottle(rightEngines, rightThrottle);
 
             // Vertical thrust
             float upThrottle = Mathf.Clamp01(upInput * upSensitivity);
             SetThrottle(upEngines, upThrottle);
+
+            if (debugInput)
+            {
+                Debug.Log($"[ShipController] Throttles -> Left:{leftThrottle:F2} Right:{rightThrottle:F2} Up:{upThrottle:F2} Move:{moveInput} UpInput:{upInput}");
+            }
         }
 
         private void SetThrottle(ShipEngine[] engines, float throttle)
