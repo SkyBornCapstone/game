@@ -65,6 +65,8 @@ namespace Player
 
         protected override void UpdateView(MoveState viewState, MoveState? verified)
         {
+            if (!animator)
+                return;
             Vector3 worldVelocity = viewState.velocity;
 
             Vector3 localVelocity = transform.InverseTransformDirection(worldVelocity);

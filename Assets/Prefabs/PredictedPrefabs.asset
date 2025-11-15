@@ -19,6 +19,10 @@ MonoBehaviour:
     initialSize: 0
   _prefabs: []
   _newPrefabs:
+  - prefab: {fileID: 6827104526897283647, guid: ae7c08f23ce4b7947b2894a7b6336914, type: 3}
+    pooling:
+      usePooling: 0
+      initialSize: 0
   - prefab: {fileID: 8427457393079084662, guid: 30d8b9742272cb94189637bf8982c947, type: 3}
     pooling:
       usePooling: 0
