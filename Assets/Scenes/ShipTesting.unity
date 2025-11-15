@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 2379407}
   - component: {fileID: 2379406}
   m_Layer: 0
-  m_Name: CinemachineCamera (1)
+  m_Name: CinemachineCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -363,7 +363,7 @@ GameObject:
   m_Component:
   - component: {fileID: 185435457}
   m_Layer: 0
-  m_Name: Spawnpoints (1)
+  m_Name: Spawnpoints
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -588,6 +588,9 @@ MonoBehaviour:
   linearDamping: 0.995
   levelStrength: 10
   autoLevel: 1
+  maxPitchAngle: 10
+  maxRollAngle: 20
+  rollLevelStrength: 5
   currentMass: 0
   verticalVelocity: 0
   velocity: {x: 0, y: 0, z: 0}
@@ -807,7 +810,7 @@ GameObject:
   - component: {fileID: 1168823839}
   - component: {fileID: 1168823838}
   m_Layer: 0
-  m_Name: PredictionManager (1)
+  m_Name: PredictionManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -889,7 +892,7 @@ GameObject:
   - component: {fileID: 1227385935}
   - component: {fileID: 1227385934}
   m_Layer: 0
-  m_Name: NetworkManager (1)
+  m_Name: NetworkManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -999,7 +1002,7 @@ GameObject:
   - component: {fileID: 1256747156}
   - component: {fileID: 1256747155}
   m_Layer: 0
-  m_Name: Main Camera (1)
+  m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1198,7 +1201,7 @@ GameObject:
   - component: {fileID: 1650088234}
   - component: {fileID: 1650088233}
   m_Layer: 0
-  m_Name: Directional Light (1)
+  m_Name: Directional Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
