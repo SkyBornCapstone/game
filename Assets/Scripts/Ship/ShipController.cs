@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Ship
 {
@@ -14,26 +15,22 @@ namespace Ship
         [Range(0f, 1f)] public float turnSensitivity = 1f;
         [Range(0f, 1f)] public float upSensitivity = 1f;
 
-        private ShipControls controls;
+        private InputSystem_Actions controls;
 
-        private float forwardInput;
-        private float turnInput;
+        private Vector2 moveInput;
         private float upInput;
 
         private void Awake()
         {
-            // Set up the InputActions instance
-            controls = new ShipControls();
+            controls = new InputSystem_Actions();
 
-            // Register callbacks
-            controls.Flight.Forward.performed += ctx => forwardInput = ctx.ReadValue<float>();
-            controls.Flight.Forward.canceled  += ctx => forwardInput = 0f;
+            // Read Move vector2 input
+            controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+            controls.Player.Move.canceled  += ctx => moveInput = Vector2.zero;
 
-            controls.Flight.Turn.performed += ctx => turnInput = ctx.ReadValue<float>();
-            controls.Flight.Turn.canceled  += ctx => turnInput = 0f;
-
-            controls.Flight.Lift.performed += ctx => upInput = ctx.ReadValue<float>();
-            controls.Flight.Lift.canceled  += ctx => upInput = 0f;
+            // Optional: use Jump button for upward thrust
+            controls.Player.Jump.performed += ctx => upInput = 1f;
+            controls.Player.Jump.canceled  += ctx => upInput = 0f;
         }
 
         private void Start()
@@ -71,15 +68,14 @@ namespace Ship
 
         private void Update()
         {
-            // Forward throttle (affects both sides)
-            float forwardThrottle = Mathf.Clamp01(forwardInput * forwardSensitivity);
+            // Forward/backward input = moveInput.y
+            float forwardThrottle = Mathf.Clamp01(moveInput.y * forwardSensitivity);
 
-            // Turning (opposes sides)
-            float leftTurn = Mathf.Clamp01(turnInput * turnSensitivity);
-            float rightTurn = Mathf.Clamp01(-turnInput * turnSensitivity);
+            // Turning left/right = moveInput.x
+            float leftTurn  = Mathf.Clamp01(moveInput.x * turnSensitivity);
+            float rightTurn = Mathf.Clamp01(-moveInput.x * turnSensitivity);
 
-            // Combined engine power
-            float leftThrottle = forwardThrottle + leftTurn;
+            float leftThrottle  = forwardThrottle + leftTurn;
             float rightThrottle = forwardThrottle + rightTurn;
 
             SetThrottle(leftEngines, leftThrottle);
