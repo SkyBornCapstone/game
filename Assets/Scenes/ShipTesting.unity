@@ -435,7 +435,8 @@ MonoBehaviour:
   maxThrust: 10000
   throttle: 0
   localThrustDirection: {x: 0, y: 0, z: 1}
-  throttleResponse: 2
+  throttleResponse: 100
+  currentThrust: 0
   engineID: L
 --- !u!1 &579786208
 GameObject:
@@ -484,7 +485,8 @@ MonoBehaviour:
   maxThrust: 10000
   throttle: 0
   localThrustDirection: {x: 0, y: 0, z: 1}
-  throttleResponse: 2
+  throttleResponse: 100
+  currentThrust: 0
   engineID: R
 --- !u!1 &762920083
 GameObject:
@@ -1316,7 +1318,7 @@ GameObject:
   - component: {fileID: 1997964524}
   - component: {fileID: 1997964525}
   m_Layer: 0
-  m_Name: Engine-C
+  m_Name: Engine-U
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1352,8 +1354,9 @@ MonoBehaviour:
   maxThrust: 20000
   throttle: 0.6
   localThrustDirection: {x: 0, y: 1, z: 0}
-  throttleResponse: 2
-  engineID: C
+  throttleResponse: 100
+  currentThrust: 12000
+  engineID: U
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

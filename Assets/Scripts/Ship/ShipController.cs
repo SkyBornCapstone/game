@@ -118,30 +118,28 @@ namespace Ship
 
         private void Update()
         {
-            // Forward/backward input = moveInput.y
-            float forwardThrottle = Mathf.Clamp01(moveInput.y * forwardSensitivity);
+            // Treat throttle values as rate inputs in the range -1 to 1.
+            // Positive = request increase, Negative = request decrease, Zero = hold.
+            float forwardInput = moveInput.y * forwardSensitivity;
 
-            // Turning left/right = moveInput.x
-            float leftTurn  = Mathf.Clamp01(moveInput.x * turnSensitivity);
-            float rightTurn = Mathf.Clamp01(-moveInput.x * turnSensitivity);
+            // Turning: positive moveInput.x means turn right -> increase left engines, decrease right engines
+            float leftInput  = forwardInput + (moveInput.x * turnSensitivity);
+            float rightInput = forwardInput + (-moveInput.x * turnSensitivity);
 
-            float leftThrottle  = forwardThrottle + leftTurn;
-            float rightThrottle = forwardThrottle + rightTurn;
+            leftInput = Mathf.Clamp(leftInput, -1f, 1f);
+            rightInput = Mathf.Clamp(rightInput, -1f, 1f);
 
-            // Ensure throttles remain in the expected 0..1 range
-            leftThrottle = Mathf.Clamp01(leftThrottle);
-            rightThrottle = Mathf.Clamp01(rightThrottle);
+            SetThrottle(leftEngines, leftInput);
+            SetThrottle(rightEngines, rightInput);
 
-            SetThrottle(leftEngines, leftThrottle);
-            SetThrottle(rightEngines, rightThrottle);
-
-            // Vertical thrust
-            float upThrottle = Mathf.Clamp01(upInput * upSensitivity);
-            SetThrottle(upEngines, upThrottle);
+            // Vertical thrust (0 - 1 from jump atm, this needs a left shift or something to go down)
+            float upInputCmd = upInput * upSensitivity;
+            upInputCmd = Mathf.Clamp(upInputCmd, -1f, 1f);
+            SetThrottle(upEngines, upInputCmd);
 
             if (debugInput)
             {
-                Debug.Log($"[ShipController] Throttles -> Left:{leftThrottle:F2} Right:{rightThrottle:F2} Up:{upThrottle:F2} Move:{moveInput} UpInput:{upInput}");
+                Debug.Log($"[ShipController] Throttle Inputs -> Left:{leftInput:F2} Right:{rightInput:F2} Up:{upInputCmd:F2} Move:{moveInput} UpInput:{upInput}");
             }
         }
 
