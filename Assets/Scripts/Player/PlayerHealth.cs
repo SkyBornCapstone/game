@@ -10,6 +10,9 @@ namespace player
         [SerializeField] public float maxHealth = 100;
         [SerializeField] public float healthRegen = 0f;
         [SerializeField] public float healthRegenDelay = 0f;
+        
+        [Header("Testing")]
+        [SerializeField] private float testHealth = -1f; // -1 means use maxHealth
 
         public System.Action<float, float> onHealthChange;
         public System.Action onDeath;
@@ -20,10 +23,13 @@ namespace player
 
         protected override void LateAwake()
         {
-            // Initialize health to max
-            currentState.currentHealth = maxHealth;
+            // Initialize health to max or test value
+            currentState.currentHealth = testHealth >= 0 ? testHealth : maxHealth;
             currentState.timeSinceLastDamage = healthRegenDelay;
             currentState.isDead = false;
+            
+            // Trigger initial health update for UI
+            onHealthChange?.Invoke(currentState.currentHealth, maxHealth);
         }
         
         protected override void Simulate(HealthInput input, ref HealthState state, float delta)
@@ -31,7 +37,7 @@ namespace player
             // Initialize state on first run
             if (state.currentHealth == 0 && !state.isDead)
             {
-                state.currentHealth = maxHealth;
+                state.currentHealth = testHealth >= 0 ? testHealth : maxHealth;
                 state.timeSinceLastDamage = healthRegenDelay;
             }
 
@@ -116,6 +122,14 @@ namespace player
         public bool IsDead()
         {
             return currentState.isDead;
+        }
+        
+        // Testing method to set health directly
+        public void SetHealthForTesting(float health)
+        {
+            if (!isOwner) return;
+            currentState.currentHealth = Mathf.Clamp(health, 0f, maxHealth);
+            currentState.isDead = currentState.currentHealth <= 0;
         }
 
         public struct HealthState : IPredictedData<HealthState>
