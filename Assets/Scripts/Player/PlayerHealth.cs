@@ -1,5 +1,4 @@
 using System;
-using PurrNet;
 using PurrNet.Prediction;
 using UnityEngine;
 
@@ -10,37 +9,23 @@ namespace player
         [SerializeField] public float maxHealth = 100;
         [SerializeField] public float healthRegen = 0f;
         [SerializeField] public float healthRegenDelay = 0f;
-        
-        [Header("Testing")]
-        [SerializeField] private float testHealth = -1f; // -1 means use maxHealth
 
-        public System.Action<float, float> onHealthChange;
-        public System.Action onDeath;
+        [Header("Testing")] [SerializeField] private float testHealth = -1f; // -1 means use maxHealth
 
-        HealthState currentState;
+        public Action<float, float> onHealthChange;
+        public Action onDeath;
+
         private float queuedDamage = 0f;
         private float queuedHealing = 0f;
 
         protected override void LateAwake()
         {
-            // Initialize health to max or test value
-            currentState.currentHealth = testHealth >= 0 ? testHealth : maxHealth;
-            currentState.timeSinceLastDamage = healthRegenDelay;
-            currentState.isDead = false;
-            
             // Trigger initial health update for UI
             onHealthChange?.Invoke(currentState.currentHealth, maxHealth);
         }
-        
+
         protected override void Simulate(HealthInput input, ref HealthState state, float delta)
         {
-            // Initialize state on first run
-            if (state.currentHealth == 0 && !state.isDead)
-            {
-                state.currentHealth = testHealth >= 0 ? testHealth : maxHealth;
-                state.timeSinceLastDamage = healthRegenDelay;
-            }
-
             // Apply damage
             if (input.damageAmount > 0)
             {
@@ -48,7 +33,7 @@ namespace player
                 state.timeSinceLastDamage = 0f;
                 input.damageAmount = 0f;
             }
-            
+
             // Apply healing
             if (input.healAmount > 0)
             {
@@ -60,11 +45,12 @@ namespace player
 
             // Handle regeneration
             state.timeSinceLastDamage += delta;
-            if (state.timeSinceLastDamage >= healthRegenDelay && state.currentHealth > 0 && state.currentHealth < maxHealth)
+            if (state.timeSinceLastDamage >= healthRegenDelay && state.currentHealth > 0 &&
+                state.currentHealth < maxHealth)
             {
                 state.currentHealth = Mathf.Min(state.currentHealth + healthRegen * delta, maxHealth);
             }
-            
+
             // Check for death
             if (state.currentHealth <= 0 && !state.isDead)
             {
@@ -74,17 +60,27 @@ namespace player
             // Store current state for external access
             currentState = state;
         }
-        
+
+        protected override HealthState GetInitialState()
+        {
+            return new HealthState
+            {
+                currentHealth = testHealth >= 0 ? testHealth : maxHealth,
+                timeSinceLastDamage = healthRegenDelay,
+                isDead = false
+            };
+        }
+
         protected override void UpdateView(HealthState healthState, HealthState? verified)
         {
             onHealthChange?.Invoke(healthState.currentHealth, maxHealth);
-            
-            if (healthState.isDead)
+
+            if (verified is { isDead: true })
             {
                 onDeath?.Invoke();
             }
         }
-        
+
         protected override void UpdateInput(ref HealthInput input)
         {
             // Input is handled in GetFinalInput
@@ -95,7 +91,7 @@ namespace player
             // Apply queued damage and healing
             input.damageAmount = queuedDamage;
             input.healAmount = queuedHealing;
-            
+
             // Clear queued values after applying
             queuedDamage = 0f;
             queuedHealing = 0f;
@@ -107,7 +103,7 @@ namespace player
             if (!isOwner) return;
             queuedDamage += amount;
         }
-        
+
         public void Heal(float amount)
         {
             if (!isOwner) return;
@@ -123,7 +119,7 @@ namespace player
         {
             return currentState.isDead;
         }
-        
+
         // Testing method to set health directly
         public void SetHealthForTesting(float health)
         {
@@ -138,7 +134,9 @@ namespace player
             public float timeSinceLastDamage;
             public bool isDead;
 
-            public void Dispose() { }
+            public void Dispose()
+            {
+            }
         }
 
         public struct HealthInput : IPredictedData
@@ -146,7 +144,9 @@ namespace player
             public float damageAmount;
             public float healAmount;
 
-            public void Dispose() { }
+            public void Dispose()
+            {
+            }
         }
     }
 }

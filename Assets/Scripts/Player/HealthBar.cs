@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace player
 {
-    public class HealthBarUI : MonoBehaviour
+    public class HealthBar : MonoBehaviour
     {
         [SerializeField] private Slider slider;
         [SerializeField] private PlayerHealth playerHealth;
@@ -18,7 +18,7 @@ namespace player
 
             // Subscribe to health changes
             playerHealth.onHealthChange += UpdateHealthBar;
-            
+
             // Initialize the health bar immediately
             UpdateHealthBar(playerHealth.GetCurrentHealth(), playerHealth.maxHealth);
         }
@@ -26,11 +26,11 @@ namespace player
         private void UpdateHealthBar(float current, float max)
         {
             if (slider == null) return;
-            
+
             slider.maxValue = max;
             slider.value = current;
         }
-        
+
         private void OnDestroy()
         {
             // Unsubscribe to prevent memory leaks
