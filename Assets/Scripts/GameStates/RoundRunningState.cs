@@ -9,11 +9,12 @@ namespace GameStates
     {
         private void Awake()
         {
-            // TODO Integrate with health system to end when dead
+            player.PlayerHealth.OnDeath += OnPlayerDeath;
         }
 
         protected override void OnDestroy()
         {
+            player.PlayerHealth.OnDeath -= OnPlayerDeath;
         }
 
         public override void Enter()
@@ -30,6 +31,11 @@ namespace GameStates
                 return;
 
             currentState.Players.Remove(owner.Value);
+
+            if (currentState.Players.Count <= 0)
+            {
+                machine.Next();
+            }
         }
 
         public struct State : IPredictedData<State>

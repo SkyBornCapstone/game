@@ -16,10 +16,12 @@ namespace player
                 return;
             }
 
-            // Subscribe to health changes
-            playerHealth.onHealthChange += UpdateHealthBar;
-
             // Initialize the health bar immediately
+            UpdateHealthBar(playerHealth.GetCurrentHealth(), playerHealth.maxHealth);
+        }
+
+        private void Update()
+        {
             UpdateHealthBar(playerHealth.GetCurrentHealth(), playerHealth.maxHealth);
         }
 
@@ -29,15 +31,6 @@ namespace player
 
             slider.maxValue = max;
             slider.value = current;
-        }
-
-        private void OnDestroy()
-        {
-            // Unsubscribe to prevent memory leaks
-            if (playerHealth != null)
-            {
-                playerHealth.onHealthChange -= UpdateHealthBar;
-            }
         }
     }
 }
