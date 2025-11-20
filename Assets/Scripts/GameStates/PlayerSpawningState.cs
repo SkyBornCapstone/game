@@ -3,12 +3,12 @@ using PurrNet.Prediction;
 using PurrNet.Prediction.StateMachine;
 using UnityEngine;
 
-namespace BallTest.GameStates
+namespace GameStates
 {
     public class PlayerSpawningState : PredictedStateNode<PlayerSpawningState.State>
     {
-        [SerializeField] private GameObject playerPrefab;
-        [SerializeField] private List<Transform> spawnPoints = new();
+        public GameObject playerPrefab;
+        public List<Transform> spawnPoints = new();
 
         public override void Enter()
         {

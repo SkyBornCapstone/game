@@ -12,7 +12,7 @@ namespace Player
         [SerializeField] private float groundCheckRadius = 0.2f;
         [SerializeField] private LayerMask groundLayer;
 
-        [SerializeField] private FirstPersonCamera camera;
+        [SerializeField] private new FirstPersonCamera camera;
         [SerializeField] private PredictedRigidbody predictedRigidbody;
         [SerializeField] private Animator animator;
 
