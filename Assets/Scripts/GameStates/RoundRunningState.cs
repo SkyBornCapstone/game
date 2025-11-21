@@ -3,18 +3,17 @@ using PurrNet.Pooling;
 using PurrNet.Prediction;
 using PurrNet.Prediction.StateMachine;
 
-namespace BallTest.GameStates
+namespace GameStates
 {
     public class RoundRunningState : PredictedStateNode<RoundRunningState.State>
     {
         private void Awake()
         {
-            PlayerHealth.OnDeathAction += OnPlayerDeath;
+            // TODO Integrate with health system to end when dead
         }
 
         protected override void OnDestroy()
         {
-            PlayerHealth.OnDeathAction -= OnPlayerDeath;
         }
 
         public override void Enter()
@@ -31,12 +30,6 @@ namespace BallTest.GameStates
                 return;
 
             currentState.Players.Remove(owner.Value);
-
-            if (currentState.Players.Count <= 1)
-            {
-                PlayerHealth.ClearPlayers.Invoke();
-                machine.Next();
-            }
         }
 
         public struct State : IPredictedData<State>

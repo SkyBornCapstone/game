@@ -2,7 +2,7 @@ using PurrNet.Prediction;
 using PurrNet.Prediction.StateMachine;
 using UnityEngine;
 
-namespace BallTest.GameStates
+namespace GameStates
 {
     public class WaitForPlayersState : PredictedStateNode<WaitForPlayersState.State>
     {

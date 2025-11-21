@@ -8,11 +8,11 @@ namespace Player
         [SerializeField] private float lookSensitivity = 2f;
         [SerializeField] private float maxLookAngle = 80f;
         [SerializeField] private CinemachineCamera cinemachineCamera;
-    
+
         private Vector2 _currentRotation;
         private bool _initialized;
-    
-        public Vector3 forward => Quaternion.Euler(_currentRotation.x, _currentRotation.y, 0) * Vector3.forward;
+
+        public Vector3 Forward => Quaternion.Euler(_currentRotation.x, _currentRotation.y, 0) * Vector3.forward;
 
         private void Awake()
         {
@@ -28,13 +28,13 @@ namespace Player
         private void LateUpdate()
         {
             if (!_initialized) return;
-        
+
             float mouseX = Input.GetAxis("Mouse X") * lookSensitivity;
             float mouseY = Input.GetAxis("Mouse Y") * lookSensitivity;
-        
+
             _currentRotation.x = Mathf.Clamp(_currentRotation.x - mouseY, -maxLookAngle, maxLookAngle);
             _currentRotation.y += mouseX;
-        
+
             transform.localRotation = Quaternion.Euler(_currentRotation.x, 0, 0);
         }
     }
