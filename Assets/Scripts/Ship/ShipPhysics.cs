@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Ship
 {
     [DisallowMultipleComponent]
-    public class ShipController : MonoBehaviour
+    public class ShipPhysics : MonoBehaviour
     {
         [Header("Ship Properties")]
         public float baseMass = 1000f;
@@ -13,6 +13,12 @@ namespace Ship
         public float linearDamping = 0.995f;
         public float levelStrength = 10f;
         public bool autoLevel = true;
+        // X axis limit
+        public float maxPitchAngle = 10f; 
+        // Z axis limit
+        public float maxRollAngle = 20f; 
+        // Strength for roll auto-leveling (Z axis)
+        public float rollLevelStrength = 1f;
 
         [Header("Runtime State")]
         public float currentMass;
@@ -26,12 +32,17 @@ namespace Ship
         void Start()
         {
             currentMass = baseMass;
-            engines = GetComponentsInChildren<ShipEngine>();
+            // Include inactive engines in case they're disabled in the hierarchy
+            engines = GetComponentsInChildren<ShipEngine>(true);
+            if (engines == null || engines.Length == 0)
+            {
+                Debug.LogWarning("[ShipPhysics] No ShipEngine components found as children (includeInactive=true). Physics will behave as if no thrust is available.");
+            }
         }
 
-        void Update()
+        void FixedUpdate()
         {
-            ApplyCustomPhysics(Time.deltaTime);
+            ApplyCustomPhysics(Time.fixedDeltaTime);
         }
 
         void ApplyCustomPhysics(float deltaTime)
@@ -45,9 +56,9 @@ namespace Ship
             {
                 Vector3 thrust = engine.GetWorldThrustForce();
                 if (engine.engineID == "L")
-                    leftForce = thrust.magnitude;
+                    leftForce += thrust.magnitude;
                 else if (engine.engineID == "R")
-                    rightForce = thrust.magnitude;
+                    rightForce += thrust.magnitude;
                 else
                     totalForce += thrust;
             }
@@ -66,8 +77,15 @@ namespace Ship
             if (autoLevel)
             {
                 float currentPitch = transform.eulerAngles.x;
-                float levelTorque = -currentPitch * levelStrength;
+                // normalize pitch to -180..180 for meaningful signed torque
+                float signedPitch = currentPitch > 180f ? currentPitch - 360f : currentPitch;
+                float levelTorque = -signedPitch * levelStrength;
                 angularVelocity.x += levelTorque * deltaTime;
+                // Roll auto-leveling: apply proportional torque to reduce roll towards zero
+                float currentRoll = transform.eulerAngles.z;
+                float signedRoll = currentRoll > 180f ? currentRoll - 360f : currentRoll;
+                float rollTorque = -signedRoll * rollLevelStrength;
+                angularVelocity.z += rollTorque * deltaTime;
             }
 
             // Custom lift calculation
@@ -95,6 +113,30 @@ namespace Ship
             transform.Rotate(Vector3.right, angularVelocity.x * deltaTime);
             transform.Rotate(Vector3.up, angularVelocity.y * deltaTime);
             transform.Rotate(Vector3.forward, angularVelocity.z * deltaTime);
+
+            // Enforce rotation limits and prevent deathball spinning
+            float pitch = transform.eulerAngles.x;
+            float signedPitchFinal = pitch > 180f ? pitch - 360f : pitch;
+            float clampedPitch = Mathf.Clamp(signedPitchFinal, -maxPitchAngle, maxPitchAngle);
+
+            float roll = transform.eulerAngles.z;
+            float signedRollFinal = roll > 180f ? roll - 360f : roll;
+            float clampedRoll = Mathf.Clamp(signedRollFinal, -maxRollAngle, maxRollAngle);
+
+            if (!Mathf.Approximately(clampedPitch, signedPitchFinal) || !Mathf.Approximately(clampedRoll, signedRollFinal))
+            {
+                // Convert clamped signed angles back to 0..360 representation for Euler set
+                Vector3 e = transform.eulerAngles;
+                e.x = clampedPitch < 0f ? 360f + clampedPitch : clampedPitch;
+                e.z = clampedRoll  < 0f ? 360f + clampedRoll  : clampedRoll;
+                transform.eulerAngles = e;
+
+                // If we hit limits, zero any angular velocity pushing further out of bounds
+                if (signedPitchFinal > clampedPitch && angularVelocity.x > 0f) angularVelocity.x = 0f;
+                if (signedPitchFinal < clampedPitch && angularVelocity.x < 0f) angularVelocity.x = 0f;
+                if (signedRollFinal  > clampedRoll  && angularVelocity.z > 0f) angularVelocity.z = 0f;
+                if (signedRollFinal  < clampedRoll  && angularVelocity.z < 0f) angularVelocity.z = 0f;
+            }
 
             // Update position
             transform.position += velocity * deltaTime;
