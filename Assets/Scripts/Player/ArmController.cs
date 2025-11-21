@@ -7,38 +7,94 @@ namespace Player
         [SerializeField] private Animator animator;
 
         // Assign these in the Inspector
-        [SerializeField]
-        private Transform leftHandTarget;
-        [SerializeField]
-        private Transform rightHandTarget;
+        [SerializeField] private Transform leftHandTarget;
+        [SerializeField] private Transform rightHandTarget;
+
+        [Header("Grabbing")] [SerializeField] private float grabDistance = 3f;
+        [SerializeField] private LayerMask grabbableMask = ~0; // default to everything
+
+        private Transform _heldLeft;
+        private Transform _heldRight;
 
         // How quickly the hands move to/from the target (0-1)
-        [Range(0, 1)] [SerializeField]
-        private float leftHandWeight;
-        [Range(0, 1)] [SerializeField]
-        private float rightHandWeight;
+        [Range(0, 1)] [SerializeField] private float leftHandWeight;
+        [Range(0, 1)] [SerializeField] private float rightHandWeight;
 
         // How fast the hands transition
-        [SerializeField]
-        private float ikTransitionSpeed = 4f;
+        [SerializeField] private float ikTransitionSpeed = 4f;
 
         void Update()
         {
-            // --- Left Hand (Left Click) ---
-            // Check if the left mouse button is being held down
-            bool isLeftClick = Input.GetMouseButton(0);
+            // Toggle grab/release on click for each hand
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (_heldLeft != null)
+                    Release(ref _heldLeft);
+                else
+                    TryGrab(ref _heldLeft, leftHandTarget);
+            }
 
-            // Smoothly increase weight to 1 if clicked, or decrease to 0 if not
-            float leftTargetWeight = isLeftClick ? 1.0f : 0.0f;
+            if (Input.GetMouseButtonDown(1))
+            {
+                if (_heldRight != null)
+                    Release(ref _heldRight);
+                else
+                    TryGrab(ref _heldRight, rightHandTarget);
+            }
+
+            // IK only while holding something; keep arms out until released
+            float leftTargetWeight = _heldLeft != null ? 1.0f : 0.0f;
+            float rightTargetWeight = _heldRight != null ? 1.0f : 0.0f;
+
             leftHandWeight = Mathf.Lerp(leftHandWeight, leftTargetWeight, Time.deltaTime * ikTransitionSpeed);
-
-            // --- Right Hand (Right Click) ---
-            // Check if the right mouse button is being held down
-            bool isRightClick = Input.GetMouseButton(1);
-
-            // Smoothly increase weight to 1 if clicked, or decrease to 0 if not
-            float rightTargetWeight = isRightClick ? 1.0f : 0.0f;
             rightHandWeight = Mathf.Lerp(rightHandWeight, rightTargetWeight, Time.deltaTime * ikTransitionSpeed);
+        }
+
+
+        // Generic helpers to reduce duplication
+        private void TryGrab(ref Transform held, Transform handTarget)
+        {
+            if (handTarget == null || held != null)
+                return;
+
+            Ray ray = Camera.main != null
+                ? Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0))
+                : new Ray(Vector3.zero, Vector3.forward);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, grabDistance, grabbableMask, QueryTriggerInteraction.Ignore))
+            {
+                var grabbable = hit.transform.GetComponentInParent<Grabbable>();
+                if (grabbable != null)
+                {
+                    held = grabbable.transform;
+                    held.SetParent(handTarget, worldPositionStays: false);
+                    held.localPosition = Vector3.zero;
+                    held.localRotation = Quaternion.identity;
+
+                    var rb = held.GetComponent<Rigidbody>();
+                    if (rb != null) rb.isKinematic = true;
+                }
+            }
+        }
+
+        private void Release(ref Transform held)
+        {
+            if (held == null) return;
+            var rb = held.GetComponent<Rigidbody>();
+            if (rb != null) rb.isKinematic = false;
+            held.SetParent(null, true);
+            held = null;
+        }
+
+        private void ApplyIK(AvatarIKGoal goal, Transform target, float weight)
+        {
+            if (animator == null || target == null)
+                return;
+
+            animator.SetIKPositionWeight(goal, weight);
+            animator.SetIKRotationWeight(goal, weight);
+            animator.SetIKPosition(goal, target.position);
+            animator.SetIKRotation(goal, target.rotation);
         }
 
         // This callback runs *after* the animation (like walking) is calculated,
@@ -47,30 +103,8 @@ namespace Player
         {
             if (animator)
             {
-                // --- Left Hand Control ---
-                if (leftHandTarget != null)
-                {
-                    
-                    // Set the *weight* (influence) of the IK
-                    animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, leftHandWeight);
-                    animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, leftHandWeight);
-                
-                    // Set the *target* position and rotation for the hand
-                    animator.SetIKPosition(AvatarIKGoal.LeftHand, leftHandTarget.position);
-                    animator.SetIKRotation(AvatarIKGoal.LeftHand, leftHandTarget.rotation);
-                }
-
-                // --- Right Hand Control ---
-                if (rightHandTarget != null)
-                {
-                    // Set the *weight* (influence) of the IK
-                    animator.SetIKPositionWeight(AvatarIKGoal.RightHand, rightHandWeight);
-                    animator.SetIKRotationWeight(AvatarIKGoal.RightHand, rightHandWeight);
-
-                    // Set the *target* position and rotation for the hand
-                    animator.SetIKPosition(AvatarIKGoal.RightHand, rightHandTarget.position);
-                    animator.SetIKRotation(AvatarIKGoal.RightHand, rightHandTarget.rotation);
-                }
+                ApplyIK(AvatarIKGoal.LeftHand, leftHandTarget, leftHandWeight);
+                ApplyIK(AvatarIKGoal.RightHand, rightHandTarget, rightHandWeight);
             }
         }
     }
