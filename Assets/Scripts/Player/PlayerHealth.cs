@@ -1,48 +1,24 @@
 using System;
+using PurrNet;
 using PurrNet.Prediction;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace player
 {
-    public class PlayerHealth : PredictedIdentity<PlayerHealth.HealthInput, PlayerHealth.HealthState>
+    public class PlayerHealth : PredictedIdentity<PlayerHealth.HealthState>
     {
         [SerializeField] public float maxHealth = 100;
         [SerializeField] public float healthRegen = 0f;
         [SerializeField] public float healthRegenDelay = 0f;
+        [SerializeField] public Slider healthSlider;
 
         [Header("Testing")] [SerializeField] private float testHealth = -1f; // -1 means use maxHealth
 
-        public Action<float, float> onHealthChange;
-        public Action onDeath;
+        public static Action<PlayerID?> OnDeath;
 
-        private float queuedDamage = 0f;
-        private float queuedHealing = 0f;
-
-        protected override void LateAwake()
+        protected override void Simulate(ref HealthState state, float delta)
         {
-            // Trigger initial health update for UI
-            onHealthChange?.Invoke(currentState.currentHealth, maxHealth);
-        }
-
-        protected override void Simulate(HealthInput input, ref HealthState state, float delta)
-        {
-            // Apply damage
-            if (input.damageAmount > 0)
-            {
-                state.currentHealth -= input.damageAmount;
-                state.timeSinceLastDamage = 0f;
-                input.damageAmount = 0f;
-            }
-
-            // Apply healing
-            if (input.healAmount > 0)
-            {
-                state.currentHealth += input.healAmount;
-            }
-
-            // Clamp health
-            state.currentHealth = Mathf.Clamp(state.currentHealth, 0f, maxHealth);
-
             // Handle regeneration
             state.timeSinceLastDamage += delta;
             if (state.timeSinceLastDamage >= healthRegenDelay && state.currentHealth > 0 &&
@@ -55,10 +31,10 @@ namespace player
             if (state.currentHealth <= 0 && !state.isDead)
             {
                 state.isDead = true;
-            }
+                OnDeath?.Invoke(owner);
 
-            // Store current state for external access
-            currentState = state;
+                predictionManager.hierarchy.Delete(gameObject);
+            }
         }
 
         protected override HealthState GetInitialState()
@@ -73,41 +49,31 @@ namespace player
 
         protected override void UpdateView(HealthState healthState, HealthState? verified)
         {
-            onHealthChange?.Invoke(healthState.currentHealth, maxHealth);
-
-            if (verified is { isDead: true })
+            if (healthSlider)
             {
-                onDeath?.Invoke();
+                healthSlider.value = healthState.currentHealth / maxHealth;
             }
-        }
-
-        protected override void UpdateInput(ref HealthInput input)
-        {
-            // Input is handled in GetFinalInput
-        }
-
-        protected override void GetFinalInput(ref HealthInput input)
-        {
-            // Apply queued damage and healing
-            input.damageAmount = queuedDamage;
-            input.healAmount = queuedHealing;
-
-            // Clear queued values after applying
-            queuedDamage = 0f;
-            queuedHealing = 0f;
         }
 
         // Public API for other systems
         public void TakeDamage(float amount)
         {
-            if (!isOwner) return;
-            queuedDamage += amount;
+            currentState.currentHealth -= amount;
+            currentState.timeSinceLastDamage = 0;
+
+            if (currentState is { currentHealth: <= 0, isDead: false })
+            {
+                currentState.isDead = true;
+                OnDeath?.Invoke(owner);
+
+                predictionManager.hierarchy.Delete(gameObject);
+            }
         }
 
         public void Heal(float amount)
         {
-            if (!isOwner) return;
-            queuedHealing += amount;
+            currentState.currentHealth += amount;
+            currentState.currentHealth = Mathf.Clamp(currentState.currentHealth, 0f, maxHealth);
         }
 
         public float GetCurrentHealth()
@@ -133,16 +99,6 @@ namespace player
             public float currentHealth;
             public float timeSinceLastDamage;
             public bool isDead;
-
-            public void Dispose()
-            {
-            }
-        }
-
-        public struct HealthInput : IPredictedData
-        {
-            public float damageAmount;
-            public float healAmount;
 
             public void Dispose()
             {
