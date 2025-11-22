@@ -16,9 +16,8 @@ namespace Player
         private Transform _heldLeft;
         private Transform _heldRight;
 
-        // How quickly the hands move to/from the target (0-1)
-        [Range(0, 1)] [SerializeField] private float leftHandWeight;
-        [Range(0, 1)] [SerializeField] private float rightHandWeight;
+        private float _leftHandWeight;
+        private float _rightHandWeight;
 
         // How fast the hands transition
         [SerializeField] private float ikTransitionSpeed = 4f;
@@ -46,8 +45,8 @@ namespace Player
             float leftTargetWeight = _heldLeft != null ? 1.0f : 0.0f;
             float rightTargetWeight = _heldRight != null ? 1.0f : 0.0f;
 
-            leftHandWeight = Mathf.Lerp(leftHandWeight, leftTargetWeight, Time.deltaTime * ikTransitionSpeed);
-            rightHandWeight = Mathf.Lerp(rightHandWeight, rightTargetWeight, Time.deltaTime * ikTransitionSpeed);
+            _leftHandWeight = Mathf.Lerp(_leftHandWeight, leftTargetWeight, Time.deltaTime * ikTransitionSpeed);
+            _rightHandWeight = Mathf.Lerp(_rightHandWeight, rightTargetWeight, Time.deltaTime * ikTransitionSpeed);
         }
 
 
@@ -103,8 +102,8 @@ namespace Player
         {
             if (animator)
             {
-                ApplyIK(AvatarIKGoal.LeftHand, leftHandTarget, leftHandWeight);
-                ApplyIK(AvatarIKGoal.RightHand, rightHandTarget, rightHandWeight);
+                ApplyIK(AvatarIKGoal.LeftHand, leftHandTarget, _leftHandWeight);
+                ApplyIK(AvatarIKGoal.RightHand, rightHandTarget, _rightHandWeight);
             }
         }
     }
