@@ -3,7 +3,7 @@ using PurrNet.Prediction;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
-
+using player;
 namespace BallTest
 {
     public class PlayerMovement : PredictedIdentity<PlayerMovement.Input, PlayerMovement.State>
@@ -44,7 +44,7 @@ namespace BallTest
         
             var dir = (transform.position - otherPlayer.transform.position).normalized;
             predictedRigidbody.AddForce(dir * knockbackForce, ForceMode.Impulse);
-            playerHealth.HitOtherPlayer();
+            // playerHealth.HitOtherPlayer();
         }
 
         protected override void Simulate(Input input, ref State state, float delta)

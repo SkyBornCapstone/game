@@ -1,36 +1,29 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace player
 {
-    public class HealthBar : MonoBehaviour
+    public class HUDHealthBar : MonoBehaviour
     {
         [SerializeField] private Slider slider;
         [SerializeField] private PlayerHealth playerHealth;
 
-        void Start()
+        public void Bind(PlayerHealth target)
         {
-            if (playerHealth == null)
+            if (target == null)
             {
-                Debug.LogError("HealthBarUI missing playerHealth reference!");
-                return;
+                Debug.LogError("PlayerHealth Bind Error: Tried to bind to null player");
             }
 
-            // Initialize the health bar immediately
-            UpdateHealthBar(playerHealth.GetCurrentHealth(), playerHealth.maxHealth);
+            target.OnHealthChange += UpdateHealthBar;
+            UpdateHealthBar(target.GetCurrentHealth() / target.maxHealth);
+
         }
 
-        private void Update()
+        private void UpdateHealthBar(float normalizedHealth)
         {
-            UpdateHealthBar(playerHealth.GetCurrentHealth(), playerHealth.maxHealth);
-        }
-
-        private void UpdateHealthBar(float current, float max)
-        {
-            if (slider == null) return;
-
-            slider.maxValue = max;
-            slider.value = current;
+            slider.value = normalizedHealth;
         }
     }
 }
