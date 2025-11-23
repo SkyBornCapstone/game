@@ -11,9 +11,8 @@ namespace player
         [SerializeField] public float maxHealth = 100;
         [SerializeField] public float healthRegen = 0f;
         [SerializeField] public float healthRegenDelay = 0f;
-        [SerializeField] public Slider healthSlider;
-
-        [Header("Testing")] [SerializeField] private float testHealth = -1f; // -1 means use maxHealth
+        public Action<float> OnHealthChange;
+        
 
         public static Action<PlayerID?> OnDeath;
 
@@ -36,12 +35,24 @@ namespace player
                 predictionManager.hierarchy.Delete(gameObject);
             }
         }
+        
+        //bind to the healthbar
+        private void Start()
+        {
+            if (!isOwner) return;
+
+            var hud = FindFirstObjectByType<player.HUDHealthBar>();
+            if (hud)
+                hud.Bind(this);
+            else
+                Debug.LogError("PlayerHealth: HUDHealthBar not found");
+        }
 
         protected override HealthState GetInitialState()
         {
             return new HealthState
             {
-                currentHealth = testHealth >= 0 ? testHealth : maxHealth,
+                currentHealth = maxHealth,
                 timeSinceLastDamage = healthRegenDelay,
                 isDead = false
             };
@@ -49,10 +60,7 @@ namespace player
 
         protected override void UpdateView(HealthState healthState, HealthState? verified)
         {
-            if (healthSlider)
-            {
-                healthSlider.value = healthState.currentHealth / maxHealth;
-            }
+            OnHealthChange?.Invoke(healthState.currentHealth / maxHealth);
         }
 
         // Public API for other systems
