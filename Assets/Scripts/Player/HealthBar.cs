@@ -18,9 +18,6 @@ namespace player
 
             target.OnHealthChange += UpdateHealthBar;
             UpdateHealthBar(target.GetCurrentHealth() / target.maxHealth);
-            print(target.GetCurrentHealth() / target.maxHealth);
-            print(target.GetCurrentHealth());
-            print(target.maxHealth);
 
         }
 

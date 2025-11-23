@@ -1,69 +1,54 @@
 using System;
 using UnityEngine;
+using PurrNet.Prediction;
+using player;
 
 namespace Damage
 {
-    public class Projectile : MonoBehaviour
+    public class Projectile : PredictedIdentity<Projectile.State>
     {
-        [SerializeField] private int damage = 10;
-        [SerializeField] private float speed = 20f;
-        [SerializeField] private float lifetime = 5f;
-        [SerializeField] private LayerMask hitLayers;
+        [SerializeField] private int damage = 20;
         [SerializeField] private bool destroyOnHit = true;
-        
-        private Rigidbody rb;
-        private float spawnTime;
-        
-        private void Awake()
-        {
-            rb = GetComponent<Rigidbody>();
-            spawnTime = Time.time;
-        }
-        
-        private void Start()
-        {
-            if (rb != null)
-            {
-                rb.linearVelocity = transform.forward * speed;
-            }
-        }
-        
-        private void Update()
-        {
-            if (Time.time - spawnTime >= lifetime)
-            {
-                Destroy(gameObject);
-            }
-        }
-        
-        private void OnTriggerEnter(Collider other)
-        {
+        [SerializeField] private PredictedRigidbody predictedRigidbody;
 
-            if (((1 << other.gameObject.layer) & hitLayers) == 0)
-                return;
-            
-            PlayerHealth health = other.GetComponent<PlayerHealth>();
-            if (health != null)
+        private void OnEnable()
+        {
+            predictedRigidbody.onCollisionEnter += OnHit;
+            // predictedRigidbody.onTriggerEnter += OnHit;
+        }
+
+        private void OnDisable()
+        {
+            predictedRigidbody.onCollisionEnter -= OnHit;
+            // predictedRigidbody.onTriggerEnter -= OnHit;
+        }
+
+
+        private void OnHit(GameObject other, PhysicsCollision collision)
+        {
+            Debug.Log($"TryGetComponent: {other.TryGetComponent(out PlayerHealth playerHalth)} on object: {other.name}");
+
+            if (other.TryGetComponent(out PlayerHealth playerHealth))
             {
-                health.TakeDamage(damage);
+                playerHealth.TakeDamage(damage);
             }
+
             if (destroyOnHit)
             {
-                Destroy(gameObject);
+                predictionManager.hierarchy.Delete(gameObject);
             }
         }
-        public void Initialize(int projectileDamage, float projectileSpeed, float projectileLifetime)
+
+        protected override State GetInitialState()
         {
-            damage = projectileDamage;
-            speed = projectileSpeed;
-            lifetime = projectileLifetime;
-            
-            spawnTime = Time.time;
-            
-            if (rb != null)
-            {
-                rb.linearVelocity = transform.forward * speed;
-            }
+            return new State();
+        }
+        
+        
+
+        public struct State : IPredictedData<State>
+        {
+            public void Dispose() { }
         }
     }
 }

@@ -68,7 +68,7 @@ namespace player
         {
             currentState.currentHealth -= amount;
             currentState.timeSinceLastDamage = 0;
-
+            print(currentState.currentHealth);
             if (currentState is { currentHealth: <= 0, isDead: false })
             {
                 currentState.isDead = true;
