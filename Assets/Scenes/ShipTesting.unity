@@ -260,7 +260,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 1.1, z: 0}
   m_LocalScale: {x: 0.05, y: 0.2, z: 0.02}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 683342084}
   m_Father: {fileID: 863968854}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &75597857
@@ -278,6 +279,15 @@ MonoBehaviour:
   forwardSensitivity: 1
   turnSensitivity: 1
   upSensitivity: 1
+  interactDistance: 3
+  interactLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  interactionAnchor: {fileID: 683342084}
+  parentPlayerToAnchor: 1
+  enableInteractPrompt: 1
+  interactPromptText: Press E to Interact
+  interactPromptScreenOffset: {x: 0, y: -100}
   debugInput: 1
 --- !u!65 &75597858
 BoxCollider:
@@ -488,6 +498,59 @@ MonoBehaviour:
   throttleResponse: 100
   currentThrust: 0
   engineID: R
+--- !u!1 &683342083
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 683342084}
+  - component: {fileID: 683342085}
+  m_Layer: 0
+  m_Name: InteractionAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &683342084
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 683342083}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 75597856}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &683342085
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 683342083}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &762920083
 GameObject:
   m_ObjectHideFlags: 0
@@ -1358,7 +1421,7 @@ MonoBehaviour:
   throttle: 0.6
   localThrustDirection: {x: 0, y: 1, z: 0}
   throttleResponse: 100
-  currentThrust: 12000
+  currentThrust: 10000
   engineID: U
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
