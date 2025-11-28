@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace Ship
 {
@@ -18,6 +19,15 @@ namespace Ship
         [Header("Interaction")]
         public float interactDistance = 3f;
         public LayerMask interactLayer = ~0;
+        public Transform interactionAnchor;
+        public bool parentPlayerToAnchor = true;
+        [Header("UI Prompt")]
+        public bool enableInteractPrompt = true;
+        public string interactPromptText = "Press E to Interact";
+        public Vector2 interactPromptScreenOffset = new Vector2(0, -100);
+
+        private Canvas _promptCanvas;
+        private Text _promptTextUI;
 
         private InputSystem_Actions controls;
 
@@ -28,6 +38,11 @@ namespace Ship
         private float upInput;
 
         private bool isInteracting = false;
+        private GameObject interactingPlayer = null;
+        private Player.PlayerMovement interactingPlayerMovement = null;
+        private Transform interactingOriginalParent = null;
+        private Vector3 interactingOriginalLocalPos;
+        private Quaternion interactingOriginalLocalRot;
 
         private void Awake()
         {
@@ -45,7 +60,6 @@ namespace Ship
                 if (debugInput) Debug.Log("[ShipController] Move canceled");
             };
 
-            // Optional: use Jump button for upward thrust
             controls.Player.Jump.performed += ctx =>
             {
                 upInput = 1f;
@@ -57,7 +71,18 @@ namespace Ship
                 if (debugInput) Debug.Log("[ShipController] Jump canceled -> upInput=0");
             };
 
-            // Interact: only grant control if player is properly interacting with the ShipController
+            controls.Player.Crouch.performed += ctx =>
+            {
+                upInput = -1f;
+                if (debugInput) Debug.Log("[ShipController] Crouch performed -> upInput=-1");
+            };
+            controls.Player.Crouch.canceled  += ctx =>
+            {
+                upInput = 0f;
+                if (debugInput) Debug.Log("[ShipController] Crouch canceled -> upInput=0");
+            };
+
+            // Interact: toggle interaction on press when looking at this ship (press again to release)
             controls.Player.Interact.performed += ctx =>
             {
                 var cam = Camera.main;
@@ -73,16 +98,71 @@ namespace Ship
                     // Allow interaction if the ray hit this object or a child collider
                     if (hit.collider != null && (hit.collider.transform == transform || hit.collider.transform.IsChildOf(transform)))
                     {
-                        isInteracting = true;
-                        if (debugInput) Debug.Log($"[ShipController] Interact started with {name} (within {interactDistance}m)");
+                        var playerRoot = cam.transform.root.gameObject;
+
+                        if (!isInteracting)
+                        {
+                            StartInteractionWith(playerRoot, hit);
+                        }
+                        else
+                        {
+                            if (interactingPlayer == playerRoot)
+                                StopInteraction();
+                        }
+
+                        if (debugInput) Debug.Log($"[ShipController] Interact toggled for {name}. isInteracting={isInteracting}");
                     }
                 }
             };
-            controls.Player.Interact.canceled += ctx =>
+
+            if (enableInteractPrompt)
+                EnsurePromptUI();
+        }
+
+        private void EnsurePromptUI()
+        {
+            if (_promptTextUI != null) return;
+
+            // Try to find an existing global prompt by name
+            var existing = GameObject.Find("GlobalInteractPrompt");
+            if (existing != null)
             {
-                isInteracting = false;
-                if (debugInput) Debug.Log("[ShipController] Interact canceled");
-            };
+                _promptTextUI = existing.GetComponentInChildren<Text>();
+                _promptCanvas = existing.GetComponentInParent<Canvas>();
+                if (_promptTextUI != null)
+                    _promptTextUI.enabled = false;
+                return;
+            }
+
+            // Create a Canvas
+            var canvasGO = new GameObject("GlobalInteractPromptCanvas");
+            _promptCanvas = canvasGO.AddComponent<Canvas>();
+            _promptCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvasGO.AddComponent<CanvasScaler>();
+            canvasGO.AddComponent<GraphicRaycaster>();
+
+            // Create prompt root
+            var promptRoot = new GameObject("GlobalInteractPrompt");
+            promptRoot.transform.SetParent(canvasGO.transform, false);
+
+            // Add Text
+            var textGO = new GameObject("PromptText");
+            textGO.transform.SetParent(promptRoot.transform, false);
+            _promptTextUI = textGO.AddComponent<Text>();
+            _promptTextUI.alignment = TextAnchor.MiddleCenter;
+            _promptTextUI.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            _promptTextUI.text = interactPromptText;
+            _promptTextUI.fontSize = 24;
+            _promptTextUI.color = Color.white;
+
+            // Position text in the center + offset
+            var rect = _promptTextUI.rectTransform;
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = interactPromptScreenOffset;
+
+            _promptTextUI.enabled = false;
         }
 
         private void Start()
@@ -151,6 +231,16 @@ namespace Ship
 
         private void Update()
         {
+            // Update interact prompt visibility for player looking at this ship
+            if (enableInteractPrompt && !isInteracting)
+            {
+                UpdatePromptForCamera(Camera.main);
+            }
+            else
+            {
+                if (_promptTextUI != null && _promptTextUI.enabled)
+                    _promptTextUI.enabled = false;
+            }
             // Only apply player inputs to the ship if the player is interacting with it
             if (!isInteracting)
             {
@@ -199,6 +289,109 @@ namespace Ship
                 else if (debugInput)
                     Debug.Log("[ShipController] Encountered null engine while setting throttle.");
             }
+        }
+
+        private void StartInteractionWith(GameObject playerRoot, RaycastHit hit)
+        {
+            if (playerRoot == null) return;
+            if (isInteracting)
+            {
+                if (debugInput) Debug.Log("[ShipController] Already interacting; ignoring start request.");
+                return;
+            }
+
+            interactingPlayer = playerRoot;
+            var t = interactingPlayer.transform;
+            interactingOriginalParent = t.parent;
+            interactingOriginalLocalPos = t.localPosition;
+            interactingOriginalLocalRot = t.localRotation;
+
+            // Snap the player to the interaction anchor or the hit point
+            if (interactionAnchor != null)
+            {
+                if (parentPlayerToAnchor)
+                {
+                    t.SetParent(interactionAnchor, worldPositionStays: false);
+                    t.localPosition = Vector3.zero;
+                    t.localRotation = Quaternion.identity;
+                }
+                else
+                {
+                    t.SetParent(interactingOriginalParent, worldPositionStays: true);
+                    t.position = interactionAnchor.position;
+                    t.rotation = interactionAnchor.rotation;
+                }
+            }
+            else
+            {
+                // No anchor provided: snap to the hit point on the ship
+                t.position = hit.point;
+                t.rotation = transform.rotation;
+            }
+
+            // Try to disable player movement so they remain locked (this doesn't work atm)
+            interactingPlayerMovement = interactingPlayer.GetComponentInChildren<Player.PlayerMovement>();
+            if (interactingPlayerMovement != null)
+            {
+                interactingPlayerMovement.enabled = false;
+            }
+
+            isInteracting = true;
+            if (_promptTextUI != null && _promptTextUI.enabled)
+                _promptTextUI.enabled = false;
+
+            if (debugInput) Debug.Log($"[ShipController] Player '{interactingPlayer.name}' started interacting with '{name}'");
+        }
+
+        private void StopInteraction()
+        {
+            if (!isInteracting || interactingPlayer == null)
+            {
+                if (debugInput) Debug.Log("[ShipController] No active interaction to stop.");
+                interactingPlayer = null;
+                isInteracting = false;
+                return;
+            }
+
+            var t = interactingPlayer.transform;
+
+            // Restore parent and local transform
+            t.SetParent(interactingOriginalParent, worldPositionStays: false);
+            t.localPosition = interactingOriginalLocalPos;
+            t.localRotation = interactingOriginalLocalRot;
+
+            // Re-enable player movement
+            if (interactingPlayerMovement != null)
+            {
+                interactingPlayerMovement.enabled = true;
+                interactingPlayerMovement = null;
+            }
+
+            if (debugInput) Debug.Log($"[ShipController] Player '{interactingPlayer.name}' stopped interacting with '{name}'");
+
+            interactingPlayer = null;
+            interactingOriginalParent = null;
+            isInteracting = false;
+            if (_promptTextUI != null && _promptTextUI.enabled)
+                _promptTextUI.enabled = false;
+        }
+
+        private void UpdatePromptForCamera(Camera cam)
+        {
+            if (cam == null || _promptTextUI == null) return;
+
+            Ray ray = new Ray(cam.transform.position, cam.transform.forward);
+            if (Physics.Raycast(ray, out RaycastHit hit, interactDistance, interactLayer))
+            {
+                if (hit.collider != null && (hit.collider.transform == transform || hit.collider.transform.IsChildOf(transform)))
+                {
+                    _promptTextUI.text = interactPromptText;
+                    _promptTextUI.enabled = true;
+                    return;
+                }
+            }
+
+            _promptTextUI.enabled = false;
         }
     }
 }
