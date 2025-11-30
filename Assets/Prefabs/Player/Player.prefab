@@ -2603,10 +2603,11 @@ MonoBehaviour:
   groundCheckRadius: 0.2
   groundLayer:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 311
   camera: {fileID: 2039026577901264161}
   predictedRigidbody: {fileID: 274904404536730117}
   animator: {fileID: 458774339894275911}
+  isUsingCannon: 0
 --- !u!54 &3600411934756180038
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2705,8 +2706,6 @@ MonoBehaviour:
   maxHealth: 100
   healthRegen: 5
   healthRegenDelay: 1
-  healthSlider: {fileID: 2101526102506649943}
-  testHealth: 50
 --- !u!114 &422921145592203282
 MonoBehaviour:
   m_ObjectHideFlags: 0

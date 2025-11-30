@@ -1,7 +1,7 @@
 using PurrNet.Prediction;
 using UnityEngine;
-
-namespace Player
+using Player;
+namespace Cannons
 {
     public class CannonController : PredictedIdentity<CannonController.CannonInput, CannonController.CannonState>
     {
@@ -9,6 +9,7 @@ namespace Player
         [SerializeField] private Transform currentBase;
         [SerializeField] private Transform barrel;
         [SerializeField] private Transform seatPosition;
+        [SerializeField] private Transform projectileSpawn;
         
         [Header("Rotation Settings")]
         [SerializeField] private float yawRotationSpeed = 30f;
@@ -23,22 +24,23 @@ namespace Player
         [Header("Base Rotation Offset")]
         [SerializeField] private float barrelBaseRotationX = 90f; // Set this to your barrel's base rotation
 
-        private PlayerMovement currentPlayer;
-        private float currentTurretAngle;
-        private float currentBarrelAngle;
-        
-        protected override void LateAwake()
-        {
-            if (currentBase)
-            {
-                currentTurretAngle = currentBase.localEulerAngles.y;
-            }
+        [Header("Cannon Ball")] 
+        [SerializeField] private float shootForce = 10;
+        [SerializeField] private float reloadTime = 3f;
+        [SerializeField] private float shootTime = 3f;
+        [SerializeField] private GameObject projectilePrefab;
 
-            if (barrel)
+        private PlayerMovement currentPlayer;
+
+        protected override CannonState GetInitialState()
+        {
+            return new CannonState
             {
-                // Start from zero, we'll add the offset when applying rotation
-                currentBarrelAngle = 0f;
-            }
+                turretAngle = currentBase.localEulerAngles.y,
+                barrelAngle = 0f,
+                canShoot = true,
+                timeToCanShoot = 0f
+            };
         }
         
         protected override void Simulate(CannonInput input, ref CannonState state, float delta)
@@ -49,51 +51,65 @@ namespace Player
             // Rotate turret (left/right) - Yaw
             if (currentBase)
             {
-                currentTurretAngle += input.horizontalInput * yawRotationSpeed * delta;
+                state.turretAngle += input.horizontalInput * yawRotationSpeed * delta;
                 
                 // Clamp yaw within limits
-                currentTurretAngle = Mathf.Clamp(currentTurretAngle, -yawLimit, yawLimit);
+                state.turretAngle = Mathf.Clamp(state.turretAngle, -yawLimit, yawLimit);
                 
-                currentBase.localRotation = Quaternion.Euler(0, currentTurretAngle, 0);
-                state.turretAngle = currentTurretAngle;
+                // currentBase.localRotation = Quaternion.Euler(0, currentTurretAngle, 0);
             }
 
             // Rotate barrel (up/down) - Pitch
             if (barrel)
             {
-                currentBarrelAngle -= input.verticalInput * pitchRotationSpeed * delta;
+                state.barrelAngle -= input.verticalInput * pitchRotationSpeed * delta;
                 
                 // Clamp pitch within limits (negative is down, positive is up)
                 // If inverted, swap the limits
                 float minLimit = invertPitchLimits ? -upPitchLimit : -downPitchLimit;
                 float maxLimit = invertPitchLimits ? downPitchLimit : upPitchLimit;
-                currentBarrelAngle = Mathf.Clamp(currentBarrelAngle, minLimit, maxLimit);
+                state.barrelAngle = Mathf.Clamp(state.barrelAngle, minLimit, maxLimit);
                 
                 // Apply rotation WITH the base offset
-                barrel.localRotation = Quaternion.Euler(barrelBaseRotationX + currentBarrelAngle, 0, 0);
-                state.barrelAngle = currentBarrelAngle;
+                // barrel.localRotation = Quaternion.Euler(barrelBaseRotationX + currentBarrelAngle, 0, 0);
             }
-        }
 
+            if (state.canShoot && input.shoot)
+            {
+                state.timeToCanShoot = shootTime;
+                // state.ammo--;
+
+
+                Vector3 shootDirection = projectileSpawn.forward;
+                Vector3 spawnPosition = projectileSpawn.position;
+                var createdObject = predictionManager.hierarchy.Create(projectilePrefab, spawnPosition, Quaternion.identity);
+                if (!createdObject.HasValue)
+                    return;
+                
+                createdObject.Value.TryGetComponent(predictionManager, out PredictedRigidbody rb);
+                rb.AddForce(shootDirection * shootForce, ForceMode.Impulse);
+            }
+            if (!state.canShoot)
+                state.timeToCanShoot -= delta;
+        }
+        protected override void UpdateInput(ref CannonInput input)
+        {
+            input.shoot |= UnityEngine.Input.GetKeyDown(KeyCode.Mouse0);
+        }
         protected override void UpdateView(CannonState viewState, CannonState? verified)
         {
             // Sync visual representation with state
-            if (currentBase != null)
+            if (currentBase)
                 currentBase.localRotation = Quaternion.Euler(0, viewState.turretAngle, 0);
             
-            if (barrel != null)
+            if (barrel)
                 // Apply rotation WITH the base offset
                 barrel.localRotation = Quaternion.Euler(barrelBaseRotationX + viewState.barrelAngle, 0, 0);
         }
 
-        protected override void UpdateInput(ref CannonInput input)
-        {
-            // Additional input processing if needed
-        }
-
         protected override void GetFinalInput(ref CannonInput input)
         {
-            if (currentPlayer == null)
+            if (!currentPlayer)
             {
                 input.isActive = false;
                 return;
@@ -181,6 +197,8 @@ namespace Player
         {
             public float turretAngle;
             public float barrelAngle;
+            public bool canShoot;
+            public float timeToCanShoot;
 
             public void Dispose()
             {
@@ -192,6 +210,7 @@ namespace Player
             public bool isActive;
             public float horizontalInput;
             public float verticalInput;
+            public bool shoot;
 
             public void Dispose()
             {

@@ -196,7 +196,7 @@ namespace Player
 
         public void ExitCannon()
         {
-            print("HERE");
+            
             isUsingCannon = false;
             cannonSeat = null;
         }
