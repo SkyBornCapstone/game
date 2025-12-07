@@ -99,16 +99,29 @@ namespace Player
         {
             if (!animator)
                 return;
-            Vector3 worldVelocity = viewState.velocity;
+
+            if (isOwner || !verified.HasValue)
+            {
+                UpdateAnimator(viewState);
+            }
+            else
+            {
+                UpdateAnimator(verified.Value);
+            }
+        }
+
+        private void UpdateAnimator(MoveState state)
+        {
+            Vector3 worldVelocity = state.velocity;
 
             Vector3 localVelocity = transform.InverseTransformDirection(worldVelocity);
 
             float deltaTime = Time.deltaTime;
             animator.SetFloat(VelocityXHash, localVelocity.x, .1f, deltaTime);
             animator.SetFloat(VelocityZHash, localVelocity.z, .1f, deltaTime);
-            animator.SetBool(IsGroundedHash, viewState.isGrounded);
+            animator.SetBool(IsGroundedHash, state.isGrounded);
 
-            if (verified.HasValue && verified.Value.jump)
+            if (state.jump)
             {
                 animator.SetBool(JumpHash, true);
             }
