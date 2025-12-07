@@ -14,6 +14,7 @@ namespace Damage
         private void OnEnable()
         {
             predictedRigidbody.onCollisionEnter += OnHit;
+            
             // predictedRigidbody.onTriggerEnter += OnHit;
         }
 
@@ -26,8 +27,8 @@ namespace Damage
 
         private void OnHit(GameObject other, PhysicsCollision collision)
         {
-            Debug.Log($"TryGetComponent: {other.TryGetComponent(out PlayerHealth playerHalth)} on object: {other.name}");
-
+            // Debug.Log($"TryGetComponent: {other.TryGetComponent(out PlayerHealth playerHalth)} on object: {other.name}");
+            Debug.Log("Projectile collided with: " + other.name);
             if (other.TryGetComponent(out PlayerHealth playerHealth))
             {
                 playerHealth.TakeDamage(damage);
