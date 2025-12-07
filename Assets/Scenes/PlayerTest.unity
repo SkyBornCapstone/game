@@ -715,6 +715,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6540785193402420746, guid: a1294ff4f3b40b74ca88420cb9473f73, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6540785193402420746, guid: a1294ff4f3b40b74ca88420cb9473f73, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6540785193402420746, guid: a1294ff4f3b40b74ca88420cb9473f73, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6540785193402420746, guid: a1294ff4f3b40b74ca88420cb9473f73, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6540785193402420746, guid: a1294ff4f3b40b74ca88420cb9473f73, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 132
+      objectReference: {fileID: 0}
+    - target: {fileID: 6540785193402420746, guid: a1294ff4f3b40b74ca88420cb9473f73, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 54
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2135,3 +2159,4 @@ SceneRoots:
   - {fileID: 643516566}
   - {fileID: 589553461}
   - {fileID: 400521707}
+  - {fileID: 1172351854}
