@@ -1,8 +1,15 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Prefabs/temp_player/Player.physicMaterial.meta
 guid: 9372c14d50521274a8c9be281822e2fd
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 13400000
+========
+guid: f7299300e6854ae498d4cb7f472ec8c3
+folderAsset: yes
+DefaultImporter:
+  externalObjects: {}
+>>>>>>>> c57be9a (Reorganize project files):Assets/Scripts/Ship.meta
   userData: 
   assetBundleName: 
   assetBundleVariant: 
