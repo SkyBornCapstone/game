@@ -21,6 +21,10 @@ namespace Player
         private static readonly int JumpHash = Animator.StringToHash("Jump");
         private static readonly int IsGroundedHash = Animator.StringToHash("Is Grounded");
 
+        [Header("Ship Interaction Variables")]
+        public bool isUsingShip;
+        private Transform shipAnchor;
+
         protected override void LateAwake()
         {
             if (isOwner)
@@ -29,6 +33,28 @@ namespace Player
 
         protected override void Simulate(MoveInput moveInput, ref MoveState moveState, float delta)
         {
+            if (isUsingShip)
+            {
+                // Lock position when using ship
+                if (shipAnchor != null)
+                {
+                    predictedRigidbody.position = shipAnchor.position;
+                }
+                moveState.velocity = Vector3.zero;
+                moveState.isGrounded = true;
+                moveState.jump = false;
+        
+                // Still allow rotation while in ship
+                if (moveInput.cameraForward.HasValue)
+                {
+                    var camForward = moveInput.cameraForward.Value;
+                    camForward.y = 0;
+                    if (camForward.sqrMagnitude > 0.0001f)
+                        predictedRigidbody.MoveRotation(Quaternion.LookRotation(camForward.normalized));
+                }
+                return;
+            }
+
             Vector3 targetVel =
                 (transform.forward * moveInput.moveDirection.y + transform.right * moveInput.moveDirection.x) *
                 moveSpeed;
@@ -88,6 +114,13 @@ namespace Player
 
         protected override void UpdateInput(ref MoveInput input)
         {
+            if (isUsingShip)
+            {
+                input.moveDirection = Vector2.zero;
+                input.jump = false;
+                return;
+            }
+            
             input.jump |= Input.GetKeyDown(KeyCode.Space);
         }
 
@@ -102,6 +135,12 @@ namespace Player
 
         protected override void GetFinalInput(ref MoveInput moveInput)
         {
+            if (isUsingShip)
+            {
+                moveInput.moveDirection = Vector2.zero;
+                moveInput.cameraForward = camera.Forward;
+                return;
+            }
             moveInput.moveDirection = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
             moveInput.cameraForward = camera.Forward;
         }
@@ -138,6 +177,23 @@ namespace Player
             public void Dispose()
             {
             }
+        }
+
+        public void EnterShip(Transform anchor)
+        {
+            isUsingShip = true;
+            shipAnchor = anchor;
+            if (!predictedRigidbody.isKinematic)
+            {
+                predictedRigidbody.velocity = Vector3.zero;
+                predictedRigidbody.angularVelocity = Vector3.zero;
+            }
+        }
+
+        public void ExitShip()
+        {
+            isUsingShip = false;
+            shipAnchor = null;
         }
     }
 }
