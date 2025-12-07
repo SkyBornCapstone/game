@@ -36,7 +36,7 @@ namespace Player
 
         protected override void Simulate(MoveInput moveInput, ref MoveState moveState, float delta)
         {
-            if (isUsingShip || isUsing Cannon)
+            if (isUsingShip || isUsingCannon)
             {
                 // Lock position when using ship
                 if (isUsingShip && shipAnchor != null)
@@ -200,6 +200,7 @@ namespace Player
         {
             isUsingShip = false;
             shipAnchor = null;
+        }
         public void EnterCannon(Transform seat)
         {
             isUsingCannon = true;
