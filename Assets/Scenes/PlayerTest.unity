@@ -409,7 +409,6 @@ GameObject:
   - component: {fileID: 400521707}
   - component: {fileID: 400521706}
   - component: {fileID: 400521705}
-  - component: {fileID: 400521704}
   - component: {fileID: 400521703}
   - component: {fileID: 400521702}
   - component: {fileID: 400521701}
@@ -453,7 +452,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98dbb08343eac044895b9b52872bcb49, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _graphics: {fileID: 0}
+  _graphics: {fileID: 2021977341}
   _floatAccuracy: 1
   _interpolationSettings: {fileID: 11400000, guid: 4a8aa8e44e23cfd4a8d4387ef3f36173, type: 2}
   _unparentGraphics: 0
@@ -474,23 +473,6 @@ MonoBehaviour:
   _floatAccuracy: 1
   _eventMask: 63
   _ignoreTriggerOnTrigger: 0
---- !u!114 &400521704
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 400521700}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 98dbb08343eac044895b9b52872bcb49, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _graphics: {fileID: 0}
-  _floatAccuracy: 1
-  _interpolationSettings: {fileID: 11400000, guid: 4a8aa8e44e23cfd4a8d4387ef3f36173, type: 2}
-  _unparentGraphics: 0
-  _characterControllerPatch: 1
 --- !u!54 &400521705
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -542,7 +524,7 @@ Transform:
   m_GameObject: {fileID: 400521700}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.48, y: 1.09, z: 2.37}
+  m_LocalPosition: {x: -3.22, y: 1.09, z: 2.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

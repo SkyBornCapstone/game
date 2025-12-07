@@ -21,12 +21,11 @@ namespace Player
         private static readonly int JumpHash = Animator.StringToHash("Jump");
         private static readonly int IsGroundedHash = Animator.StringToHash("Is Grounded");
 
-        [Header("Ship Interaction Variables")]
-        public bool isUsingShip;
+        [Header("Ship Interaction Variables")] public bool isUsingShip;
         private Transform shipAnchor;
         [Header("Cannon Variables")] public bool isUsingCannon;
         private Transform cannonSeat;
-        
+
 
         protected override void LateAwake()
         {
@@ -45,12 +44,14 @@ namespace Player
                 }
                 // Lock position when using cannon
                 else if (isUsingCannon && cannonSeat != null)
-                predictedRigidbody.velocity = Vector3.zero;
-                predictedRigidbody.angularVelocity = Vector3.zero;
-                moveState.velocity = Vector3.zero;
-                moveState.isGrounded = true;
-                moveState.jump = false;
-        
+                {
+                    predictedRigidbody.velocity = Vector3.zero;
+                    predictedRigidbody.angularVelocity = Vector3.zero;
+                    moveState.velocity = Vector3.zero;
+                    moveState.isGrounded = true;
+                    moveState.jump = false;
+                }
+
                 // Still allow rotation while interacting
                 if (moveInput.cameraForward.HasValue)
                 {
@@ -59,8 +60,10 @@ namespace Player
                     if (camForward.sqrMagnitude > 0.0001f)
                         predictedRigidbody.MoveRotation(Quaternion.LookRotation(camForward.normalized));
                 }
+
                 return;
             }
+
             Vector3 targetVel =
                 (transform.forward * moveInput.moveDirection.y + transform.right * moveInput.moveDirection.x) *
                 moveSpeed;
@@ -139,7 +142,7 @@ namespace Player
                 input.jump = false;
                 return;
             }
-            
+
             input.jump |= Input.GetKeyDown(KeyCode.Space);
         }
 
@@ -160,6 +163,7 @@ namespace Player
                 moveInput.cameraForward = camera.Forward;
                 return;
             }
+
             moveInput.moveDirection = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
             moveInput.cameraForward = camera.Forward;
         }
@@ -214,6 +218,7 @@ namespace Player
             isUsingShip = false;
             shipAnchor = null;
         }
+
         public void EnterCannon(Transform seat)
         {
             isUsingCannon = true;
@@ -221,14 +226,12 @@ namespace Player
             transform.position = cannonSeat.position;
             predictedRigidbody.angularVelocity = Vector3.zero;
             transform.rotation = cannonSeat.rotation;
-            
+
             predictedRigidbody.velocity = Vector3.zero;
-            
         }
 
         public void ExitCannon()
         {
-            
             isUsingCannon = false;
             cannonSeat = null;
         }
