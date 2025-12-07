@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
+ 
 
 namespace Ship
 {
@@ -18,16 +20,28 @@ namespace Ship
         [Header("Interaction")]
         public float interactDistance = 3f;
         public LayerMask interactLayer = ~0;
+        public Transform interactionAnchor;
+        public bool parentPlayerToAnchor = true;
+        [Header("UI Prompt")]
+        public bool enableInteractPrompt = true;
+        public string interactPromptText = "Press E to Interact";
+        public Vector2 interactPromptScreenOffset = new Vector2(0, -100);
+
+        private Canvas _promptCanvas;
+        private Text _promptTextUI;
 
         private InputSystem_Actions controls;
-
-        [Header("Debug")]
-        public bool debugInput = false;
 
         private Vector2 moveInput;
         private float upInput;
 
         private bool isInteracting = false;
+        private GameObject interactingPlayer = null;
+        private System.Collections.Generic.List<Player.PlayerMovement> interactingPlayerMovements = new System.Collections.Generic.List<Player.PlayerMovement>();
+        // Interaction state
+        private Transform interactingOriginalParent = null;
+        private Vector3 interactingOriginalLocalPos;
+        private Quaternion interactingOriginalLocalRot;
 
         private void Awake()
         {
@@ -37,33 +51,36 @@ namespace Ship
             controls.Player.Move.performed += ctx =>
             {
                 moveInput = ctx.ReadValue<Vector2>();
-                if (debugInput) Debug.Log($"[ShipController] Move performed: {moveInput}");
             };
             controls.Player.Move.canceled  += ctx =>
             {
                 moveInput = Vector2.zero;
-                if (debugInput) Debug.Log("[ShipController] Move canceled");
             };
 
-            // Optional: use Jump button for upward thrust
             controls.Player.Jump.performed += ctx =>
             {
                 upInput = 1f;
-                if (debugInput) Debug.Log("[ShipController] Jump performed -> upInput=1");
             };
             controls.Player.Jump.canceled  += ctx =>
             {
                 upInput = 0f;
-                if (debugInput) Debug.Log("[ShipController] Jump canceled -> upInput=0");
             };
 
-            // Interact: only grant control if player is properly interacting with the ShipController
+            controls.Player.Crouch.performed += ctx =>
+            {
+                upInput = -1f;
+            };
+            controls.Player.Crouch.canceled  += ctx =>
+            {
+                upInput = 0f;
+            };
+
+            // Interact: toggle interaction on press when looking at this ship (press again to release)
             controls.Player.Interact.performed += ctx =>
             {
                 var cam = Camera.main;
                 if (cam == null)
                 {
-                    if (debugInput) Debug.LogWarning("[ShipController] No main camera found for Interact check.");
                     return;
                 }
 
@@ -73,15 +90,34 @@ namespace Ship
                     // Allow interaction if the ray hit this object or a child collider
                     if (hit.collider != null && (hit.collider.transform == transform || hit.collider.transform.IsChildOf(transform)))
                     {
-                        isInteracting = true;
-                        if (debugInput) Debug.Log($"[ShipController] Interact started with {name} (within {interactDistance}m)");
+                        GameObject playerRoot = null;
+                        try
+                        {
+                            var movesAll = UnityEngine.Object.FindObjectsByType<Player.PlayerMovement>(FindObjectsSortMode.None);
+                            foreach (var m in movesAll)
+                            {
+                                if (m.isOwner)
+                                {
+                                    playerRoot = m.gameObject;
+                                    break;
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            playerRoot = null;
+                        }
+
+                        // Fallback to camera root
+                        if (playerRoot == null)
+                            playerRoot = cam.transform.root.gameObject;
+
+                        if (!isInteracting)
+                            StartInteractionWith(playerRoot, hit);
+                        else if (interactingPlayer == playerRoot)
+                            StopInteraction();
                     }
                 }
-            };
-            controls.Player.Interact.canceled += ctx =>
-            {
-                isInteracting = false;
-                if (debugInput) Debug.Log("[ShipController] Interact canceled");
             };
         }
 
@@ -89,28 +125,14 @@ namespace Ship
         {
             ShipEngine[] allEngines = GetComponentsInChildren<ShipEngine>(true);
 
-            // Fallback: if no child engines, search the entire scene
-            if ((allEngines == null || allEngines.Length == 0))
+            if (allEngines == null || allEngines.Length == 0)
             {
                 var sceneEngines = UnityEngine.Resources.FindObjectsOfTypeAll<ShipEngine>();
                 if (sceneEngines != null && sceneEngines.Length > 0)
                 {
-                    Debug.LogWarning("[ShipController] No child ShipEngine components found; falling back to scene-wide search.");
                     allEngines = sceneEngines;
                 }
-            }
-
-            if (debugInput)
-            {
-                if (allEngines == null || allEngines.Length == 0)
-                    Debug.LogWarning("[ShipController] No ShipEngine components found in children (includeInactive=true).");
-                else
-                {
-                    Debug.Log($"[ShipController] Found {allEngines.Length} ShipEngine(s):");
-                    foreach (var e in allEngines)
-                        Debug.Log($"  - {e.name} (engineID='{e.engineID}')");
-                }
-            }
+            }   
 
             var leftList = new System.Collections.Generic.List<ShipEngine>();
             var rightList = new System.Collections.Generic.List<ShipEngine>();
@@ -125,8 +147,6 @@ namespace Ship
                     case "R": rightList.Add(engine); break;
                     case "U": upList.Add(engine); break;
                     default:
-                        if (debugInput)
-                            Debug.Log($"[ShipController] Unrecognized engineID '{engine.engineID}' on {engine.name}");
                         break;
                 }
             }
@@ -134,9 +154,6 @@ namespace Ship
             leftEngines = leftList.ToArray();
             rightEngines = rightList.ToArray();
             upEngines = upList.ToArray();
-
-            if (debugInput)
-                Debug.Log($"[ShipController] Engine groups -> Left:{leftEngines.Length} Right:{rightEngines.Length} Up:{upEngines.Length}");
         }
 
         private void OnEnable()
@@ -151,13 +168,18 @@ namespace Ship
 
         private void Update()
         {
-            // Only apply player inputs to the ship if the player is interacting with it
-            if (!isInteracting)
+            // Update interact prompt visibility for player looking at this ship
+            if (enableInteractPrompt && !isInteracting)
             {
-                if (debugInput)
-                    Debug.Log($"[ShipController] Not interacting; ignoring player input for {name}.");
-                return;
+                UpdatePromptForCamera(Camera.main);
             }
+            else
+            {
+                if (_promptTextUI != null && _promptTextUI.enabled)
+                    _promptTextUI.enabled = false;
+            }
+            // Only apply player inputs to the ship if the player is interacting with it
+            if (!isInteracting) return;
 
             // Treat throttle values as rate inputs in the range -1 to 1.
             // Positive = request increase, Negative = request decrease, Zero = hold.
@@ -178,17 +200,12 @@ namespace Ship
             upInputCmd = Mathf.Clamp(upInputCmd, -1f, 1f);
             SetThrottle(upEngines, upInputCmd);
 
-            if (debugInput)
-            {
-                Debug.Log($"[ShipController] Throttle Inputs -> Left:{leftInput:F2} Right:{rightInput:F2} Up:{upInputCmd:F2} Move:{moveInput} UpInput:{upInput}");
-            }
         }
 
         private void SetThrottle(ShipEngine[] engines, float throttle)
         {
             if (engines == null || engines.Length == 0)
             {
-                if (debugInput) Debug.Log("[ShipController] SetThrottle called with no engines.");
                 return;
             }
 
@@ -196,9 +213,111 @@ namespace Ship
             {
                 if (engine != null)
                     engine.throttle = throttle;
-                else if (debugInput)
-                    Debug.Log("[ShipController] Encountered null engine while setting throttle.");
             }
+        }
+
+        private void StartInteractionWith(GameObject playerRoot, RaycastHit hit)
+        {
+            if (playerRoot == null || isInteracting) return;
+
+            interactingPlayer = playerRoot;
+            var t = interactingPlayer.transform;
+            interactingOriginalParent = t.parent;
+            interactingOriginalLocalPos = t.localPosition;
+            interactingOriginalLocalRot = t.localRotation;
+
+            // Now snap the player to the interaction anchor or the hit point (after disabling prediction)
+            if (interactionAnchor != null)
+            {
+                if (parentPlayerToAnchor)
+                {
+                    t.SetParent(interactionAnchor, worldPositionStays: false);
+                    t.localPosition = Vector3.zero;
+                    t.localRotation = Quaternion.identity;
+                }
+                else
+                {
+                    t.SetParent(interactingOriginalParent, worldPositionStays: true);
+                    t.position = interactionAnchor.position;
+                    t.rotation = interactionAnchor.rotation;
+                }
+            }
+            else
+            {
+                // No anchor provided: snap to the hit point on the ship *this is bad*
+                t.position = hit.point;
+                t.rotation = transform.rotation;    
+            }
+
+            // Disable player movement and physics so they remain locked to the ship
+            interactingPlayerMovements.Clear();
+            var moves = interactingPlayer.GetComponentsInChildren<Player.PlayerMovement>(true);
+            foreach (var mv in moves)
+            {
+                try
+                {
+                    // Call EnterShip to lock the player to the ship anchor
+                    Transform anchor = (interactionAnchor != null) ? interactionAnchor : t;
+                    mv.EnterShip(anchor);
+                    interactingPlayerMovements.Add(mv);
+                    
+                }
+                catch
+                {
+                }
+            }
+
+            isInteracting = true;
+            if (_promptTextUI != null && _promptTextUI.enabled)
+                _promptTextUI.enabled = false;
+        }
+
+        private void StopInteraction()
+        {
+            if (!isInteracting || interactingPlayer == null)
+            {
+                interactingPlayer = null;
+                isInteracting = false;
+                return;
+            }
+
+            var t = interactingPlayer.transform;
+
+            // Restore parent and local transform
+            t.SetParent(interactingOriginalParent, worldPositionStays: false);
+            t.localPosition = interactingOriginalLocalPos;
+            t.localRotation = interactingOriginalLocalRot;
+
+            // Notify PlayerMovement instances to exit ship mode
+            foreach (var mv in interactingPlayerMovements)
+            {
+                try { mv.ExitShip(); } catch { }
+            }
+            interactingPlayerMovements.Clear();
+
+            interactingPlayer = null;
+            interactingOriginalParent = null;
+            isInteracting = false;
+            if (_promptTextUI != null && _promptTextUI.enabled)
+                _promptTextUI.enabled = false;
+        }
+
+        private void UpdatePromptForCamera(Camera cam)
+        {
+            if (cam == null || _promptTextUI == null) return;
+
+            Ray ray = new Ray(cam.transform.position, cam.transform.forward);
+            if (Physics.Raycast(ray, out RaycastHit hit, interactDistance, interactLayer))
+            {
+                if (hit.collider != null && (hit.collider.transform == transform || hit.collider.transform.IsChildOf(transform)))
+                {
+                    _promptTextUI.text = interactPromptText;
+                    _promptTextUI.enabled = true;
+                    return;
+                }
+            }
+
+            _promptTextUI.enabled = false;
         }
     }
 }

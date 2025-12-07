@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Ship
@@ -28,6 +29,8 @@ namespace Ship
         public float turnSensitivity = 0.05f;
 
         private ShipEngine[] engines;
+        // Track original parents for any transforms we re-parent on collision so we can restore them on exit
+        private Dictionary<Transform, Transform> _originalParents = new Dictionary<Transform, Transform>();
 
         void Start()
         {
@@ -37,6 +40,73 @@ namespace Ship
             if (engines == null || engines.Length == 0)
             {
                 Debug.LogWarning("[ShipPhysics] No ShipEngine components found as children (includeInactive=true). Physics will behave as if no thrust is available.");
+            }
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            TryParentPlayerOnContact(collision.collider);
+        }
+
+        private void OnCollisionExit(Collision collision)
+        {
+            TryUnparentPlayerOnContact(collision.collider);
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            TryParentPlayerOnContact(other);
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            TryUnparentPlayerOnContact(other);
+        }
+
+        private void TryParentPlayerOnContact(Collider col)
+        {
+            if (col == null) return;
+
+            // Find the root GameObject that might contain a PlayerMovement component
+            var root = col.transform.root;
+            if (root == null) return;
+
+            var playerMovement = root.GetComponentInChildren<Player.PlayerMovement>();
+            if (playerMovement == null) return;
+
+            // If already parented to this ship (or a child of it), do nothing
+            if (root.IsChildOf(transform)) return;
+
+            // Record original parent so we can restore later
+            if (!_originalParents.ContainsKey(root))
+                _originalParents[root] = root.parent;
+
+            // Parent the player's root to this ship so it inherits movement
+            root.SetParent(transform, worldPositionStays: true);
+            Debug.Log($"[ShipPhysics] Parented player '{root.name}' to ship '{name}' on contact.");
+        }
+
+        private void TryUnparentPlayerOnContact(Collider col)
+        {
+            if (col == null) return;
+
+            var root = col.transform.root;
+            if (root == null) return;
+
+            var playerMovement = root.GetComponentInChildren<Player.PlayerMovement>();
+            if (playerMovement == null) return;
+
+            // Only unparent if we previously recorded this root and it's currently a child of this ship
+            if (_originalParents.TryGetValue(root, out var originalParent))
+            {
+                // Ensure we only restore if current parent is the ship
+                if (root.parent == transform)
+                {
+                    root.SetParent(originalParent, worldPositionStays: true);
+                    Debug.Log($"[ShipPhysics] Restored original parent for player '{root.name}' after leaving ship '{name}'.");
+                }
+
+                _originalParents.Remove(root);
             }
         }
 
