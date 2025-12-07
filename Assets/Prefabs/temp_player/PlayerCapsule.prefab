@@ -226,7 +226,7 @@ GameObject:
   - component: {fileID: 2295133751634501622}
   - component: {fileID: 6708748319428657228}
   - component: {fileID: -434076312531773531}
-  - component: {fileID: 8196430801611729356}
+  - component: {fileID: -4810885185802932985}
   m_Layer: 0
   m_Name: PlayerCapsule
   m_TagString: Untagged
@@ -370,7 +370,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df2987b2f647ec146aa7db64ff0b2d8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &8196430801611729356
+--- !u!114 &-4810885185802932985
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -382,12 +382,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 770498be24b165d438eca57a95af6452, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _repeatInputFactor: 0.8
-  _extrapolateInput: 1
   maxHealth: 100
   healthRegen: 0
   healthRegenDelay: 0
-  testHealth: 1.35
 --- !u!1 &8838664431253737783
 GameObject:
   m_ObjectHideFlags: 0
