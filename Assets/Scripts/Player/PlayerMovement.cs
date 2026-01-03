@@ -1,4 +1,4 @@
-﻿using PurrNet.Prediction;
+using PurrNet.Prediction;
 using UnityEngine;
 
 namespace Player
@@ -21,6 +21,9 @@ namespace Player
         private static readonly int JumpHash = Animator.StringToHash("Jump");
         private static readonly int IsGroundedHash = Animator.StringToHash("Is Grounded");
 
+        [Header("Ship Interaction Variables")]
+        public bool isUsingShip;
+        private Transform shipAnchor;
         [Header("Cannon Variables")] public bool isUsingCannon;
         private Transform cannonSeat;
         
@@ -33,10 +36,15 @@ namespace Player
 
         protected override void Simulate(MoveInput moveInput, ref MoveState moveState, float delta)
         {
-            if (isUsingCannon)
+            if (isUsingShip || isUsingCannon)
             {
+                // Lock position when using ship
+                if (isUsingShip && shipAnchor != null)
+                {
+                    predictedRigidbody.position = shipAnchor.position;
+                }
                 // Lock position when using cannon
-                if (cannonSeat != null)
+                else if (isUsingCannon && cannonSeat != null)
                 {
                     predictedRigidbody.position = cannonSeat.position;
                 }
@@ -46,7 +54,7 @@ namespace Player
                 moveState.isGrounded = true;
                 moveState.jump = false;
         
-                // Still allow rotation while in cannon
+                // Still allow rotation while interacting
                 if (moveInput.cameraForward.HasValue)
                 {
                     var camForward = moveInput.cameraForward.Value;
@@ -54,7 +62,6 @@ namespace Player
                     if (camForward.sqrMagnitude > 0.0001f)
                         predictedRigidbody.MoveRotation(Quaternion.LookRotation(camForward.normalized));
                 }
-        
                 return;
             }
             Vector3 targetVel =
@@ -116,10 +123,9 @@ namespace Player
 
         protected override void UpdateInput(ref MoveInput input)
         {
-            if (isUsingCannon)
+            if (isUsingShip || isUsingCannon)
             {
                 input.moveDirection = Vector2.zero;
-                // input.cameraForward = null;
                 input.jump = false;
                 return;
             }
@@ -138,7 +144,7 @@ namespace Player
 
         protected override void GetFinalInput(ref MoveInput moveInput)
         {
-            if (isUsingCannon)
+            if (isUsingShip || isUsingCannon)
             {
                 moveInput.moveDirection = Vector2.zero;
                 moveInput.cameraForward = camera.Forward;
@@ -182,6 +188,22 @@ namespace Player
             }
         }
 
+        public void EnterShip(Transform anchor)
+        {
+            isUsingShip = true;
+            shipAnchor = anchor;
+            if (!predictedRigidbody.isKinematic)
+            {
+                predictedRigidbody.velocity = Vector3.zero;
+                predictedRigidbody.angularVelocity = Vector3.zero;
+            }
+        }
+
+        public void ExitShip()
+        {
+            isUsingShip = false;
+            shipAnchor = null;
+        }
         public void EnterCannon(Transform seat)
         {
             isUsingCannon = true;
