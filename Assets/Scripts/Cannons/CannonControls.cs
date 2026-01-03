@@ -22,8 +22,13 @@ namespace Cannons
         [SerializeField] private bool invertPitchLimits = false; // Toggle to invert up/down limits
         
         [Header("Base Rotation Offset")]
-        [SerializeField] private float barrelBaseRotationX = 90f; // Set this to your barrel's base rotation
+        [SerializeField] private float barrelBaseRotationZ = 90f;
 
+        public Transform Barrel
+        {
+            get => barrel;
+            set => barrel = value;
+        }
         [Header("Cannon Ball")] 
         [SerializeField] private float shootForce = 10;
         [SerializeField] private float reloadTime = 3f;
@@ -34,10 +39,20 @@ namespace Cannons
 
         protected override CannonState GetInitialState()
         {
+            // Get the actual starting barrel angle by removing the base offset
+            float actualBarrelAngle = barrel ? barrel.localEulerAngles.z : 0f;
+    
+            // Normalize the angle to the -180 to 180 range
+            if (actualBarrelAngle > 180f)
+                actualBarrelAngle -= 360f;
+    
+            // Subtract the base offset to get the "game" angle
+            float initialBarrelAngle = actualBarrelAngle - barrelBaseRotationZ;
+    
             return new CannonState
             {
-                turretAngle = currentBase.localEulerAngles.y,
-                barrelAngle = 0f,
+                turretAngle = currentBase ? currentBase.localEulerAngles.y : 0f,
+                barrelAngle = initialBarrelAngle,
                 canShoot = true,
                 timeToCanShoot = 0f
             };
@@ -80,7 +95,7 @@ namespace Cannons
                 // state.ammo--;
 
 
-                Vector3 shootDirection = projectileSpawn.forward;
+                Vector3 shootDirection = projectileSpawn.right;
                 Vector3 spawnPosition = projectileSpawn.position;
                 var createdObject = predictionManager.hierarchy.Create(projectilePrefab, spawnPosition, Quaternion.identity);
                 if (!createdObject.HasValue)
@@ -104,7 +119,7 @@ namespace Cannons
             
             if (barrel)
                 // Apply rotation WITH the base offset
-                barrel.localRotation = Quaternion.Euler(barrelBaseRotationX + viewState.barrelAngle, 0, 0);
+                barrel.localRotation = Quaternion.Euler(0, 0, barrelBaseRotationZ + viewState.barrelAngle);
         }
 
         protected override void GetFinalInput(ref CannonInput input)
@@ -160,7 +175,7 @@ namespace Cannons
                 Quaternion minRot = Quaternion.Euler(0, -yawLimit, 0);
                 Quaternion maxRot = Quaternion.Euler(0, yawLimit, 0);
                 
-                Vector3 forward = currentBase.parent ? currentBase.parent.forward : Vector3.forward;
+                Vector3 forward = currentBase.parent ? currentBase.parent.right : Vector3.right;
                 Gizmos.DrawRay(center, minRot * forward * 2f);
                 Gizmos.DrawRay(center, maxRot * forward * 2f);
             }
@@ -172,17 +187,17 @@ namespace Cannons
                 Vector3 center = barrel.position;
                 
                 // Draw barrel elevation limits (accounting for base rotation and inversion)
-                Quaternion baseOffset = Quaternion.Euler(barrelBaseRotationX, 0, 0);
+                Quaternion baseOffset = Quaternion.Euler(0, 0, barrelBaseRotationZ); 
                 float minAngle = invertPitchLimits ? -upPitchLimit : -downPitchLimit;
                 float maxAngle = invertPitchLimits ? downPitchLimit : upPitchLimit;
                 Quaternion minRot = Quaternion.Euler(minAngle, 0, 0);
                 Quaternion maxRot = Quaternion.Euler(maxAngle, 0, 0);
                 
-                Vector3 parentForward = barrel.parent ? barrel.parent.forward : Vector3.forward;
+                Vector3 parentForward = barrel.parent ? barrel.parent.right : Vector3.right;
                 Quaternion parentRot = barrel.parent ? barrel.parent.rotation : Quaternion.identity;
                 
-                Gizmos.DrawRay(center, parentRot * baseOffset * minRot * Vector3.forward * 2f);
-                Gizmos.DrawRay(center, parentRot * baseOffset * maxRot * Vector3.forward * 2f);
+                Gizmos.DrawRay(center, parentRot * baseOffset * minRot * Vector3.right * 2f);
+                Gizmos.DrawRay(center, parentRot * baseOffset * maxRot * Vector3.right * 2f);
             }
 
             // Draw seat position

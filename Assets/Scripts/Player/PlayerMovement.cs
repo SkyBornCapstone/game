@@ -45,6 +45,9 @@ namespace Player
                 }
                 // Lock position when using cannon
                 else if (isUsingCannon && cannonSeat != null)
+                {
+                    predictedRigidbody.position = cannonSeat.position;
+                }
                 predictedRigidbody.velocity = Vector3.zero;
                 predictedRigidbody.angularVelocity = Vector3.zero;
                 moveState.velocity = Vector3.zero;
@@ -99,29 +102,16 @@ namespace Player
         {
             if (!animator)
                 return;
-
-            if (isOwner || !verified.HasValue)
-            {
-                UpdateAnimator(viewState);
-            }
-            else
-            {
-                UpdateAnimator(verified.Value);
-            }
-        }
-
-        private void UpdateAnimator(MoveState state)
-        {
-            Vector3 worldVelocity = state.velocity;
+            Vector3 worldVelocity = viewState.velocity;
 
             Vector3 localVelocity = transform.InverseTransformDirection(worldVelocity);
 
             float deltaTime = Time.deltaTime;
             animator.SetFloat(VelocityXHash, localVelocity.x, .1f, deltaTime);
             animator.SetFloat(VelocityZHash, localVelocity.z, .1f, deltaTime);
-            animator.SetBool(IsGroundedHash, state.isGrounded);
+            animator.SetBool(IsGroundedHash, viewState.isGrounded);
 
-            if (state.jump)
+            if (verified.HasValue && verified.Value.jump)
             {
                 animator.SetBool(JumpHash, true);
             }
