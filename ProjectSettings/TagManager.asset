@@ -17,9 +17,9 @@ TagManager:
   - 
   - Player
   - Projectile
-  - 
-  - 
-  - 
+  - ShipItemDetection
+  - ShipFloor
+  - Ship
   - 
   - 
   - 

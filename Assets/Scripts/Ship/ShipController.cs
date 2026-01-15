@@ -258,7 +258,7 @@ namespace Ship
                 {
                     // Call EnterShip to lock the player to the ship anchor
                     Transform anchor = (interactionAnchor != null) ? interactionAnchor : t;
-                    mv.EnterShip(anchor);
+                    // mv.EnterShip(anchor);
                     interactingPlayerMovements.Add(mv);
                     
                 }
