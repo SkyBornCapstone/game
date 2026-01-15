@@ -1,90 +1,82 @@
-using System;
-using PurrNet.Prediction;
-using Unity.VisualScripting;
+using PurrNet;
 using UnityEngine;
-using UnityEngine.Serialization;
-using player;
+
 namespace BallTest
 {
-    public class PlayerMovement : PredictedIdentity<PlayerMovement.Input, PlayerMovement.State>
+    public class PlayerMovement : NetworkIdentity
     {
-        [SerializeField] protected PredictedTransform predictedTransform;
-        [SerializeField] private PredictedRigidbody predictedRigidbody;
-        [SerializeField] private float moveForce = 5; 
-        [SerializeField] private float jumpForce = 10;
-        [SerializeField] private float knockbackForce = 4;
-        [SerializeField] private float groundCheckDistance = 0.51f;
-        [SerializeField] private LayerMask groundLayer;
-        [SerializeField] private PlayerHealth playerHealth;
+        [SerializeField] private Rigidbody rb;
+        [SerializeField] private float moveSpeed = 5f;
+        [SerializeField] private float jumpForce = 5f;
 
-        protected override void LateAwake()
+        [SerializeField] private SyncInput<Vector2> moveInput = new();
+        [SerializeField] private SyncInput<bool> jumpInput = new();
+
+        private bool _jump;
+
+        private void Awake()
         {
-            base.LateAwake();
+            jumpInput.onChanged += OnJump;
+            jumpInput.onSentData += OnSentData;
+        }
 
+        protected override void OnSpawned()
+        {
             if (isOwner)
             {
-                PlayerCamera.Instance.SetTarget(predictedTransform.graphics);
+                PlayerCamera.Instance.SetTarget(rb.transform);
             }
         }
 
-        private void OnEnable()
+        protected override void OnDestroy()
         {
-            predictedRigidbody.onCollisionEnter += OnCollisionStart;
+            jumpInput.onChanged -= OnJump;
+            jumpInput.onSentData -= OnSentData;
         }
 
-        private void OnDisable()
+        private void OnSentData()
         {
-            predictedRigidbody.onCollisionEnter -= OnCollisionStart;
+            _jump = false;
         }
 
-        private void OnCollisionStart(GameObject other, PhysicsCollision physicsEvent)
+        private void OnJump(bool newInput)
         {
-            if (!other.TryGetComponent(out PlayerMovement otherPlayer))
+            if (newInput)
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
+
+        private void Update()
+        {
+            if (!isOwner)
                 return;
-        
-            var dir = (transform.position - otherPlayer.transform.position).normalized;
-            predictedRigidbody.AddForce(dir * knockbackForce, ForceMode.Impulse);
-            // playerHealth.HitOtherPlayer();
+
+            moveInput.value = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+
+            if (!_jump)
+                _jump = Input.GetKeyDown(KeyCode.Space);
+            jumpInput.value = _jump;
         }
 
-        protected override void Simulate(Input input, ref State state, float delta)
+        private void FixedUpdate()
         {
-            Vector3 moveDir = new Vector3(input.Direction.x, 0, input.Direction.y).normalized * moveForce;
-            predictedRigidbody.AddForce(moveDir);
-        
-            if (input.Jump && IsGrounded())
+            if (!isServer)
+                return;
+
+            Vector3 move = new Vector3(moveInput.value.x, 0, moveInput.value.y).normalized;
+            rb.AddForce(move * moveSpeed);
+        }
+
+        private void OnCollisionEnter(Collision other)
+        {
+            if (!isServer) return;
+
+            if (other.transform.TryGetComponent(out PlayerHealth otherPlayer))
             {
-                predictedRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+                otherPlayer.HitOtherPlayer();
+
+                var dir = (transform.position - otherPlayer.transform.position).normalized;
+                rb.AddForce(dir * 4f, ForceMode.Impulse);
             }
-        }
-
-        protected override void GetFinalInput(ref Input input)
-        {
-            input.Direction = new Vector2(UnityEngine.Input.GetAxisRaw("Horizontal"), UnityEngine.Input.GetAxisRaw("Vertical"));
-        
-        }
-
-        protected override void UpdateInput(ref Input input)
-        {
-            input.Jump |= UnityEngine.Input.GetKeyDown(KeyCode.Space);
-        }
-
-        private bool IsGrounded()
-        {
-            return Physics.Raycast(transform.position, Vector3.down, out var hit, groundCheckDistance, groundLayer);
-        }
-
-        public struct State : IPredictedData<State>
-        {
-            public void Dispose() { }
-        }
-
-        public struct Input : IPredictedData
-        {
-            public Vector2 Direction;
-            public bool Jump;
-        
-            public void Dispose() { }
         }
     }
 }

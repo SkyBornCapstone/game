@@ -1,25 +1,27 @@
-using System;
 using UnityEngine;
 
-public class LookAtCamera : MonoBehaviour
+namespace BallTest
 {
-    private Transform _cam;
-
-    private void Awake()
+    public class LookAtCamera : MonoBehaviour
     {
-        _cam = Camera.main?.transform;
-    }
+        private Transform _cam;
 
-    private void LateUpdate()
-    {
-        if (!_cam)
+        private void Awake()
         {
             _cam = Camera.main?.transform;
-            if (!_cam) return;
         }
-        
-        var dir = _cam.position - transform.position;
-        dir.x = 0;
-        transform.rotation = Quaternion.LookRotation(dir);
+
+        private void LateUpdate()
+        {
+            if (!_cam)
+            {
+                _cam = Camera.main?.transform;
+                if (!_cam) return;
+            }
+
+            var dir = _cam.position - transform.position;
+            dir.x = 0;
+            transform.rotation = Quaternion.LookRotation(dir);
+        }
     }
 }
