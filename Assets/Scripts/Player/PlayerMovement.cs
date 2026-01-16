@@ -1,10 +1,17 @@
 using PurrNet.Prediction;
+using Ship;
 using UnityEngine;
 
 namespace Player
 {
-    public class PlayerMovement : PredictedIdentity<PlayerMovement.MoveInput, PlayerMovement.MoveState>
+    public class PlayerMovement : PredictedIdentity<PlayerMovement.MoveInput, PlayerMovement.MoveState>, IShipProxyRider
     {
+        [SerializeField] private Transform physicsRoot;
+        [SerializeField] private Transform visualRoot;
+        
+        public Transform PhysicsRoot => physicsRoot;
+        public Transform VisualRoot => visualRoot;
+        
         [SerializeField] private float moveSpeed = 7;
         [SerializeField] private float acceleration = 20;
         [SerializeField] private float planarDamping = 10f;
@@ -205,6 +212,18 @@ namespace Player
             
             isUsingCannon = false;
             cannonSeat = null;
+        }
+
+        public void OnEnterShipProxy(Transform proxy, Transform realShip)
+        {
+            isOnProxyShip = true;
+            isOnShipDeck = true;
+        }
+
+        public void OnExitShipProxy()
+        {
+            isOnShipDeck = false;
+            isOnProxyShip = false;
         }
     }
 }
