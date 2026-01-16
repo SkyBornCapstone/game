@@ -595,7 +595,7 @@ MonoBehaviour:
   groundCheckRadius: 0.2
   groundLayer:
     serializedVersion: 2
-    m_Bits: 311
+    m_Bits: 24887
   camera: {fileID: 4809315219122779261}
   predictedRigidbody: {fileID: 9034071791271709436}
   animator: {fileID: 6683935804289596046}

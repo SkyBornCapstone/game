@@ -99,6 +99,8 @@ namespace Player
         {
             if (!animator)
                 return;
+            
+            
             Vector3 worldVelocity = viewState.velocity;
 
             Vector3 localVelocity = transform.InverseTransformDirection(worldVelocity);
@@ -116,6 +118,15 @@ namespace Player
             {
                 animator.SetBool(JumpHash, false);
             }
+            
+            if (isOnShipDeck)
+            {
+                return;
+            }
+            
+            visualRoot.position = physicsRoot.position;
+            visualRoot.rotation = physicsRoot.rotation;
+        
         }
 
         protected override void UpdateInput(ref MoveInput input)
@@ -224,6 +235,8 @@ namespace Player
         {
             isOnShipDeck = false;
             isOnProxyShip = false;
+            visualRoot.position = physicsRoot.position;
+            visualRoot.rotation = physicsRoot.rotation;
         }
     }
 }
