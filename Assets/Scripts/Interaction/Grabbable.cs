@@ -8,6 +8,9 @@ namespace Interaction
     [RequireComponent(typeof(ParentConstraint))]
     public class Grabbable : AInteractable
     {
+        [SerializeField] private Vector3 offsetPosition;
+        [SerializeField] private Vector3 offsetRotation;
+
         private Rigidbody _rb;
         private ParentConstraint _parentConstraint;
         private bool _constraintApplied;
@@ -58,6 +61,8 @@ namespace Interaction
             _parentConstraint.constraintActive = true;
             if (_parentConstraint.sourceCount != 0) return;
             var source = new ConstraintSource { sourceTransform = handTarget, weight = 1f };
+            _parentConstraint.translationOffsets = new[] { offsetPosition };
+            _parentConstraint.rotationOffsets = new[] { offsetRotation };
             _parentConstraint.AddSource(source);
         }
     }
