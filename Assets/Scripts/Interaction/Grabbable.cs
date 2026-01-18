@@ -1,72 +1,64 @@
-﻿using PurrNet.Prediction;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
 
 namespace Interaction
 {
-    /// <summary>
-    /// Tag component to mark items as grabbable.
-    /// Add this to any GameObject (or one of its parents) to allow the player to grab it.
-    /// </summary>
-    [RequireComponent(typeof(PredictedRigidbody))]
+    [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(ParentConstraint))]
-    public class Grabbable : PredictedIdentity<Grabbable.GrabbableState>
+    public class Grabbable : AInteractable
     {
-        private PredictedRigidbody _rb;
+        private Rigidbody _rb;
         private ParentConstraint _parentConstraint;
         private bool _constraintApplied;
 
-        private void Awake()
+        protected override void OnSpawned()
         {
-            _rb = GetComponent<PredictedRigidbody>();
+            _rb = GetComponent<Rigidbody>();
             _parentConstraint = GetComponent<ParentConstraint>();
 
-            _parentConstraint.enabled = false;
+            _parentConstraint.constraintActive = false;
         }
 
-        protected override void Simulate(ref GrabbableState state, float delta)
+        public override void Interact(InteractionController interactionController)
         {
-            _rb.isKinematic = state.IsGrabbed;
+            var grabController = interactionController.GetComponent<GrabController>();
+            Grab(grabController);
         }
 
-        protected override void UpdateView(GrabbableState viewState, GrabbableState? verified)
+        public virtual void Grab(GrabController grabController)
         {
-            bool shouldBeConstrained = viewState.IsGrabbed;
+            if (grabController == null || grabController.IsGrabbing) return;
 
-            if (shouldBeConstrained && !_constraintApplied)
-            {
-                _parentConstraint.enabled = true;
-                _parentConstraint.constraintActive = true;
-                _constraintApplied = true;
-            }
-            else if (!shouldBeConstrained && _constraintApplied)
-            {
-                _parentConstraint.enabled = false;
-                _parentConstraint.constraintActive = false;
-                _parentConstraint.RemoveSource(0);
-                _constraintApplied = false;
-            }
+            SetPhysics(true);
+            grabController.Grab(this);
         }
+
+        public virtual void Drop(GrabController grabController)
+        {
+            _parentConstraint.constraintActive = false;
+            _parentConstraint.SetSources(new List<ConstraintSource>());
+            SetPhysics(false);
+        }
+
+        public virtual void Use()
+        {
+            Debug.Log("Used");
+        }
+
+        public void SetPhysics(bool grabbed)
+        {
+            _rb.isKinematic = grabbed;
+        }
+
 
         public void SetConstraintSource(Transform handTarget)
         {
+            _parentConstraint.enabled = true;
+            _parentConstraint.constraintActive = true;
             if (_parentConstraint.sourceCount != 0) return;
             var source = new ConstraintSource { sourceTransform = handTarget, weight = 1f };
             _parentConstraint.AddSource(source);
-        }
-
-        protected override GrabbableState GetInitialState()
-        {
-            return new GrabbableState { IsGrabbed = false };
-        }
-
-        public struct GrabbableState : IPredictedData<GrabbableState>
-        {
-            public bool IsGrabbed;
-
-            public void Dispose()
-            {
-            }
         }
     }
 }

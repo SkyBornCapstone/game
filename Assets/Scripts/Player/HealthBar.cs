@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,9 +15,8 @@ namespace player
                 Debug.LogError("PlayerHealth Bind Error: Tried to bind to null player");
             }
 
-            target.OnHealthChange += UpdateHealthBar;
-            UpdateHealthBar(target.GetCurrentHealth() / target.maxHealth);
-
+            target.health.onChanged += UpdateHealthBar;
+            UpdateHealthBar(target.GetHealth() / target.maxHealth);
         }
 
         private void UpdateHealthBar(float normalizedHealth)

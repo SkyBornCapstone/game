@@ -24,7 +24,7 @@ namespace BallTest
             if (_frames <= 5)
             {
                 Debug.Log(
-                    $"[Frame {_frames}] Velocity: {rb.velocity} (Mag: {rb.velocity.magnitude}) | Pos: {transform.position}");
+                    $"[Frame {_frames}] Velocity: {rb.linearVelocity} (Mag: {rb.linearVelocity.magnitude}) | Pos: {transform.position}");
                 //TODO fix
             }
 
