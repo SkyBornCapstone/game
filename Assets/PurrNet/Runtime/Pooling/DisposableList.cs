@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using PurrNet.Modules;
 using PurrNet.Packing;
 
 namespace PurrNet.Pooling
@@ -14,6 +15,18 @@ namespace PurrNet.Pooling
 
         public DisposableList<T> Duplicate()
         {
+            if (isDisposed)
+                return default;
+
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                int c = Count;
+                var res = Create(c);
+                for (var i = 0; i < c; ++i)
+                    res.Add(Packer.Copy(list[i]));
+                return res;
+            }
+
             return Create(this);
         }
 
@@ -49,6 +62,23 @@ namespace PurrNet.Pooling
             return val;
         }
 
+        public static DisposableList<T> Create(IList<T> copyFrom)
+        {
+            var val = new DisposableList<T>();
+            val.list = ListPool<T>.Instantiate();
+
+            if (val.list.Capacity < copyFrom.Count)
+                val.list.Capacity = copyFrom.Count;
+
+            int c = copyFrom.Count;
+            for (var i = 0; i < c; ++i)
+                val.list.Add(copyFrom[i]);
+
+            val._isAllocated = true;
+            val._shouldDispose = true;
+            return val;
+        }
+
         public static DisposableList<T> Create(IEnumerable<T> copyFrom)
         {
             var val = new DisposableList<T>();
@@ -71,7 +101,8 @@ namespace PurrNet.Pooling
         public void AddRange(IList<T> collection)
         {
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
-            for (var i = 0; i < collection.Count; i++)
+            int c = collection.Count;
+            for (var i = 0; i < c; i++)
                 list.Add(collection[i]);
             NotifyUsage();
         }
@@ -174,6 +205,14 @@ namespace PurrNet.Pooling
 
         public bool isDisposed => !_isAllocated;
 
+        [UsedByIL]
+        public T GetAt(int index)
+        {
+            if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
+            NotifyUsage();
+            return list[index];
+        }
+
         public int IndexOf(T item)
         {
             if (isDisposed) throw new ObjectDisposedException(nameof(DisposableList<T>));
@@ -229,7 +268,8 @@ namespace PurrNet.Pooling
             NotifyUsage();
 
             if (opIndex + opLength > list.Count)
-                throw new IndexOutOfRangeException($"Index {opIndex} + {opLength} is out of range for list of size {list.Count}.");
+                throw new IndexOutOfRangeException(
+                    $"Index {opIndex} + {opLength} is out of range for list of size {list.Count}.");
             if (opIndex < 0)
                 throw new IndexOutOfRangeException($"Index {opIndex} is out of range for list of size {list.Count}.");
 

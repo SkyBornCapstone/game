@@ -10,11 +10,12 @@ using JetBrains.Annotations;
 using LiteNetLib;
 using PurrNet.Logging;
 using PurrNet.Packing;
+using UnityEditor;
 using UnityEngine;
 
 namespace PurrNet.Transports
 {
-    public class PurrTransport : GenericTransport, ITransport
+    public partial class PurrTransport : GenericTransport, ITransport
     {
         enum SERVER_PACKET_TYPE : byte
         {
@@ -28,7 +29,8 @@ namespace PurrNet.Transports
         enum HOST_PACKET_TYPE : byte
         {
             SEND_KEEPALIVE = 0,
-            SEND_ONE = 1
+            SEND_ONE = 1,
+            KICK_PLAYER = 2
         }
 
         [Serializable, UsedImplicitly]
@@ -38,15 +40,18 @@ namespace PurrNet.Transports
             public string clientSecret;
         }
 
-        [Header("Remote Settings")]
-        [SerializeField, HideInInspector] private string _masterServer = "https://purrtransport.purrservers.com/";
+        [Header("Remote Settings")] [SerializeField, HideInInspector]
+        private string _masterServer = "https://purrtransport.purrservers.com/";
+
         [SerializeField, HideInInspector] private string _roomName;
         [SerializeField, HideInInspector] private string _region = "eu-central";
         [SerializeField, HideInInspector] private string _host;
 
         [Header("Shared Settings")]
         [Tooltip("The amount of time in seconds before socket is disconnected due to no data being received.")]
-        [SerializeField, HideInInspector] private float _timeoutInSeconds = 5f;
+        [SerializeField, HideInInspector]
+        private float _timeoutInSeconds = 5f;
+
         [SerializeField, HideInInspector] private bool _pollEventsInUpdate;
 
         public string region
@@ -112,6 +117,33 @@ namespace PurrNet.Transports
             }
         }
 
+        public bool SupportsChannel(Channel channel)
+        {
+            return true;
+        }
+
+        public int GetMTU(Connection target, Channel channel, bool asServer)
+        {
+            if (_isUsingUDP)
+            {
+                try
+                {
+                    var method = UDPTransport.ToDeliveryMethod(channel);
+                    var result = asServer
+                        ? _udpServer.FirstPeer.GetMaxSinglePacketSize(method)
+                        : _udpClient.FirstPeer.GetMaxSinglePacketSize(method);
+                    return result - 16; // give the relay some space for metadata
+                }
+                catch
+                {
+                    return 1024;
+                }
+            }
+
+            return 8192 * 2;
+        }
+
+
         public IReadOnlyList<Connection> connections => _connections;
         private readonly List<Connection> _connections = new List<Connection>();
 
@@ -126,9 +158,9 @@ namespace PurrNet.Transports
             if (_masterServer == "https://purrbalancer.riten.dev:8080/")
             {
                 _masterServer = "https://purrtransport.purrservers.com/";
-                UnityEditor.EditorUtility.SetDirty(this);
-                UnityEditor.AssetDatabase.SaveAssets();
-                UnityEditor.AssetDatabase.Refresh();
+                EditorUtility.SetDirty(this);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
             }
         }
 #endif
@@ -638,6 +670,7 @@ namespace PurrNet.Transports
                 _udpServer.SendToAll(data.data, data.offset, data.length, deliveryMethod);
             }
             else _server.Send(new ArraySegment<byte>(data.data, data.offset, data.length));
+
             RaiseDataSent(target, data, true);
         }
 
@@ -665,7 +698,17 @@ namespace PurrNet.Transports
 
         public void CloseConnection(Connection conn)
         {
-            throw new NotImplementedException();
+            _packer.ResetPositionAndMode(false);
+
+            Packer<byte>.Write(_packer, (byte)HOST_PACKET_TYPE.KICK_PLAYER);
+            Packer<int>.Write(_packer, conn.connectionId);
+
+            var data = _packer.ToByteData();
+
+            if (_isUsingUDP)
+                _udpServer.SendToAll(data.data, data.offset, data.length, DeliveryMethod.ReliableSequenced);
+            else _server.Send(new ArraySegment<byte>(data.data, data.offset, data.length));
+            RaiseDataSent(conn, data, true);
         }
 
         public void ReceiveMessages(float delta)

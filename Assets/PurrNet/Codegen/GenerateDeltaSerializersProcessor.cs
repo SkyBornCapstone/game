@@ -66,7 +66,8 @@ namespace PurrNet.Codegen
             if (standaloneType != null && standaloneType.FullName != type.FullName)
             {
                 var genericM =
-                    GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, standaloneType, deltaSerializer,
+                    GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, standaloneType,
+                        deltaSerializer,
                         module);
 
                 var variable = new VariableDefinition(standaloneType);
@@ -111,11 +112,14 @@ namespace PurrNet.Codegen
                 il.Emit(OpCodes.Brfalse, endOfFunction);
             }
 
+            GenerateSerializersProcessor.CreateGettersAndSetters(false, type);
+
             if (type.IsEnum)
             {
                 var underlyingType = type.GetField("value__").FieldType;
                 var enumReadMethod =
-                    GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, underlyingType, deltaSerializer,
+                    GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, underlyingType,
+                        deltaSerializer,
                         module);
 
                 var tmpVar = new VariableDefinition(underlyingType);
@@ -143,7 +147,8 @@ namespace PurrNet.Codegen
                     if (baseType is { IsValueType: false })
                     {
                         var genericM =
-                            GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, baseType, deltaSerializer,
+                            GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, baseType,
+                                deltaSerializer,
                                 module);
 
                         var variable = new VariableDefinition(baseType);
@@ -309,7 +314,8 @@ namespace PurrNet.Codegen
             if (standaloneType != null && standaloneType.FullName != type.FullName)
             {
                 var genericM =
-                    GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, standaloneType, deltaSerializer,
+                    GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, standaloneType,
+                        deltaSerializer,
                         module);
 
                 il.Emit(OpCodes.Ldarg_0);
@@ -341,11 +347,14 @@ namespace PurrNet.Codegen
                 il.Emit(OpCodes.Brfalse, endOfFunction);
             }
 
+            GenerateSerializersProcessor.CreateGettersAndSetters(true, type);
+
             if (type.IsEnum)
             {
                 var underlyingType = type.GetField("value__").FieldType;
                 var enumWriteMethod =
-                    GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, underlyingType, deltaSerializer,
+                    GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, underlyingType,
+                        deltaSerializer,
                         module);
 
                 il.Emit(OpCodes.Ldarg_0);
@@ -359,7 +368,7 @@ namespace PurrNet.Codegen
             else
             {
                 bool isInheritedClass = isClass && type.BaseType != null &&
-                                    type.BaseType.FullName != typeof(object).FullName;
+                                        type.BaseType.FullName != typeof(object).FullName;
 
                 if (isInheritedClass)
                 {
@@ -368,7 +377,8 @@ namespace PurrNet.Codegen
                     if (baseType is { IsValueType: false })
                     {
                         var genericM =
-                            GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, baseType, deltaSerializer,
+                            GenerateSerializersProcessor.CreateGenericMethod(deltaPackerGenType, baseType,
+                                deltaSerializer,
                                 module);
 
                         il.Emit(OpCodes.Ldarg_0);
@@ -494,7 +504,8 @@ namespace PurrNet.Codegen
         private static bool ShouldIgnoreField(FieldDefinition field)
         {
             bool ignore = field.CustomAttributes.Any(a =>
-                a.AttributeType.FullName == typeof(DontPackAttribute).FullName) || GenerateSerializersProcessor.DoesTypeHaveDontPackAttribute(field.FieldType.Resolve());
+                              a.AttributeType.FullName == typeof(DontPackAttribute).FullName) ||
+                          GenerateSerializersProcessor.DoesTypeHaveDontPackAttribute(field.FieldType.Resolve());
 
             return ignore;
         }
@@ -504,7 +515,8 @@ namespace PurrNet.Codegen
             bool ignore = field.CustomAttributes.Any(a =>
                 a.AttributeType.FullName == typeof(DontDeltaCompressAttribute).FullName);
 
-            if (GenerateSerializersProcessor.DoesTypeHaveAttribute(field.FieldType.Resolve(), typeof(DontDeltaCompressAttribute)))
+            if (GenerateSerializersProcessor.DoesTypeHaveAttribute(field.FieldType.Resolve(),
+                    typeof(DontDeltaCompressAttribute)))
                 ignore = true;
             return ignore;
         }

@@ -1,32 +1,29 @@
 using System.Collections.Generic;
-using PurrNet.Prediction;
-using PurrNet.Prediction.StateMachine;
+using PurrNet;
+using PurrNet.StateMachine;
 using UnityEngine;
 
 namespace GameStates
 {
-    public class PlayerSpawningState : PredictedStateNode<PlayerSpawningState.State>
+    public class PlayerSpawningState : StateNode
     {
-        public GameObject playerPrefab;
-        public List<Transform> spawnPoints = new();
+        [SerializeField] private GameObject playerPrefab;
+        [SerializeField] private List<Transform> spawnPoints = new();
 
         public override void Enter()
         {
-            for (var i = 0; i < predictionManager.players.currentState.players.Count; i++)
+            if (!isServer) return;
+
+            for (var i = 0; i < networkManager.players.Count; i++)
             {
-                var player = predictionManager.players.currentState.players[i];
+                var player = networkManager.players[i];
                 var spawnPoint = spawnPoints[i];
-                predictionManager.hierarchy.Create(playerPrefab, spawnPoint.position, spawnPoint.rotation, player);
+                var spawnedPlayer = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
+                spawnedPlayer.TryGetComponent(out NetworkIdentity networkIdentity);
+                networkIdentity.GiveOwnership(player);
             }
 
             machine.Next();
-        }
-
-        public struct State : IPredictedData<State>
-        {
-            public void Dispose()
-            {
-            }
         }
     }
 }

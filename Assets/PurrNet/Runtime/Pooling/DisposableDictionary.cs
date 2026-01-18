@@ -6,7 +6,8 @@ using PurrNet.Packing;
 
 namespace PurrNet.Pooling
 {
-    public struct DisposableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDisposable, IDuplicate<DisposableDictionary<TKey, TValue>>
+    public struct DisposableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDisposable,
+        IDuplicate<DisposableDictionary<TKey, TValue>>
         where TKey : notnull
     {
         private bool _isAllocated;
@@ -102,7 +103,8 @@ namespace PurrNet.Pooling
             if (!_isAllocated)
                 throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
             NotifyUsage();
-            return dictionary.ContainsKey(item.Key) && EqualityComparer<TValue>.Default.Equals(dictionary[item.Key], item.Value);
+            return dictionary.ContainsKey(item.Key) &&
+                   EqualityComparer<TValue>.Default.Equals(dictionary[item.Key], item.Value);
         }
 
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
@@ -126,12 +128,14 @@ namespace PurrNet.Pooling
             if (!_isAllocated)
                 throw new ObjectDisposedException(nameof(DisposableDictionary<TKey, TValue>));
             NotifyUsage();
-            if (dictionary.ContainsKey(item.Key) && EqualityComparer<TValue>.Default.Equals(dictionary[item.Key], item.Value))
+            if (dictionary.ContainsKey(item.Key) &&
+                EqualityComparer<TValue>.Default.Equals(dictionary[item.Key], item.Value))
             {
                 dictionary.Remove(item.Key);
                 _keys.Remove(item.Key);
                 return true;
             }
+
             return false;
         }
 
@@ -196,6 +200,7 @@ namespace PurrNet.Pooling
                 value = default;
                 return false;
             }
+
             NotifyUsage();
             return dictionary.TryGetValue(key, out value);
         }
@@ -244,7 +249,8 @@ namespace PurrNet.Pooling
 
         public ICollection<TValue> Values
         {
-            get => throw new NotSupportedException("Values may be mismatched with keys. Use dictionary.Values directly if needed.");
+            get => throw new NotSupportedException(
+                "Values may be mismatched with keys. Use dictionary.Values directly if needed.");
         }
 
         public TValue GetValueOrDefault(TKey key)
@@ -257,6 +263,18 @@ namespace PurrNet.Pooling
 
         public DisposableDictionary<TKey, TValue> Duplicate()
         {
+            if (isDisposed)
+                return default;
+
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<TKey>() ||
+                RuntimeHelpers.IsReferenceOrContainsReferences<TValue>())
+            {
+                var res = Create();
+                foreach (var pair in this)
+                    res.Add(Packer.Copy(pair.Key), Packer.Copy(pair.Value));
+                return res;
+            }
+
             return Create(this);
         }
     }

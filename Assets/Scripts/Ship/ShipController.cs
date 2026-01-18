@@ -1,7 +1,7 @@
+using System.Collections.Generic;
+using Player;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
- 
 
 namespace Ship
 {
@@ -12,18 +12,17 @@ namespace Ship
         private ShipEngine[] rightEngines;
         private ShipEngine[] upEngines;
 
-        [Header("Input Sensitivity")]
-        [Range(0f, 1f)] public float forwardSensitivity = 1f;
+        [Header("Input Sensitivity")] [Range(0f, 1f)]
+        public float forwardSensitivity = 1f;
+
         [Range(0f, 1f)] public float turnSensitivity = 1f;
         [Range(0f, 1f)] public float upSensitivity = 1f;
 
-        [Header("Interaction")]
-        public float interactDistance = 3f;
+        [Header("Interaction")] public float interactDistance = 3f;
         public LayerMask interactLayer = ~0;
         public Transform interactionAnchor;
         public bool parentPlayerToAnchor = true;
-        [Header("UI Prompt")]
-        public bool enableInteractPrompt = true;
+        [Header("UI Prompt")] public bool enableInteractPrompt = true;
         public string interactPromptText = "Press E to Interact";
         public Vector2 interactPromptScreenOffset = new Vector2(0, -100);
 
@@ -37,7 +36,9 @@ namespace Ship
 
         private bool isInteracting = false;
         private GameObject interactingPlayer = null;
-        private System.Collections.Generic.List<Player.PlayerMovement> interactingPlayerMovements = new System.Collections.Generic.List<Player.PlayerMovement>();
+
+        private List<PlayerMovement> interactingPlayerMovements = new List<PlayerMovement>();
+
         // Interaction state
         private Transform interactingOriginalParent = null;
         private Vector3 interactingOriginalLocalPos;
@@ -48,32 +49,14 @@ namespace Ship
             controls = new InputSystem_Actions();
 
             // Read Move vector2 input
-            controls.Player.Move.performed += ctx =>
-            {
-                moveInput = ctx.ReadValue<Vector2>();
-            };
-            controls.Player.Move.canceled  += ctx =>
-            {
-                moveInput = Vector2.zero;
-            };
+            controls.Player.Move.performed += ctx => { moveInput = ctx.ReadValue<Vector2>(); };
+            controls.Player.Move.canceled += ctx => { moveInput = Vector2.zero; };
 
-            controls.Player.Jump.performed += ctx =>
-            {
-                upInput = 1f;
-            };
-            controls.Player.Jump.canceled  += ctx =>
-            {
-                upInput = 0f;
-            };
+            controls.Player.Jump.performed += ctx => { upInput = 1f; };
+            controls.Player.Jump.canceled += ctx => { upInput = 0f; };
 
-            controls.Player.Crouch.performed += ctx =>
-            {
-                upInput = -1f;
-            };
-            controls.Player.Crouch.canceled  += ctx =>
-            {
-                upInput = 0f;
-            };
+            controls.Player.Crouch.performed += ctx => { upInput = -1f; };
+            controls.Player.Crouch.canceled += ctx => { upInput = 0f; };
 
             // Interact: toggle interaction on press when looking at this ship (press again to release)
             controls.Player.Interact.performed += ctx =>
@@ -88,12 +71,13 @@ namespace Ship
                 if (Physics.Raycast(ray, out RaycastHit hit, interactDistance, interactLayer))
                 {
                     // Allow interaction if the ray hit this object or a child collider
-                    if (hit.collider != null && (hit.collider.transform == transform || hit.collider.transform.IsChildOf(transform)))
+                    if (hit.collider != null && (hit.collider.transform == transform ||
+                                                 hit.collider.transform.IsChildOf(transform)))
                     {
                         GameObject playerRoot = null;
                         try
                         {
-                            var movesAll = UnityEngine.Object.FindObjectsByType<Player.PlayerMovement>(FindObjectsSortMode.None);
+                            var movesAll = FindObjectsByType<PlayerMovement>(FindObjectsSortMode.None);
                             foreach (var m in movesAll)
                             {
                                 if (m.isOwner)
@@ -127,16 +111,16 @@ namespace Ship
 
             if (allEngines == null || allEngines.Length == 0)
             {
-                var sceneEngines = UnityEngine.Resources.FindObjectsOfTypeAll<ShipEngine>();
+                var sceneEngines = Resources.FindObjectsOfTypeAll<ShipEngine>();
                 if (sceneEngines != null && sceneEngines.Length > 0)
                 {
                     allEngines = sceneEngines;
                 }
-            }   
+            }
 
-            var leftList = new System.Collections.Generic.List<ShipEngine>();
-            var rightList = new System.Collections.Generic.List<ShipEngine>();
-            var upList = new System.Collections.Generic.List<ShipEngine>();
+            var leftList = new List<ShipEngine>();
+            var rightList = new List<ShipEngine>();
+            var upList = new List<ShipEngine>();
 
             foreach (var engine in allEngines)
             {
@@ -178,6 +162,7 @@ namespace Ship
                 if (_promptTextUI != null && _promptTextUI.enabled)
                     _promptTextUI.enabled = false;
             }
+
             // Only apply player inputs to the ship if the player is interacting with it
             if (!isInteracting) return;
 
@@ -186,7 +171,7 @@ namespace Ship
             float forwardInput = moveInput.y * forwardSensitivity;
 
             // Turning: positive moveInput.x means turn right -> increase left engines, decrease right engines
-            float leftInput  = forwardInput + (moveInput.x * turnSensitivity);
+            float leftInput = forwardInput + (moveInput.x * turnSensitivity);
             float rightInput = forwardInput + (-moveInput.x * turnSensitivity);
 
             leftInput = Mathf.Clamp(leftInput, -1f, 1f);
@@ -199,7 +184,6 @@ namespace Ship
             float upInputCmd = upInput * upSensitivity;
             upInputCmd = Mathf.Clamp(upInputCmd, -1f, 1f);
             SetThrottle(upEngines, upInputCmd);
-
         }
 
         private void SetThrottle(ShipEngine[] engines, float throttle)
@@ -246,21 +230,20 @@ namespace Ship
             {
                 // No anchor provided: snap to the hit point on the ship *this is bad*
                 t.position = hit.point;
-                t.rotation = transform.rotation;    
+                t.rotation = transform.rotation;
             }
 
             // Disable player movement and physics so they remain locked to the ship
             interactingPlayerMovements.Clear();
-            var moves = interactingPlayer.GetComponentsInChildren<Player.PlayerMovement>(true);
+            var moves = interactingPlayer.GetComponentsInChildren<PlayerMovement>(true);
             foreach (var mv in moves)
             {
                 try
                 {
                     // Call EnterShip to lock the player to the ship anchor
                     Transform anchor = (interactionAnchor != null) ? interactionAnchor : t;
-                    mv.EnterShip(anchor);
+                    // mv.EnterShip(anchor);
                     interactingPlayerMovements.Add(mv);
-                    
                 }
                 catch
                 {
@@ -291,8 +274,9 @@ namespace Ship
             // Notify PlayerMovement instances to exit ship mode
             foreach (var mv in interactingPlayerMovements)
             {
-                try { mv.ExitShip(); } catch { }
+                // try { mv.ExitShip(); } catch { }
             }
+
             interactingPlayerMovements.Clear();
 
             interactingPlayer = null;
@@ -309,7 +293,8 @@ namespace Ship
             Ray ray = new Ray(cam.transform.position, cam.transform.forward);
             if (Physics.Raycast(ray, out RaycastHit hit, interactDistance, interactLayer))
             {
-                if (hit.collider != null && (hit.collider.transform == transform || hit.collider.transform.IsChildOf(transform)))
+                if (hit.collider != null &&
+                    (hit.collider.transform == transform || hit.collider.transform.IsChildOf(transform)))
                 {
                     _promptTextUI.text = interactPromptText;
                     _promptTextUI.enabled = true;

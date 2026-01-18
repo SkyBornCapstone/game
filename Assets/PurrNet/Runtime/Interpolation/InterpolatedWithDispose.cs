@@ -8,7 +8,6 @@ namespace PurrNet
         private readonly LerpFunction<T> _lerp;
         private readonly List<T> _buffer;
         private T _lastValue;
-        private T _currentStateRaw;
         private float _timer;
         private float _tickDelta;
         protected bool _waitForMinBufferSize;
@@ -27,20 +26,25 @@ namespace PurrNet
         }
 
         public int maxBufferSize { get; set; }
-
         public int minBufferSize { get; set; }
 
-        public InterpolatedWithDispose(LerpFunction<T> lerp, float tickDelta, T initialValue = default, int maxBufferSize = 2, int minBufferSize = 1)
+        public InterpolatedWithDispose(
+            LerpFunction<T> lerp,
+            float tickDelta,
+            T initialValue = default,
+            int maxBufferSize = 2,
+            int minBufferSize = 1
+        )
         {
             _lerp = lerp ?? throw new ArgumentNullException(nameof(lerp));
 
             if (tickDelta <= 0f)
                 throw new ArgumentException("tickDelta must be greater than 0", nameof(tickDelta));
 
-            _buffer = new List<T>(maxBufferSize);
+            _buffer = new List<T>(Math.Max(1, maxBufferSize));
 
-            this.maxBufferSize = maxBufferSize;
-            this.minBufferSize = minBufferSize;
+            this.maxBufferSize = Math.Max(1, maxBufferSize);
+            this.minBufferSize = Math.Max(0, Math.Min(minBufferSize, this.maxBufferSize - 1));
 
             _tickDelta = tickDelta;
             _lastValue = initialValue;
@@ -53,24 +57,30 @@ namespace PurrNet
             {
                 // remove up to minBufferSize
                 var removeCount = _buffer.Count - minBufferSize;
-                for (int i = 0; i < removeCount; i++)
-                    _buffer[i].Dispose();
-                _buffer.RemoveRange(0, removeCount);
-                // _lastValue = _currentState;
-                _timer = 0f;
+                if (removeCount > 0)
+                {
+                    for (int i = 0; i < removeCount; i++)
+                        _buffer[i].Dispose();
+
+                    _buffer.RemoveRange(0, removeCount);
+                    _timer = 0f;
+                }
             }
+
             _buffer.Add(value);
         }
 
         public void Teleport(T value)
         {
+            _lastValue?.Dispose();
             _lastValue = value;
 
-            for (var i = 0; i < _buffer.Count; i++)
+            for (int i = 0; i < _buffer.Count; i++)
                 _buffer[i].Dispose();
 
             _buffer.Clear();
             _timer = 0f;
+            _waitForMinBufferSize = true;
         }
 
         public T Advance(float deltaTime)
@@ -95,18 +105,24 @@ namespace PurrNet
 
             _timer += deltaTime;
 
-            while (_timer >= _tickDelta)
+            while (_timer >= _tickDelta && _buffer.Count > 0)
             {
-                _lastValue = _buffer[0];
-                var first = _buffer[0];
-                first.Dispose();
+                // We are moving to the next committed value.
+                // Dispose previous _lastValue (it’s no longer needed).
+                _lastValue?.Dispose();
+
+                // Pop the next state from buffer and set as new _lastValue
+                var next = _buffer[0];
                 _buffer.RemoveAt(0);
+                _lastValue = next;
+
                 _timer -= _tickDelta;
 
                 if (_buffer.Count <= 0)
                 {
                     _timer = 0f;
                     _waitForMinBufferSize = true;
+                    // No "to" state; hold on the last committed value.
                     return _lerp(_lastValue, _lastValue, 1f);
                 }
             }

@@ -26,6 +26,18 @@ namespace PurrNet.Transports
 
         public ConnectionState clientState { get; private set; } = ConnectionState.Disconnected;
 
+        public bool SupportsChannel(Channel channel)
+        {
+            if (channel != Channel.ReliableOrdered)
+                return false;
+            return true;
+        }
+
+        public int GetMTU(Connection target, Channel channel, bool asServer)
+        {
+            return int.MaxValue;
+        }
+
         public void Listen(ushort port)
         {
             listenerState = ConnectionState.Connecting;
@@ -172,7 +184,9 @@ namespace PurrNet.Transports
             }
         }
 
-        public void SendMessages(float delta) { }
+        public void SendMessages(float delta)
+        {
+        }
 
         ConnectionState _prevClientState = ConnectionState.Disconnected;
         ConnectionState _prevServerState = ConnectionState.Disconnected;

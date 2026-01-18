@@ -1,7 +1,5 @@
-using System;
-using UnityEngine;
-
 using Player;
+using UnityEngine;
 
 namespace Cannons
 {
@@ -12,7 +10,7 @@ namespace Cannons
         public float interactDistance = 1f;
         [SerializeField] private CannonController cannonController;
         private PlayerMovement _currentPlayer;
-        
+
         // Update is called once per frame
         void Update()
         {
@@ -22,12 +20,12 @@ namespace Cannons
             {
                 if (!_currentPlayer.isUsingCannon)
                 {
-                    _currentPlayer.EnterCannon(controlPosition);
+                    // _currentPlayer.EnterCannon(controlPosition);
                     cannonController.EnterCannon(_currentPlayer);
                 }
                 else
                 {
-                    _currentPlayer.ExitCannon();
+                    // _currentPlayer.ExitCannon();
                     cannonController.ExitCannon();
                 }
             }
@@ -49,9 +47,7 @@ namespace Cannons
                 {
                     _currentPlayer = null;
                 }
-                
             }
         }
     }
 }
-

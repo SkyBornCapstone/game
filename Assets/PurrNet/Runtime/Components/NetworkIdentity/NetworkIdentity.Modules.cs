@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using PurrNet.Logging;
 using PurrNet.Modules;
@@ -18,8 +19,8 @@ namespace PurrNet
         {
             if (_moduleId >= byte.MaxValue)
             {
-                throw new System.Exception($"Too many modules in {GetType().Name}! Max is {byte.MaxValue}.\n" +
-                                           $"This could also happen with circular dependencies.");
+                throw new Exception($"Too many modules in {GetType().Name}! Max is {byte.MaxValue}.\n" +
+                                    $"This could also happen with circular dependencies.");
             }
 
             if (module == null)
@@ -43,7 +44,7 @@ namespace PurrNet
             _externalModulesView.Add(module);
         }
 
-        public bool TryGetModule(byte moduleId, out NetworkModule module)
+        public bool TryGetModule(int moduleId, out NetworkModule module)
         {
             if (moduleId >= _modules.Count)
             {

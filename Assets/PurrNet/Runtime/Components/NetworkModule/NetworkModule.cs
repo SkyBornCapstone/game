@@ -6,7 +6,6 @@ using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Pooling;
 using PurrNet.Profiler;
-using PurrNet.Transports;
 
 namespace PurrNet
 {
@@ -63,9 +62,13 @@ namespace PurrNet
                                   $"You can initialize it on Awake or override OnInitializeModules.", parent);
         }
 
-        public virtual void OnReceivedRpc(int id, BitPacker stream, ChildRPCPacket packet, RPCInfo info, bool asServer) { }
+        public virtual void OnReceivedRpc(int id, BitPacker stream, ChildRPCPacket packet, RPCInfo info, bool asServer)
+        {
+        }
 
-        public static void OnReceivedRpc(int id, BitPacker stream, StaticRPCPacket packet, RPCInfo info, bool asServer) { }
+        public static void OnReceivedRpc(int id, BitPacker stream, StaticRPCPacket packet, RPCInfo info, bool asServer)
+        {
+        }
 
         public virtual void OnSpawn()
         {
@@ -173,111 +176,23 @@ namespace PurrNet
         [UsedByIL]
         protected void SendRPC(ChildRPCPacket packet, RPCSignature signature)
         {
-            if (!parent)
-            {
-                if (signature.channel is Channel.ReliableOrdered or Channel.ReliableUnordered)
-                    PurrLogger.LogError($"Trying to send RPC from '{GetType().Name}' which is not initialized.");
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
+            _myType ??= GetType();
+#endif
+
+            if (!parent.ValidateSendingRPC(signature, out var module))
                 return;
-            }
-
-            if (!parent.isSpawned)
-            {
-                if (signature.channel is Channel.ReliableOrdered or Channel.ReliableUnordered)
-                    PurrLogger.LogError($"Trying to send RPC from '{parent.name}' which is not spawned.", parent);
-                return;
-            }
-
-            var nm = parent.networkManager;
-
-            if (!nm.TryGetModule<RPCModule>(nm.isServer, out var module))
-            {
-                PurrLogger.LogError("Failed to get RPC module.", parent);
-                return;
-            }
-
-            var rules = networkManager.networkRules;
-            bool shouldIgnoreOwnership = rules && rules.ShouldIgnoreRequireOwner();
-
-            if (!shouldIgnoreOwnership && signature.requireOwnership && !isOwner)
-            {
-                if (!signature.runLocally)
-                    PurrLogger.LogError(
-                        $"Trying to send RPC '{signature.rpcName}' from '{GetType().Name}' without ownership.", parent);
-                return;
-            }
-
-            bool shouldIgnore = rules && rules.ShouldIgnoreRequireServer();
-
-            if (!shouldIgnore && signature.requireServer && !networkManager.isServer)
-            {
-                if (!signature.runLocally)
-                    PurrLogger.LogError(
-                        $"Trying to send RPC '{signature.rpcName}' from '{GetType().Name}' without server.", parent);
-                return;
-            }
 
             module.AppendToBufferedRPCs(packet, signature);
 
-            switch (signature.type)
-            {
-                case RPCType.ServerRPC: parent.SendToServer(packet, signature.channel); break;
-                case RPCType.ObserversRPC:
-                {
-                    if (isServer)
-                    {
-                        var obs = parent.observers;
-                        var count = parent.observers.Count;
-                        using var players = DisposableList<PlayerID>.Create(count);
-                        for (var i = 0; i < count; i++)
-                        {
-                            var player = obs[i];
-                            if (ShouldSend(player))
-                                players.Add(player);
-                        }
-
-                        parent.Send(players, packet, signature.channel);
-                    }
-                    else parent.SendToServer(packet, signature.channel);
-                    break;
-                }
-                case RPCType.TargetRPC:
-                    if (isServer)
-                    {
-                        using var targets = signature.GetTargets();
-                        parent.Send(targets, packet, signature.channel);
-                    }
-                    else
-                    {
-                        using var targets = signature.GetTargets();
-
-                        // TODO: we should batch this into one packet to the server instead of N
-                        for (int i = 0; i < targets.Count; i++)
-                        {
-                            packet.targetPlayerId = targets[i];
-                            parent.SendToServer(packet, signature.channel);
-                        }
-                    }
-                    break;
-                default: throw new ArgumentOutOfRangeException();
-            }
-
-            return;
-
-            bool ShouldSend(PlayerID player)
-            {
-                bool isLocalPlayer = player == networkManager.localPlayer;
-
-                if (signature.runLocally && isLocalPlayer)
-                    return false;
-
-                if (signature.excludeSender && isLocalPlayer)
-                    return false;
-
-                return !signature.excludeOwner || parent.IsNotOwnerPredicate(player);
-            }
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
+            parent.SendRPC(_myType, module, packet, signature);
+#else
+            parent.SendRPC(null, module, packet, signature);
+#endif
         }
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR || PURR_RUNTIME_PROFILING
         private Type _myType;
 #endif
 
@@ -289,6 +204,12 @@ namespace PurrNet
             Statistics.ReceivedRPC(_myType, signature.type, signature.rpcName, data.rpcData.segment, parent);
 #endif
             return parent && parent.ValidateIncomingRPC(info, signature, data, asServer);
+        }
+
+        [UsedByIL]
+        public DisposableList<PlayerID> GetObservers(RPCSignature signature)
+        {
+            return parent.GetObservers(signature);
         }
 
         [UsedByIL]
@@ -311,11 +232,29 @@ namespace PurrNet
                 return null;
             }
 
-            return gmethod.Invoke(this, rpcHeader.values);
+            try
+            {
+                var res = gmethod.Invoke(this, rpcHeader.values);
+                PreciseArrayPool<Type>.Return(rpcHeader.types);
+                PreciseArrayPool<object>.Return(rpcHeader.values);
+                return res;
+            }
+            catch (TargetInvocationException e)
+            {
+                var actualException = e.InnerException;
+
+                if (actualException != null)
+                {
+                    PurrLogger.LogException(actualException);
+                    throw BypassLoggingException.instance;
+                }
+
+                throw;
+            }
         }
 
         [UsedByIL]
-        protected ChildRPCPacket BuildRPC(byte rpcId, BitPacker data)
+        protected ChildRPCPacket BuildRPC(int rpcId, BitPacker data)
         {
             if (!parent)
                 throw new InvalidOperationException(
@@ -323,12 +262,15 @@ namespace PurrNet
 
             var rpc = new ChildRPCPacket
             {
-                networkId = parent.id!.Value,
-                sceneId = parent.sceneId,
-                childId = index,
-                rpcId = rpcId,
+                header = new NetworkModuleRPCHeader
+                {
+                    networkId = parent.id!.Value,
+                    sceneId = parent.sceneId,
+                    childId = (int)index,
+                    rpcId = rpcId,
+                    senderId = RPCModule.GetLocalPlayer(networkManager)
+                },
                 data = data.ToByteData(),
-                senderId = RPCModule.GetLocalPlayer(networkManager)
             };
 
             return rpc;
@@ -394,6 +336,15 @@ namespace PurrNet
                     $"Client is trying to act on module that is `<b>ownerAuth</b>` but the owner is `<b>{owner}</b>` (not you: `{local}`).",
                 _ => "Client is trying to act on module that is not `<b>ownerAuth</b>`, only server can act on it."
             };
+        }
+
+        /// <summary>
+        /// Promotes the NetworkIdentity instance to function as a server entity.
+        /// This is used for host-migration, when a client is promoted to host.
+        /// Use this to ensure client has everything it needs to function as server.
+        /// </summary>
+        public virtual void PromoteToServer()
+        {
         }
     }
 }

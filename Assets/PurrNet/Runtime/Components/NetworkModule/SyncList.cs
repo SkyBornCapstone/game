@@ -1,9 +1,10 @@
-using UnityEngine;
-using PurrNet.Logging;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using PurrNet.Logging;
+using PurrNet.Pooling;
 using PurrNet.Transports;
+using UnityEngine;
 using UnityEngine.Scripting;
 
 namespace PurrNet
@@ -198,7 +199,7 @@ namespace PurrNet
 
         private void HandleFullState(List<T> newList)
         {
-            if (isHost) return;
+            if (isHost || IsController(ownerAuth)) return;
 
             bool listChanged = false;
 
@@ -345,6 +346,34 @@ namespace PurrNet
             InvokeChange(change);
         }
 
+        /// <summary>
+        /// Sorts the list using the given comparison and syncs the changes.
+        /// </summary>
+        /// <param name="comparison">Comparison to use for sorting the list</param>
+        public void Sort(Comparison<T> comparison)
+        {
+            if (!ValidateAuthority())
+                return;
+
+            using var sorted = DisposableList<T>.Create(_list);
+            sorted.list.Sort(comparison);
+
+            for (int i = 0; i < sorted.Count; i++)
+            {
+                T newItem = sorted[i];
+                T oldItem = _list[i];
+
+                if (!EqualityComparer<T>.Default.Equals(oldItem, newItem))
+                {
+                    _list[i] = newItem;
+
+                    var change = SyncListChange<T>.Set(newItem, oldItem, i);
+                    QueueChange(change);
+                    InvokeChange(change);
+                }
+            }
+        }
+
         public bool Contains(T item) => _list.Contains(item);
         public void CopyTo(T[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
         public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
@@ -363,6 +392,7 @@ namespace PurrNet
                     $"\n{GetPermissionErrorDetails(_ownerAuth, this)}", parent);
                 return false;
             }
+
             return true;
         }
 
@@ -448,7 +478,7 @@ namespace PurrNet
             }
             else if (_wasLastDirty)
             {
-                if(isServer)
+                if (isServer)
                     SendInitialStateToAll(_list);
                 else
                     ForceSendReliable();

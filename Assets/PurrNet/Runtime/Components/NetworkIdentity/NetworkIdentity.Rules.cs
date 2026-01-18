@@ -18,12 +18,14 @@ namespace PurrNet
         /// Whitelist of players that can interact with this identity.
         /// This doesn't block visibility for others but rather enforces visibility for these players.
         /// </summary>
-        [UsedImplicitly] public IReadonlyHashSet<PlayerID> whitelist => _whitelist;
+        [UsedImplicitly]
+        public IReadonlyHashSet<PlayerID> whitelist => _whitelist;
 
         /// <summary>
         /// Blacklist of players that can't interact with this identity.
         /// </summary>
-        [UsedImplicitly] public IReadonlyHashSet<PlayerID> blacklist => _blacklist;
+        [UsedImplicitly]
+        public IReadonlyHashSet<PlayerID> blacklist => _blacklist;
 
 
         private bool _whiteBlackDirty;
@@ -33,7 +35,8 @@ namespace PurrNet
             if (!isServer)
             {
                 PurrLogger.LogError(
-                    $"Tried to whitelist player `{player}` on `{this}` but only the server can modify the whitelist.", this);
+                    $"Tried to whitelist player `{player}` on `{this}` but only the server can modify the whitelist.",
+                    this);
                 return false;
             }
 
@@ -42,6 +45,7 @@ namespace PurrNet
                 SetVisibilityDirty();
                 return true;
             }
+
             return false;
         }
 
@@ -59,7 +63,8 @@ namespace PurrNet
             if (!isServer)
             {
                 PurrLogger.LogError(
-                    $"Tried to blacklist player `{player}` on `{this}` but only the server can modify the blacklist.", this);
+                    $"Tried to blacklist player `{player}` on `{this}` but only the server can modify the blacklist.",
+                    this);
                 return false;
             }
 
@@ -68,6 +73,7 @@ namespace PurrNet
                 SetVisibilityDirty();
                 return true;
             }
+
             return false;
         }
 
@@ -76,7 +82,8 @@ namespace PurrNet
             if (!isServer)
             {
                 PurrLogger.LogError(
-                    $"Tried to remove player `{player}` from whitelist on `{this}` but only the server can modify the whitelist.", this);
+                    $"Tried to remove player `{player}` from whitelist on `{this}` but only the server can modify the whitelist.",
+                    this);
                 return false;
             }
 
@@ -85,6 +92,7 @@ namespace PurrNet
                 SetVisibilityDirty();
                 return true;
             }
+
             return false;
         }
 
@@ -93,7 +101,8 @@ namespace PurrNet
             if (!isServer)
             {
                 PurrLogger.LogError(
-                    $"Tried to remove player `{player}` from blacklist on `{this}` but only the server can modify the blacklist.", this);
+                    $"Tried to remove player `{player}` from blacklist on `{this}` but only the server can modify the blacklist.",
+                    this);
                 return false;
             }
 
@@ -102,10 +111,11 @@ namespace PurrNet
                 SetVisibilityDirty();
                 return true;
             }
+
             return false;
         }
 
-        private NetworkRules networkRules =>
+        public NetworkRules networkRules =>
             _networkRules ? _networkRules : networkManager ? networkManager.networkRules : null;
 
         [UsedImplicitly]

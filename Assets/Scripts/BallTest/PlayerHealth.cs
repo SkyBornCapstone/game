@@ -1,53 +1,30 @@
 using System;
 using PurrNet;
-using PurrNet.Prediction;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using balltest;
-namespace balltest
+
+namespace BallTest
 {
-    public class PlayerHealth : PredictedIdentity<PlayerHealth.State>
+    public class PlayerHealth : NetworkIdentity
     {
         [SerializeField] private Slider healthSlider;
         [SerializeField] private int maxHealth = 100;
         [SerializeField] private int damage = 10;
         [SerializeField] private ParticleSystem deathParticles;
 
-        public static Action<PlayerID?> OnDeathAction;
-        public static Action ClearPlayers;
-    
-        private PredictedEvent _onDeath;
+        public static event Action<PlayerID?> OnDeath;
 
-        protected override void LateAwake()
+        [SerializeField] private SyncVar<int> health = new(100);
+
+        protected override void OnSpawned(bool asServer)
         {
-            _onDeath = new PredictedEvent(predictionManager, this);
-            _onDeath.AddListener(OnDeath);
-            ClearPlayers += OnClearPlayers;
+            health.value = maxHealth;
+            health.onChanged += OnHealthChanged;
         }
 
-        protected override void OnDestroy()
+        private void OnHealthChanged(int newHealth)
         {
-            _onDeath.RemoveListener(OnDeath);
-            ClearPlayers -= OnClearPlayers;
-        }
-
-        private void OnClearPlayers()
-        {
-            predictionManager.hierarchy.Delete(gameObject);
-        }
-
-        private void OnDeath()
-        {
-            Instantiate(deathParticles, transform.position, Quaternion.identity);
-        }
-
-        protected override State GetInitialState()
-        {
-            return new State
-            {
-                Health = maxHealth
-            };
+            healthSlider.value = newHealth / (float)maxHealth;
         }
 
         public void HitOtherPlayer()
@@ -55,38 +32,24 @@ namespace balltest
             TakeDamage(damage);
         }
 
+        [ServerRpc]
         public void TakeDamage(int amount)
         {
-            currentState.Health -= amount;
-        
-            if (currentState is { Health: <= 0, IsDead: false })
+            health.value -= amount;
+
+            if (health.value <= 0)
             {
-                currentState.IsDead = true;
-                _onDeath?.Invoke();
-                OnDeathAction.Invoke(owner);
-            
-                predictionManager.hierarchy.Delete(gameObject);
+                Destroy(gameObject);
+                OnDeath?.Invoke(owner);
             }
         }
-    
 
-        protected override void UpdateView(State viewState, State? verified)
+        protected override void OnDestroy()
         {
-            base.UpdateView(viewState, verified);
-
-            if (healthSlider)
+            if (health.value == 0)
             {
-                healthSlider.value = viewState.Health / (float) maxHealth;
+                Instantiate(deathParticles, transform.position, Quaternion.identity);
             }
-        }
-    
-        public struct State : IPredictedData<State>
-        {
-            public int Health;
-            public bool IsDead;
-        
-            public void Dispose() { }
         }
     }
 }
-

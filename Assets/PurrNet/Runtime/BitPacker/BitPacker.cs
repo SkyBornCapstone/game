@@ -61,7 +61,7 @@ namespace PurrNet.Packing
     }
 
     [UsedImplicitly]
-    public partial class BitPacker : IDisposable
+    public partial class BitPacker : IDisposable, IDuplicate<BitPacker>
     {
         private byte[] _buffer;
         private bool _isReading;
@@ -221,7 +221,8 @@ namespace PurrNet.Packing
             if (targetPos > _buffer.Length << 3)
             {
                 if (_isReading)
-                    throw new IndexOutOfRangeException($"Not enough bits in the buffer. | {targetPos} > {_buffer.Length << 3}");
+                    throw new IndexOutOfRangeException(
+                        $"Not enough bits in the buffer. | {targetPos} > {_buffer.Length << 3}");
                 int newSize = Math.Max(_buffer.Length * 2, (targetPos + 7) / 8);
                 Array.Resize(ref _buffer, newSize);
             }
@@ -295,7 +296,7 @@ namespace PurrNet.Packing
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 if (typeof(T).GetConstructor(Type.EmptyTypes) != null)
-                     value = Activator.CreateInstance<T>();
+                    value = Activator.CreateInstance<T>();
                 else value = (T)FormatterServices.GetUninitializedObject(typeof(T));
             }
 
@@ -402,6 +403,7 @@ namespace PurrNet.Packing
                                     b[fullBytes] = (byte)((b[fullBytes] & ~mask) | (value & mask));
                                 }
                             }
+
                             break;
                     }
                 }
@@ -433,6 +435,7 @@ namespace PurrNet.Packing
                             ulong preserveMask = ~((1UL << totalBits) - 1);
                             combined |= *(ulong*)b & preserveMask;
                         }
+
                         *(ulong*)b = combined;
                     }
                     else
@@ -446,7 +449,7 @@ namespace PurrNet.Packing
             _positionInBits += bits;
             return;
 
-        SlowPath:
+            SlowPath:
             // Original implementation as fallback
             fixed (byte* b = &_buffer[bytePos])
             {
@@ -466,6 +469,7 @@ namespace PurrNet.Packing
                     ptr++;
                 }
             }
+
             _positionInBits += bits;
         }
 
@@ -532,6 +536,7 @@ namespace PurrNet.Packing
                                     result |= (b[fullBytes] & mask) << (fullBytes * 8);
                                 }
                             }
+
                             break;
                     }
                 }
@@ -560,7 +565,7 @@ namespace PurrNet.Packing
             _positionInBits += bits;
             return result;
 
-        SlowPath:
+            SlowPath:
             // Fallback: manual bit-by-bit read (already little-endian safe)
             result = 0;
             int bitsLeft = bits;
@@ -748,6 +753,15 @@ namespace PurrNet.Packing
                 bitsLeft -= bitsToWrite;
                 positionInBits += bitsToWrite;
             }
+        }
+
+        public BitPacker Duplicate()
+        {
+            var newPacker = BitPackerPool.Get();
+            int len = length;
+            newPacker.EnsureBitsExist(len * 8);
+            Array.Copy(_buffer, newPacker.buffer, len);
+            return newPacker;
         }
     }
 }
