@@ -28,11 +28,6 @@ namespace Player
         [Header("Cannon Variables")] public bool isUsingCannon;
         private Transform cannonSeat;
 
-        private Vector3 velocity;
-        private float verticalRotation = 0f;
-
-        private bool _jump;
-
         protected override void OnSpawned()
         {
             enabled = isOwner;

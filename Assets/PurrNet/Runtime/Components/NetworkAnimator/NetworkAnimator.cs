@@ -1,3 +1,4 @@
+using UnityEngine.Internal;
 #if UNITY_ANIMATION
 using System;
 using System.Collections.Generic;
@@ -133,6 +134,7 @@ namespace PurrNet
                 {
                     _avatarRoot = _animator.GetAvatarRoot();
                 }
+
                 return _avatarRoot;
             }
         }
@@ -500,7 +502,10 @@ namespace PurrNet
 
         public bool GetBool(int nameHash) => _animator.GetBool(nameHash);
 
-        public void SetInt(string propName, int value) => SetInt(Animator.StringToHash(propName), value);
+        [Obsolete("Use SetInteger instead")]
+        public void SetInt(int nameHash, int value) => SetInteger(nameHash, value);
+
+        public void SetInteger(string propName, int value) => SetInteger(Animator.StringToHash(propName), value);
 
         public int GetInteger(string propName) => _animator.GetInteger(propName);
 
@@ -556,17 +561,17 @@ namespace PurrNet
                 (a, b) => a._bool.nameHash == b._bool.nameHash);
         }
 
-        public void SetInt(int nameHash, int value)
+        public void SetInteger(int nameHash, int value)
         {
             if (!IsController(_ownerAuth))
                 return;
 
-            var setInt = new SetInt { nameHash = nameHash, value = value };
-            setInt.Apply(_animator);
+            var setInteger = new SetInteger { nameHash = nameHash, value = value };
+            setInteger.Apply(_animator);
             _intValues[nameHash] = value;
 
-            IfSameReplace(new NetAnimatorRPC(setInt),
-                (a, b) => a._int.nameHash == b._int.nameHash);
+            IfSameReplace(new NetAnimatorRPC(setInteger),
+                (a, b) => a._integer.nameHash == b._integer.nameHash);
         }
 
         public void Play(string stateName, int layer)
@@ -581,15 +586,17 @@ namespace PurrNet
             Play(hash);
         }
 
-        public void Play(string stateName, [UnityEngine.Internal.DefaultValue("-1")] int layer,
-            [UnityEngine.Internal.DefaultValue("float.NegativeInfinity")] float normalizedTime)
+        public void Play(string stateName, [DefaultValue("-1")] int layer,
+            [DefaultValue("float.NegativeInfinity")]
+            float normalizedTime)
         {
             var hash = Animator.StringToHash(stateName);
             Play(hash, layer, normalizedTime);
         }
 
-        public void Play(int stateNameHash, [UnityEngine.Internal.DefaultValue("-1")] int layer,
-            [UnityEngine.Internal.DefaultValue("float.NegativeInfinity")] float normalizedTime)
+        public void Play(int stateNameHash, [DefaultValue("-1")] int layer,
+            [DefaultValue("float.NegativeInfinity")]
+            float normalizedTime)
         {
             if (!IsController(_ownerAuth))
                 return;
@@ -673,12 +680,10 @@ namespace PurrNet
         public void CrossFade(
             string stateName,
             float normalizedTransitionDuration,
-            [UnityEngine.Internal.DefaultValue("-1")]
-            int layer,
-            [UnityEngine.Internal.DefaultValue("float.NegativeInfinity")]
+            [DefaultValue("-1")] int layer,
+            [DefaultValue("float.NegativeInfinity")]
             float normalizedTimeOffset,
-            [UnityEngine.Internal.DefaultValue("0.0f")]
-            float normalizedTransitionTime)
+            [DefaultValue("0.0f")] float normalizedTransitionTime)
         {
             CrossFade(Animator.StringToHash(stateName), normalizedTransitionDuration, layer, normalizedTimeOffset,
                 normalizedTransitionTime);
@@ -687,12 +692,9 @@ namespace PurrNet
         public void CrossFade(
             int stateHashName,
             float normalizedTransitionDuration,
-            [UnityEngine.Internal.DefaultValue("-1")]
-            int layer,
-            [UnityEngine.Internal.DefaultValue("0.0f")]
-            float normalizedTimeOffset,
-            [UnityEngine.Internal.DefaultValue("0.0f")]
-            float normalizedTransitionTime)
+            [DefaultValue("-1")] int layer,
+            [DefaultValue("0.0f")] float normalizedTimeOffset,
+            [DefaultValue("0.0f")] float normalizedTransitionTime)
         {
             if (!IsController(_ownerAuth))
                 return;

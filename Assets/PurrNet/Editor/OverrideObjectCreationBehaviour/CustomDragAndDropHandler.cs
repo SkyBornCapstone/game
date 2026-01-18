@@ -17,7 +17,8 @@ namespace PurrNet.Editor
         private static void TakeSnapShotOfHierarchy(HashSet<int> set)
         {
             set.Clear();
-            var allObjects = Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            var allObjects =
+                Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             for (var i = 0; i < allObjects.Length; i++)
             {
                 var obj = allObjects[i];
@@ -120,7 +121,11 @@ namespace PurrNet.Editor
                 int idx = 0;
                 foreach (var id in _newObjects)
                 {
+#if UNITY_6000_3_OR_NEWER
+                    var go = EditorUtility.EntityIdToObject(id) as GameObject;
+#else
                     var go = EditorUtility.InstanceIDToObject(id) as GameObject;
+#endif
                     if (go)
                     {
                         bool isAnyParentInNewObjects = false;

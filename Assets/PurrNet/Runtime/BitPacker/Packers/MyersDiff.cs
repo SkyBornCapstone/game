@@ -32,7 +32,7 @@ namespace PurrNet.Packing
 
             int n = a.Count, m = b.Count;
             int max = n + m;
-            int size = 2 * max + 1;       // total array size per wavefront
+            int size = 2 * max + 1; // total array size per wavefront
 
             var trace = DisposableList<DisposableArray<int>>.Create(max + 1);
             var v = DisposableArray<int>.Create(size);
@@ -47,7 +47,7 @@ namespace PurrNet.Packing
                     int kIndex = k + max;
                     int x;
                     if (k == -d || (k != d && v[kIndex - 1] < v[kIndex + 1]))
-                        x = v[kIndex + 1];   // down
+                        x = v[kIndex + 1]; // down
                     else
                         x = v[kIndex - 1] + 1; // right
 
@@ -185,7 +185,7 @@ namespace PurrNet.Packing
 
                         while (i + 1 < ops.Count &&
                                ops[i + 1].type == op.type &&
-                               (isAdd || ops[i + 1].index == idx + vals.Count))
+                               (isAdd || ops[i + 1].index == idx))
                         {
                             vals.AddRange(ops[i + 1].values!);
                             i++;

@@ -1,4 +1,3 @@
-using PurrNet.Logging;
 using PurrNet.Modules;
 using PurrNet.Packing;
 using PurrNet.Utils;
@@ -7,7 +6,7 @@ using UnityEngine.Serialization;
 
 namespace PurrNet
 {
-    public sealed class NetworkTransform : NetworkIdentity
+    public sealed class NetworkTransform : NetworkIdentity, INetworkTransform
     {
         [Header("What to Sync")]
         [Tooltip("Whether to sync the position of the transform. And if so, in what space.")]
@@ -27,12 +26,17 @@ namespace PurrNet
         [Header("How to Sync")] [Tooltip("What to interpolate when syncing the transform.")] [SerializeField, PurrLock]
         private TransformSyncMode _interpolateSettings =
             TransformSyncMode.Position | TransformSyncMode.Rotation | TransformSyncMode.Scale;
+
         [Tooltip("The minimum amount of buffered ticks to store.\nThis is used for interpolation.")]
-        [SerializeField, PurrLock, Min(1)] private int _minBufferSize = 1;
+        [SerializeField, PurrLock, Min(1)]
+        private int _minBufferSize = 1;
+
         [Tooltip("The maximum amount of buffered ticks to store.\nThis is used for interpolation.")]
-        [SerializeField, PurrLock, Min(1)] private int _maxBufferSize = 2;
+        [SerializeField, PurrLock, Min(1)]
+        private int _maxBufferSize = 2;
 #if UNITY_PHYSICS_3D
-        [Tooltip("Will enforce the character controller getting enabled and disabled when attempting to sync the transform - CAUTION - Physics events can/will be called multiple times")]
+        [Tooltip(
+            "Will enforce the character controller getting enabled and disabled when attempting to sync the transform - CAUTION - Physics events can/will be called multiple times")]
         [SerializeField]
         private bool _characterControllerPatch;
 #endif
@@ -43,8 +47,7 @@ namespace PurrNet
         [SerializeField, PurrLock]
         private bool _ownerAuth = true;
 
-        [SerializeField]
-        private InterpolationTiming _interpolationTiming = InterpolationTiming.Update;
+        [SerializeField] private InterpolationTiming _interpolationTiming = InterpolationTiming.Update;
 
         /// <summary>
         /// Whether to sync the parent of the transform. Only works if the parent is a NetworkIdentiy.
@@ -147,7 +150,8 @@ namespace PurrNet
             _lastSentDelta = _currentData;
 
             // Force sync if we're the controller and spawned
-            if (_wasOnSpawnedCalled && isController) {
+            if (_wasOnSpawnedCalled && isController)
+            {
                 ForceSync();
             }
         }
@@ -166,18 +170,19 @@ namespace PurrNet
 
             if (syncPosition)
             {
-                var currentPos = _syncPosition == SyncMode.World ?
-                    new Vector3WithParent(p, false, _trs.position) :
-                    new Vector3WithParent(p, true, _trs.localPosition);
-                _position = new Interpolated<Vector3WithParent>(interpolatePosition ? Vector3WithParent.Lerp : Vector3WithParent.NoLerp,
+                var currentPos = _syncPosition == SyncMode.World
+                    ? new Vector3WithParent(p, false, _trs.position)
+                    : new Vector3WithParent(p, true, _trs.localPosition);
+                _position = new Interpolated<Vector3WithParent>(
+                    interpolatePosition ? Vector3WithParent.Lerp : Vector3WithParent.NoLerp,
                     sendDelta, currentPos, _maxBufferSize, _minBufferSize);
             }
 
             if (syncRotation)
             {
-                var currentRot = _syncRotation == SyncMode.World ?
-                    new QuaternionWithParent(p, false, _trs.rotation) :
-                    new QuaternionWithParent(p, true, _trs.localRotation);
+                var currentRot = _syncRotation == SyncMode.World
+                    ? new QuaternionWithParent(p, false, _trs.rotation)
+                    : new QuaternionWithParent(p, true, _trs.localRotation);
                 _rotation = new Interpolated<QuaternionWithParent>(
                     interpolateRotation ? QuaternionWithParent.Lerp : QuaternionWithParent.NoLerp,
                     sendDelta, currentRot, _maxBufferSize, _minBufferSize);
@@ -186,7 +191,8 @@ namespace PurrNet
             if (syncScale)
             {
                 var currentScale = new ScaleWithParent(p, _trs.localScale);
-                _scale = new Interpolated<ScaleWithParent>(interpolateScale ? ScaleWithParent.Lerp : ScaleWithParent.NoLerp,
+                _scale = new Interpolated<ScaleWithParent>(
+                    interpolateScale ? ScaleWithParent.Lerp : ScaleWithParent.NoLerp,
                     sendDelta, currentScale, _maxBufferSize, _minBufferSize);
             }
 
@@ -208,7 +214,8 @@ namespace PurrNet
             _cachedConnectedOwner = hasConnectedOwner;
             _cachedIsController = IsController(_ownerAuth);
 
-            if (!enabled) {
+            if (!enabled)
+            {
                 return;
             }
 
@@ -243,10 +250,7 @@ namespace PurrNet
             _wasOnSpawnedCalled = true;
 
             if (!networkManager.TryGetModule<NetworkTransformFactory>(asServer, out var factory))
-            {
-                PurrLogger.LogError("NetworkTransformFactory not found");
                 return;
-            }
 
             if (!factory.TryGetModule(sceneId, out var ntModule))
                 return;
@@ -267,7 +271,10 @@ namespace PurrNet
             _wasOnSpawnedCalled = false;
 
             if (!networkManager.TryGetModule<NetworkTransformFactory>(asServer, out var factory))
-                return;
+            {
+                if (!networkManager.TryGetModule<NetworkTransformFactory>(true, out factory))
+                    return;
+            }
 
             if (!factory.TryGetModule(sceneId, out var ntModule))
                 return;
@@ -287,7 +294,8 @@ namespace PurrNet
 
         protected override void OnObserverAdded(PlayerID player)
         {
-            if (!enabled) {
+            if (!enabled)
+            {
                 return;
             }
 
@@ -439,12 +447,6 @@ namespace PurrNet
         {
             if (_interpolationTiming == InterpolationTiming.LateLateUpdate)
                 UpdateNT();
-
-            if (_parentChanged)
-            {
-                OnTransformParentChangedDelayed();
-                _parentChanged = false;
-            }
         }
 
         private void UpdateNT()
@@ -538,8 +540,6 @@ namespace PurrNet
             return new NetworkTransformData(pos, rot, ntScale);
         }
 
-        private bool _parentChanged;
-
         void OnTransformParentChanged()
         {
             if (!isSpawned)
@@ -551,25 +551,7 @@ namespace PurrNet
             if (!_syncParent)
                 return;
 
-            _parentChanged = true;
-        }
-
-        void OnTransformParentChangedDelayed()
-        {
-            if (_isIgnoringParentChanges)
-                return;
-
-            if (ApplicationContext.isQuitting)
-                return;
-
-            if (!isSpawned)
-                return;
-
-            if (!_trs)
-                return;
-
-            if (_syncParent)
-                HandleParentChanged(_trs.parent);
+            HandleParentChanged(_trs.parent);
         }
 
         private void HandleParentChanged(Transform parent)
@@ -636,18 +618,20 @@ namespace PurrNet
             bool hasChanged = false;
 
             if (syncPosition)
-                hasChanged = DeltaPacker<CompressedVector3>.Write(packer, _lastSentDelta.position, _currentData.position);
+                hasChanged =
+                    DeltaPacker<CompressedVector3>.Write(packer, _lastSentDelta.position, _currentData.position);
 
             if (syncRotation)
             {
-                hasChanged = DeltaPacker<PackedQuaternion>.Write(packer, _lastSentDelta.rotation, _currentData.rotation) ||
-                          hasChanged;
+                hasChanged =
+                    DeltaPacker<PackedQuaternion>.Write(packer, _lastSentDelta.rotation, _currentData.rotation) ||
+                    hasChanged;
             }
 
             if (syncScale)
             {
                 hasChanged = DeltaPacker<CompressedVector3>.Write(packer, _lastSentDelta.scale, _currentData.scale) ||
-                          hasChanged;
+                             hasChanged;
             }
 
             return hasChanged;

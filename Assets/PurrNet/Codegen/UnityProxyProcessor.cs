@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Unity.CompilationPipeline.Common.Diagnostics;
+using Object = UnityEngine.Object;
 
 namespace PurrNet.Codegen
 {
@@ -21,7 +22,7 @@ namespace PurrNet.Codegen
 
                 var module = type.Module;
 
-                string objectClassFullName = typeof(UnityEngine.Object).FullName;
+                string objectClassFullName = typeof(Object).FullName;
 
                 foreach (var method in type.Methods)
                 {
@@ -42,7 +43,8 @@ namespace PurrNet.Codegen
                         if (methodReference.DeclaringType.FullName != objectClassFullName)
                             continue;
 
-                        if (methodReference.Name != "Instantiate" && methodReference.Name != "Destroy")
+                        if (methodReference.Name != "Instantiate" && methodReference.Name != "Destroy" &&
+                            methodReference.Name != "DontDestroyOnLoad")
                             continue;
 
                         var resolved = methodReference.Resolve();

@@ -51,7 +51,7 @@ namespace PurrNet.Codegen
                 // Recursively validate all generic arguments
                 foreach (var argument in genericInstance.GenericArguments)
                 {
-                    if (argument.ContainsGenericParameter ||/* argument.Resolve()?.IsInterface == true ||*/
+                    if (argument.ContainsGenericParameter || /* argument.Resolve()?.IsInterface == true ||*/
                         !ValideType(argument))
                     {
                         return false;
@@ -108,8 +108,10 @@ namespace PurrNet.Codegen
                 assembly.MainModule.TypeSystem.Object
             );
 
-            var editorType = assembly.MainModule.GetTypeDefinition<GeneratedByILAttribute>().Import(assembly.MainModule);
-            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters).Import(assembly.MainModule);
+            var editorType = assembly.MainModule.GetTypeDefinition<GeneratedByILAttribute>()
+                .Import(assembly.MainModule);
+            var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && !m.HasParameters)
+                .Import(assembly.MainModule);
             var editorAttribute = new CustomAttribute(editorConstructor);
             serializerClass.CustomAttributes.Add(editorAttribute);
             var resolvedType = type.Resolve();
@@ -227,7 +229,8 @@ namespace PurrNet.Codegen
             var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
                 .Import(assembly.MainModule);
             var editorAttribute = new CustomAttribute(editorConstructor);
-            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, -1));
+            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32,
+                -1));
             registerMethod.CustomAttributes.Add(editorAttribute);
 
             var il = registerMethod.Body.GetILProcessor();
@@ -254,7 +257,8 @@ namespace PurrNet.Codegen
             var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
                 .Import(assembly.MainModule);
             var editorAttribute = new CustomAttribute(editorConstructor);
-            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, -1));
+            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32,
+                -1));
             registerMethod.CustomAttributes.Add(editorAttribute);
 
             registerMethod.Body = new MethodBody(registerMethod)
@@ -277,7 +281,8 @@ namespace PurrNet.Codegen
             var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
                 .Import(assembly.MainModule);
             var editorAttribute = new CustomAttribute(editorConstructor);
-            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, -1));
+            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32,
+                -1));
             registerMethod.CustomAttributes.Add(editorAttribute);
             registerMethod.Body = new MethodBody(registerMethod)
             {
@@ -300,7 +305,8 @@ namespace PurrNet.Codegen
             var editorConstructor = editorType.Resolve().Methods.First(m => m.IsConstructor && m.HasParameters)
                 .Import(assembly.MainModule);
             var editorAttribute = new CustomAttribute(editorConstructor);
-            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32, -1));
+            editorAttribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.TypeSystem.Int32,
+                -1));
             registerMethod.CustomAttributes.Add(editorAttribute);
             registerMethod.Body = new MethodBody(registerMethod)
             {
@@ -489,14 +495,13 @@ namespace PurrNet.Codegen
             return baseType != null && HasInterface(baseType, interfaceType);
         }
 
-        private static MethodReference CreateSetterMethod(TypeDefinition parent, FieldDefinition field)
+        private static void CreateSetterMethod(TypeDefinition parent, FieldDefinition field)
         {
             var name = MakeFullNameValidCSharp($"Purrnet_Set_{field.Name}");
 
             foreach (var m in parent.Methods)
             {
-                if (m.Name == name)
-                    return m;
+                if (m.Name == name) return;
             }
 
             var method = new MethodDefinition(name, MethodAttributes.Public, parent.Module.TypeSystem.Void);
@@ -534,17 +539,15 @@ namespace PurrNet.Codegen
             setter.Emit(OpCodes.Ret);
 
             parent.Methods.Add(method);
-            return method;
         }
 
-        private static MethodReference CreateGetterMethod(TypeDefinition parent, FieldDefinition field)
+        private static void CreateGetterMethod(TypeDefinition parent, FieldDefinition field)
         {
             var name = MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}");
 
             foreach (var m in parent.Methods)
             {
-                if (m.Name == name)
-                    return m;
+                if (m.Name == name) return;
             }
 
             var method = new MethodDefinition(MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}"),
@@ -578,7 +581,6 @@ namespace PurrNet.Codegen
             getter.Emit(OpCodes.Ret); // Return the field value
 
             parent.Methods.Add(method);
-            return method;
         }
 
         public static bool DoesTypeHaveAttribute(TypeDefinition type, Type attribute)
@@ -609,7 +611,8 @@ namespace PurrNet.Codegen
         }
 
         private static void GenerateMethod(
-            bool isWriting, MethodDefinition method, MethodReference serialize, MethodReference serializeDirect, TypeReference typeRef, ILProcessor il,
+            bool isWriting, MethodDefinition method, MethodReference serialize, MethodReference serializeDirect,
+            TypeReference typeRef, ILProcessor il,
             ModuleDefinition mainmodule, ParameterDefinition valueArg)
         {
             var bitPackerType = mainmodule.GetTypeDefinition(typeof(BitPacker)).Import(mainmodule);
@@ -657,6 +660,8 @@ namespace PurrNet.Codegen
                 // if returned false, just return
                 il.Emit(OpCodes.Brfalse, ret);
             }
+
+            CreateGettersAndSetters(isWriting, type);
 
             if (type.IsEnum)
             {
@@ -742,7 +747,11 @@ namespace PurrNet.Codegen
                 {
                     if (isWriting)
                     {
-                        var getter = CreateGetterMethod(type, field);
+                        var getterName = MakeFullNameValidCSharp($"Purrnet_Get_{field.Name}");
+                        var getter = new MethodReference(getterName, fieldType, typeRef)
+                        {
+                            HasThis = true
+                        };
 
                         if (typeRef is GenericInstanceType genericInstanceType)
                         {
@@ -776,7 +785,14 @@ namespace PurrNet.Codegen
                         var variable = new VariableDefinition(fieldType);
                         method.Body.Variables.Add(variable);
 
-                        var setter = CreateSetterMethod(type, field);
+                        var setterName = MakeFullNameValidCSharp($"Purrnet_Set_{field.Name}");
+                        var setter = new MethodReference(setterName, type.Module.TypeSystem.Void, typeRef)
+                        {
+                            HasThis = true
+                        };
+
+                        setter.Parameters.Add(
+                            new ParameterDefinition("value", ParameterAttributes.None, fieldType));
 
                         if (typeRef is GenericInstanceType genericInstanceType)
                         {
@@ -825,6 +841,33 @@ namespace PurrNet.Codegen
             il.Emit(OpCodes.Call, readData);*/
 
             il.Append(ret);
+        }
+
+        public static void CreateGettersAndSetters(bool isWriting, TypeDefinition type)
+        {
+            for (var i = 0; i < type.Fields.Count; i++)
+            {
+                var field = type.Fields[i];
+                if (field.IsStatic)
+                    continue;
+
+                bool isDelegate = PostProcessor.InheritsFrom(field.FieldType.Resolve(), typeof(Delegate).FullName);
+
+                if (isDelegate)
+                    continue;
+
+                var ignore = ShouldIgnoreField(field);
+
+                if (ignore)
+                    continue;
+
+                if (!field.IsPublic)
+                {
+                    if (isWriting)
+                        CreateGetterMethod(type, field);
+                    else CreateSetterMethod(type, field);
+                }
+            }
         }
 
         private static void CallForStandalone(bool isWriting, MethodDefinition method, MethodReference serializeDirect,
@@ -886,7 +929,8 @@ namespace PurrNet.Codegen
             return fieldType;
         }
 
-        private static TypeReference SubstituteDeclaringTypeGenerics(TypeReference type, GenericInstanceType declaringGeneric)
+        private static TypeReference SubstituteDeclaringTypeGenerics(TypeReference type,
+            GenericInstanceType declaringGeneric)
         {
             // Direct mapping for generic parameter T from the declaring type
             if (type.IsGenericParameter)
@@ -904,6 +948,7 @@ namespace PurrNet.Codegen
                     var arg = gi.GenericArguments[i];
                     rebuilt.GenericArguments.Add(SubstituteDeclaringTypeGenerics(arg, declaringGeneric));
                 }
+
                 return rebuilt;
             }
 

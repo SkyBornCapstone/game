@@ -1,12 +1,44 @@
-using UnityEngine;
-using PurrNet.Logging;
 using System;
-using UnityEngine.Events;
+using PurrNet.Logging;
+using PurrNet.Packing;
 using PurrNet.Transports;
 using PurrNet.Utils;
+using UnityEngine;
+using UnityEngine.Events;
 
 namespace PurrNet
 {
+    public struct SyncEventData : IDisposable
+    {
+        public BitPacker _dataPacker;
+
+        public SyncEventData AddData<T>(T data)
+        {
+            if (_dataPacker == null)
+                _dataPacker = BitPackerPool.Get();
+            Packer<T>.Write(_dataPacker, data);
+            return this;
+        }
+
+        public T ReadData<T>()
+        {
+            if (_dataPacker == null)
+                return default;
+
+            return Packer<T>.Read(_dataPacker);
+        }
+
+        public void ResetPosition()
+        {
+            _dataPacker?.ResetPosition();
+        }
+
+        public void Dispose()
+        {
+            _dataPacker.Dispose();
+        }
+    }
+
     [Serializable]
     public abstract class SyncEventBase : NetworkModule
     {
@@ -42,190 +74,121 @@ namespace PurrNet
     }
 
     [Serializable]
-    public class SyncEvent : SyncEventBase
+    public abstract class SyncEventLogic<T> : SyncEventBase
     {
-        [SerializeField] private UnityEvent _unityEvent = new UnityEvent();
+        protected SyncEventData _lastData;
 
-        public SyncEvent(bool ownerAuth = false) : base(ownerAuth)
+        protected SyncEventLogic(bool ownerAuth = false) : base(ownerAuth)
         {
         }
 
-        /// <summary>
-        /// Adds a listener to the event.
-        /// </summary>
-        /// <param name="listener">Listener to add</param>
-        public void AddListener(UnityAction listener) => _unityEvent.AddListener(listener);
+        protected abstract void InvokeUnityEvent(T data);
 
-        /// <summary>
-        /// Removes a listener from the event.
-        /// </summary>
-        /// <param name="listener">Listener to remove</param>
-        public void RemoveListener(UnityAction listener) => _unityEvent.RemoveListener(listener);
+        protected virtual void ClearUnityEvent()
+        {
+        }
 
-        /// <summary>
-        /// Invokes the event for all clients.
-        /// </summary>
-        public void Invoke()
+        public void InvokePacket(SyncEventData data)
         {
             if (!ValidateInvoke()) return;
 
-            InvokeLocal();
+            _lastData = data;
 
             if (isSpawned)
             {
-                if (isServer)
-                    SendToAll();
-                else SendToServer();
+                if (isServer) SendToAll(data);
+                else SendToServer(data);
             }
-        }
 
-        protected override void InvokeLocal() => _unityEvent?.Invoke();
-
-        [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
-        private void SendToServer()
-        {
-            if (!_ownerAuth) return;
-            SendToOthers();
-        }
-
-        [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true)]
-        private void SendToOthers()
-        {
-            if (isServer && !isHost)
-                return;
+            _lastData.ResetPosition();
             InvokeLocal();
         }
 
-        [ObserversRpc(Channel.ReliableOrdered)]
-        private void SendToAll()
-        {
-            if (!isHost) InvokeLocal();
-        }
-
-        /// <summary>
-        /// Removes all listeners from the event.
-        /// </summary>
-        /// <param name="sync">Whether to sync it or do it locally. By default, it's local</param>
         public void RemoveAllListeners(bool sync = false)
         {
             if (!sync)
             {
-                _unityEvent.RemoveAllListeners();
+                ClearUnityEvent();
                 return;
             }
 
-            _unityEvent.RemoveAllListeners();
-
-            if (!isSpawned) return;
-
-            if (isServer)
-                RemoveAllListenersRpc();
-            else
-                RemoveAllListenersServer();
-        }
-
-        [ServerRpc(requireOwnership: true)]
-        private void RemoveAllListenersServer()
-        {
-            if (!_ownerAuth) return;
             RemoveAllListenersRpc();
         }
 
-        [ObserversRpc(runLocally: true, excludeOwner: true)]
-        private void RemoveAllListenersRpc()
-        {
-            _unityEvent.RemoveAllListeners();
-        }
-    }
-
-    [Serializable]
-    public class SyncEvent<T> : SyncEventBase
-    {
-        [SerializeField] private SerializableSyncUnityEvent<T> unityEvent = new SerializableSyncUnityEvent<T>();
-        private T _lastArg;
-
-        public SyncEvent(bool ownerAuth = false) : base(ownerAuth)
-        {
-        }
-
-        /// <summary>
-        /// Adds a listener to the event.
-        /// </summary>
-        /// <param name="listener">Listener to add</param>
-        public void AddListener(UnityAction<T> listener) => unityEvent.AddListener(listener);
-
-        /// <summary>
-        /// Removes a listener from the event.
-        /// </summary>
-        /// <param name="listener">Listener to remove</param>
-        public void RemoveListener(UnityAction<T> listener) => unityEvent.RemoveListener(listener);
-
-        /// <summary>
-        /// Invokes the event for all clients.
-        /// </summary>
-        public void Invoke(T arg)
-        {
-            if (!ValidateInvoke()) return;
-
-            _lastArg = arg;
-            InvokeLocal();
-
-            if (isSpawned)
-            {
-                if (isServer)
-                    SendToAll(arg);
-                else SendToServer(arg);
-            }
-        }
-
-        protected override void InvokeLocal() => unityEvent?.Invoke(_lastArg);
-
         [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
-        private void SendToServer(T arg)
+        private void SendToServer(SyncEventData data)
         {
             if (!_ownerAuth) return;
-            SendToOthers(arg);
+            SendToOthers(data);
         }
 
         [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true)]
-        private void SendToOthers(T arg)
+        private void SendToOthers(SyncEventData data)
         {
-            if (isServer && !isHost)
-                return;
-
-            _lastArg = arg;
-            InvokeLocal();
-        }
-
-        [ObserversRpc(Channel.ReliableOrdered)]
-        private void SendToAll(T arg)
-        {
-            if (!isHost)
+            using (data)
             {
-                _lastArg = arg;
+                if (isServer && !isHost) return;
+                _lastData = data;
                 InvokeLocal();
             }
         }
 
-        /// <summary>
-        /// Removes all listeners from the event.
-        /// </summary>
-        /// <param name="sync">Whether to sync it or do it locally. By default, it's local</param>
-        public void RemoveAllListeners(bool sync = false)
+        [ObserversRpc(Channel.ReliableOrdered)]
+        private void SendToAll(SyncEventData data)
         {
-            if (!sync)
+            using (data)
             {
-                unityEvent.RemoveAllListeners();
-                return;
+                if (!isHost)
+                {
+                    _lastData = data;
+                    InvokeLocal();
+                }
             }
-
-            RemoveAllListenersRpc();
         }
 
         [ObserversRpc(runLocally: true)]
-        private void RemoveAllListenersRpc()
+        private void RemoveAllListenersRpc() => ClearUnityEvent();
+    }
+
+    [Serializable]
+    public class SerializableSyncUnityEvent : UnityEvent
+    {
+    }
+
+    [Serializable]
+    public class SyncEvent : SyncEventLogic<byte>
+    {
+        [SerializeField] private SerializableSyncUnityEvent unityEvent = new SerializableSyncUnityEvent();
+
+        public SyncEvent(bool ownerAuth = false) : base(ownerAuth)
         {
-            unityEvent.RemoveAllListeners();
+        }
+
+        public void AddListener(UnityAction listener) => unityEvent.AddListener(listener);
+        public void RemoveListener(UnityAction listener) => unityEvent.RemoveListener(listener);
+
+        public void Invoke() => InvokePacket(default);
+
+        protected override void InvokeLocal()
+        {
+            unityEvent.Invoke();
+        }
+
+        protected override void InvokeUnityEvent(byte data) => unityEvent?.Invoke();
+        protected override void ClearUnityEvent() => unityEvent.RemoveAllListeners();
+
+        public static SyncEvent operator +(SyncEvent e, UnityAction listener)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.AddListener(listener);
+            return e;
+        }
+
+        public static SyncEvent operator -(SyncEvent e, UnityAction listener)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.RemoveListener(listener);
+            return e;
         }
     }
 
@@ -235,104 +198,232 @@ namespace PurrNet
     }
 
     [Serializable]
-    public class SerializableSyncUnityEvent<T1, T2> : UnityEvent<T1, T2>
+    public class SyncEvent<T> : SyncEventLogic<T>
     {
-    }
-
-    [Serializable]
-    public class SyncEvent<T1, T2> : SyncEventBase
-    {
-        [SerializeField]
-        private SerializableSyncUnityEvent<T1, T2> unityEvent = new SerializableSyncUnityEvent<T1, T2>();
-
-        private T1 _lastArg1;
-        private T2 _lastArg2;
+        [SerializeField] private SerializableSyncUnityEvent<T> unityEvent = new SerializableSyncUnityEvent<T>();
 
         public SyncEvent(bool ownerAuth = false) : base(ownerAuth)
         {
         }
 
-        /// <summary>
-        /// Adds a listener to the event.
-        /// </summary>
-        /// <param name="listener">Listener to add</param>
-        public void AddListener(UnityAction<T1, T2> listener) => unityEvent.AddListener(listener);
+        public void AddListener(UnityAction<T> listener) => unityEvent.AddListener(listener);
+        public void RemoveListener(UnityAction<T> listener) => unityEvent.RemoveListener(listener);
 
-        /// <summary>
-        /// Removes a listener from the event.
-        /// </summary>
-        /// <param name="listener">Listener to remove</param>
+        public void Invoke(T arg) => InvokePacket(new SyncEventData().AddData<T>(arg));
+
+        protected override void InvokeLocal()
+        {
+            T value = _lastData.ReadData<T>();
+            unityEvent.Invoke(value);
+        }
+
+        protected override void InvokeUnityEvent(T arg) => unityEvent?.Invoke(arg);
+        protected override void ClearUnityEvent() => unityEvent.RemoveAllListeners();
+
+        public static SyncEvent<T> operator +(SyncEvent<T> e, UnityAction<T> listener)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.AddListener(listener);
+            return e;
+        }
+
+        public static SyncEvent<T> operator -(SyncEvent<T> e, UnityAction<T> listener)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.RemoveListener(listener);
+            return e;
+        }
+    }
+
+    [Serializable]
+    public class SerializableSyncUnityEvent<T1, T2> : UnityEvent<T1, T2>
+    {
+    }
+
+    [Serializable]
+    public class SyncEvent<T1, T2> : SyncEventLogic<(T1, T2)>
+    {
+        [SerializeField]
+        private SerializableSyncUnityEvent<T1, T2> unityEvent = new SerializableSyncUnityEvent<T1, T2>();
+
+        public SyncEvent(bool ownerAuth = false) : base(ownerAuth)
+        {
+        }
+
+        public void AddListener(UnityAction<T1, T2> listener) => unityEvent.AddListener(listener);
         public void RemoveListener(UnityAction<T1, T2> listener) => unityEvent.RemoveListener(listener);
 
-        /// <summary>
-        /// Invokes the event for all clients.
-        /// </summary>
-        public void Invoke(T1 arg1, T2 arg2)
+        public void Invoke(T1 arg1, T2 arg2) => InvokePacket(new SyncEventData().AddData<T1>(arg1).AddData<T2>(arg2));
+
+        protected override void InvokeLocal()
         {
-            if (!ValidateInvoke()) return;
-
-            _lastArg1 = arg1;
-            _lastArg2 = arg2;
-            InvokeLocal();
-
-            if (isSpawned)
-            {
-                if (isServer)
-                    SendToAll(arg1, arg2);
-                else SendToServer(arg1, arg2);
-            }
+            T1 value1 = _lastData.ReadData<T1>();
+            T2 value2 = _lastData.ReadData<T2>();
+            unityEvent.Invoke(value1, value2);
         }
 
-        protected override void InvokeLocal() => unityEvent?.Invoke(_lastArg1, _lastArg2);
+        protected override void InvokeUnityEvent((T1, T2) data) => unityEvent?.Invoke(data.Item1, data.Item2);
+        protected override void ClearUnityEvent() => unityEvent.RemoveAllListeners();
 
-        [ServerRpc(Channel.ReliableOrdered, requireOwnership: true)]
-        private void SendToServer(T1 arg1, T2 arg2)
+        public static SyncEvent<T1, T2> operator +(SyncEvent<T1, T2> e, UnityAction<T1, T2> listener)
         {
-            if (!_ownerAuth) return;
-            SendToOthers(arg1, arg2);
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.AddListener(listener);
+            return e;
         }
 
-        [ObserversRpc(Channel.ReliableOrdered, excludeOwner: true)]
-        private void SendToOthers(T1 arg1, T2 arg2)
+        public static SyncEvent<T1, T2> operator -(SyncEvent<T1, T2> e, UnityAction<T1, T2> listener)
         {
-            if (isServer && !isHost)
-                return;
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.RemoveListener(listener);
+            return e;
+        }
+    }
 
-            _lastArg1 = arg1;
-            _lastArg2 = arg2;
-            InvokeLocal();
+    [Serializable]
+    public class SerializableSyncUnityEvent<T1, T2, T3> : UnityEvent<T1, T2, T3>
+    {
+    }
+
+    [Serializable]
+    public class SyncEvent<T1, T2, T3> : SyncEventLogic<(T1, T2, T3)>
+    {
+        [SerializeField]
+        private SerializableSyncUnityEvent<T1, T2, T3> unityEvent = new SerializableSyncUnityEvent<T1, T2, T3>();
+
+        public SyncEvent(bool ownerAuth = false) : base(ownerAuth)
+        {
         }
 
-        [ObserversRpc(Channel.ReliableOrdered)]
-        private void SendToAll(T1 arg1, T2 arg2)
+        public void AddListener(UnityAction<T1, T2, T3> listener) => unityEvent.AddListener(listener);
+        public void RemoveListener(UnityAction<T1, T2, T3> listener) => unityEvent.RemoveListener(listener);
+
+        public void Invoke(T1 a, T2 b, T3 c) =>
+            InvokePacket(new SyncEventData().AddData<T1>(a).AddData<T2>(b).AddData<T3>(c));
+
+        protected override void InvokeLocal()
         {
-            if (!isHost)
-            {
-                _lastArg1 = arg1;
-                _lastArg2 = arg2;
-                InvokeLocal();
-            }
+            T1 value1 = _lastData.ReadData<T1>();
+            T2 value2 = _lastData.ReadData<T2>();
+            T3 value3 = _lastData.ReadData<T3>();
+            unityEvent.Invoke(value1, value2, value3);
         }
 
-        /// <summary>
-        /// Removes all listeners from the event.
-        /// </summary>
-        /// <param name="sync">Whether to sync it or do it locally. By default, it's local</param>
-        public void RemoveAllListeners(bool sync = false)
-        {
-            if (!sync)
-            {
-                unityEvent.RemoveAllListeners();
-                return;
-            }
+        protected override void InvokeUnityEvent((T1, T2, T3) data) =>
+            unityEvent?.Invoke(data.Item1, data.Item2, data.Item3);
 
-            RemoveAllListenersRpc();
+        protected override void ClearUnityEvent() => unityEvent.RemoveAllListeners();
+
+        public static SyncEvent<T1, T2, T3> operator +(SyncEvent<T1, T2, T3> e, UnityAction<T1, T2, T3> listener)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.AddListener(listener);
+            return e;
         }
 
-        [ObserversRpc(runLocally: true)]
-        private void RemoveAllListenersRpc()
+        public static SyncEvent<T1, T2, T3> operator -(SyncEvent<T1, T2, T3> e, UnityAction<T1, T2, T3> listener)
         {
-            unityEvent.RemoveAllListeners();
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.RemoveListener(listener);
+            return e;
+        }
+    }
+
+    [Serializable]
+    public class SerializableSyncUnityEvent<T1, T2, T3, T4> : UnityEvent<T1, T2, T3, T4>
+    {
+    }
+
+    [Serializable]
+    public class SyncEvent<T1, T2, T3, T4> : SyncEventLogic<(T1, T2, T3, T4)>
+    {
+        [SerializeField]
+        private SerializableSyncUnityEvent<T1, T2, T3, T4>
+            unityEvent = new SerializableSyncUnityEvent<T1, T2, T3, T4>();
+
+        public SyncEvent(bool ownerAuth = false) : base(ownerAuth)
+        {
+        }
+
+        public void AddListener(UnityAction<T1, T2, T3, T4> listener) => unityEvent.AddListener(listener);
+        public void RemoveListener(UnityAction<T1, T2, T3, T4> listener) => unityEvent.RemoveListener(listener);
+
+        public void Invoke(T1 a, T2 b, T3 c, T4 d) =>
+            InvokePacket(new SyncEventData().AddData<T1>(a).AddData<T2>(b).AddData<T3>(c).AddData<T4>(d));
+
+        protected override void InvokeLocal()
+        {
+            T1 value1 = _lastData.ReadData<T1>();
+            T2 value2 = _lastData.ReadData<T2>();
+            T3 value3 = _lastData.ReadData<T3>();
+            T4 value4 = _lastData.ReadData<T4>();
+            unityEvent.Invoke(value1, value2, value3, value4);
+        }
+
+        protected override void InvokeUnityEvent((T1, T2, T3, T4) data) =>
+            unityEvent?.Invoke(data.Item1, data.Item2, data.Item3, data.Item4);
+
+        protected override void ClearUnityEvent() => unityEvent.RemoveAllListeners();
+
+        public static SyncEvent<T1, T2, T3, T4> operator +(SyncEvent<T1, T2, T3, T4> e,
+            UnityAction<T1, T2, T3, T4> listener)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.AddListener(listener);
+            return e;
+        }
+
+        public static SyncEvent<T1, T2, T3, T4> operator -(SyncEvent<T1, T2, T3, T4> e,
+            UnityAction<T1, T2, T3, T4> listener)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.RemoveListener(listener);
+            return e;
+        }
+    }
+
+    [Serializable]
+    public class SyncEvent<T1, T2, T3, T4, T5> : SyncEventLogic<(T1, T2, T3, T4, T5)>
+    {
+        private event Action<T1, T2, T3, T4, T5> unityEvent;
+
+        public SyncEvent(bool ownerAuth = false) : base(ownerAuth)
+        {
+        }
+
+        public void AddListener(Action<T1, T2, T3, T4, T5> listener) => unityEvent += listener;
+        public void RemoveListener(Action<T1, T2, T3, T4, T5> listener) => unityEvent -= listener;
+
+        public void Invoke(T1 a, T2 b, T3 c, T4 d, T5 e) => InvokePacket(new SyncEventData().AddData<T1>(a)
+            .AddData<T2>(b).AddData<T3>(c).AddData<T4>(d).AddData<T5>(e));
+
+        protected override void InvokeLocal()
+        {
+            T1 value1 = _lastData.ReadData<T1>();
+            T2 value2 = _lastData.ReadData<T2>();
+            T3 value3 = _lastData.ReadData<T3>();
+            T4 value4 = _lastData.ReadData<T4>();
+            T5 value5 = _lastData.ReadData<T5>();
+            unityEvent.Invoke(value1, value2, value3, value4, value5);
+        }
+
+        protected override void InvokeUnityEvent((T1, T2, T3, T4, T5) data) =>
+            unityEvent?.Invoke(data.Item1, data.Item2, data.Item3, data.Item4, data.Item5);
+
+        public static SyncEvent<T1, T2, T3, T4, T5> operator +(SyncEvent<T1, T2, T3, T4, T5> e,
+            Action<T1, T2, T3, T4, T5> listener)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.AddListener(listener);
+            return e;
+        }
+
+        public static SyncEvent<T1, T2, T3, T4, T5> operator -(SyncEvent<T1, T2, T3, T4, T5> e,
+            Action<T1, T2, T3, T4, T5> listener)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            e.RemoveListener(listener);
+            return e;
         }
     }
 }

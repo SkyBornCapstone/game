@@ -1,25 +1,27 @@
+using System.Collections.Generic;
+using player;
 using PurrNet;
-using PurrNet.Pooling;
-using PurrNet.Prediction;
-using PurrNet.Prediction.StateMachine;
+using PurrNet.StateMachine;
 
 namespace GameStates
 {
-    public class RoundRunningState : PredictedStateNode<RoundRunningState.State>
+    public class RoundRunningState : StateNode
     {
+        private List<PlayerID> _currentPlayers;
+
         private void Awake()
         {
-            player.PlayerHealth.OnDeath += OnPlayerDeath;
+            PlayerHealth.OnDeath += OnPlayerDeath;
         }
 
         protected override void OnDestroy()
         {
-            player.PlayerHealth.OnDeath -= OnPlayerDeath;
+            PlayerHealth.OnDeath -= OnPlayerDeath;
         }
 
         public override void Enter()
         {
-            currentState.Players = DisposableList<PlayerID>.Create(predictionManager.players.currentState.players);
+            _currentPlayers = new List<PlayerID>(networkManager.players);
         }
 
         private void OnPlayerDeath(PlayerID? owner)
@@ -30,21 +32,11 @@ namespace GameStates
             if (!owner.HasValue)
                 return;
 
-            currentState.Players.Remove(owner.Value);
+            _currentPlayers.Remove(owner.Value);
 
-            if (currentState.Players.Count <= 0)
+            if (_currentPlayers.Count <= 0)
             {
                 machine.Next();
-            }
-        }
-
-        public struct State : IPredictedData<State>
-        {
-            public DisposableList<PlayerID> Players;
-
-            public void Dispose()
-            {
-                Players.Dispose();
             }
         }
     }

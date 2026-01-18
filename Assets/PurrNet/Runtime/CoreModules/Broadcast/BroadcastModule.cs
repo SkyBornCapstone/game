@@ -8,51 +8,14 @@ using PurrNet.Utils;
 
 namespace PurrNet.Modules
 {
-    public delegate void BroadcastDelegate<in T>(Connection conn, T data, bool asServer);
-
-    public interface IBroadcastCallback
-    {
-        bool IsSame(object callback);
-
-        void TriggerCallback(Connection conn, object data, bool asServer);
-
-        void Subscribe(BroadcastModule module);
-    }
-
-    internal readonly struct BroadcastCallback<T> : IBroadcastCallback
-    {
-        readonly BroadcastDelegate<T> callback;
-
-        public BroadcastCallback(BroadcastDelegate<T> callback)
-        {
-            this.callback = callback;
-        }
-
-        public bool IsSame(object callbackToCmp)
-        {
-            return callbackToCmp is BroadcastDelegate<T> action && action == callback;
-        }
-
-        public void TriggerCallback(Connection conn, object data, bool asServer)
-        {
-            if (data is T value)
-                callback?.Invoke(conn, value, asServer);
-        }
-
-        public void Subscribe(BroadcastModule module)
-        {
-            module.Subscribe(callback);
-        }
-    }
-
-    public class BroadcastModule : INetworkModule, IDataListener
+    public class BroadcastModule : INetworkModule, IDataListener, IPromoteToServerModule
     {
         private readonly ITransport _transport;
 
-        private readonly bool _asServer;
-
         private readonly Dictionary<uint, List<IBroadcastCallback>> _actions =
             new Dictionary<uint, List<IBroadcastCallback>>();
+
+        private bool _asServer;
 
         internal event Action<Connection, uint, object> onRawDataReceived;
 
@@ -84,7 +47,7 @@ namespace PurrNet.Modules
             return stream.ToByteData();
         }
 
-        private static ByteData GetData<T>(T data)
+        public static ByteData GetData<T>(T data)
         {
             using var stream = BitPackerPool.Get();
             var typeId = Hasher.GetStableHashU32<T>();
@@ -93,6 +56,14 @@ namespace PurrNet.Modules
             Packer<T>.Write(stream, data);
 
             return stream.ToByteData();
+        }
+
+        public static void GetData<T>(BitPacker stream, T data)
+        {
+            var typeId = Hasher.GetStableHashU32<T>();
+
+            Packer<PackedUInt>.Write(stream, typeId);
+            Packer<T>.Write(stream, data);
         }
 
         static bool ShouldTrackType(Type type)
@@ -197,10 +168,7 @@ namespace PurrNet.Modules
                 return;
 
             using var stream = BitPackerPool.Get(data);
-
-            PackedUInt typeId = default;
-
-            Packer<PackedUInt>.Read(stream, ref typeId);
+            var typeId = Packer<PackedUInt>.Read(stream);
 
             if (!Hasher.TryGetType(typeId, out var typeInfo))
             {
@@ -262,6 +230,15 @@ namespace PurrNet.Modules
             }
 
             onRawDataReceived?.Invoke(conn, hash, instance);
+        }
+
+        public void PromoteToServerModule()
+        {
+            _asServer = true;
+        }
+
+        public void PostPromoteToServerModule()
+        {
         }
     }
 }

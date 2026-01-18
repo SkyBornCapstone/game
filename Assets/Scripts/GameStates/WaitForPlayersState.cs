@@ -1,24 +1,19 @@
-using PurrNet.Prediction;
-using PurrNet.Prediction.StateMachine;
+using PurrNet.StateMachine;
 using UnityEngine;
 
 namespace GameStates
 {
-    public class WaitForPlayersState : PredictedStateNode<WaitForPlayersState.State>
+    public class WaitForPlayersState : StateNode
     {
         [SerializeField] private int requiredPlayers = 2;
 
-        protected override void StateSimulate(ref State state, float delta)
+        public override void StateUpdate()
         {
-            if (predictionManager.players.currentState.players.Count >= requiredPlayers)
-                machine.Next();
-        }
+            if (!isServer) return;
 
-        public struct State : IPredictedData<State>
-        {
-            public void Dispose()
-            {
-            }
+            Debug.Log("Waiting for players");
+            if (networkManager.players.Count >= requiredPlayers)
+                machine.Next();
         }
     }
 }

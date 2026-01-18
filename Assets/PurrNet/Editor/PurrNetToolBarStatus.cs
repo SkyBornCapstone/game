@@ -16,7 +16,11 @@ namespace PurrNet.Editor
         [InitializeOnLoadMethod]
         static void Init()
         {
+#if !UNITY_6000_3_OR_NEWER
             ToolbarExtender.RightToolbarGUI.Add(OnToolbarGUI);
+#else
+            ToolbarExtender.toolbarGUI += OnToolbarGUI;
+#endif
 
             PurrNetSettings.onSettingsChanged += OnSettingsChanged;
             NetworkManager.onAnyServerConnectionState += OnConnectionStateChanged;
@@ -28,13 +32,18 @@ namespace PurrNet.Editor
         private static void OnSettingsChanged(PurrNetSettings obj)
         {
             ToolbarExtender.RequestToolbarRepaint();
+
+#if UNITY_PLAYMODE
             PlayModePatch.Repaint();
+#endif
         }
 
         private static void OnConnectionStateChanged(ConnectionState state)
         {
             ToolbarExtender.RequestToolbarRepaint();
+#if UNITY_PLAYMODE
             PlayModePatch.Repaint();
+#endif
         }
 
         static string TryFindVersion()
@@ -55,7 +64,7 @@ namespace PurrNet.Editor
 
         static string _version;
 
-        static readonly List<GenericTransport> _transports = new ();
+        static readonly List<GenericTransport> _transports = new();
 
         static string[] _transportNames = Array.Empty<string>();
 
@@ -84,8 +93,10 @@ namespace PurrNet.Editor
         public static void OnToolbarGUI()
         {
             var settings = PurrNetSettings.GetOrCreateSettings();
+#if !UNITY_6000_3_OR_NEWER
             if (settings.toolbarMode == ToolbarMode.None)
                 return;
+#endif
             _version ??= TryFindVersion();
 
             GUILayout.FlexibleSpace();
@@ -105,7 +116,7 @@ namespace PurrNet.Editor
                 GUILayout.Label("PurrNet " + _version, GUILayout.ExpandWidth(false));
             }
 
-            DrawConnectionButton(settings, manager, true);  // Server
+            DrawConnectionButton(settings, manager, true); // Server
             DrawConnectionButton(settings, manager, false); // Client
 
             if (settings.toolbarTransportDropDown)
@@ -134,9 +145,12 @@ namespace PurrNet.Editor
             GUILayout.EndHorizontal();
             GUILayout.Space(20);
 
-            if (IsClientOrServerTransitioning(manager)) {
+            if (IsClientOrServerTransitioning(manager))
+            {
                 ToolbarExtender.RequestToolbarRepaint();
+#if UNITY_PLAYMODE
                 PlayModePatch.Repaint();
+#endif
             }
         }
 
@@ -185,13 +199,14 @@ namespace PurrNet.Editor
             else
             {
                 buttonText = isTransitioning ? state.ToString() :
-                               isActive ? $"Stop {(isServer ? "Server" : "Client")}" :
-                               $"Start {(isServer ? "Server" : "Client")}";
+                    isActive ? $"Stop {(isServer ? "Server" : "Client")}" :
+                    $"Start {(isServer ? "Server" : "Client")}";
             }
 
             GUI.enabled = manager != null && !isTransitioning;
             GUI.color = color;
-            if (GUILayout.Button(buttonText, settings.toolbarMode == ToolbarMode.Compact ? GUILayout.Width(25) : GUILayout.Width(100)))
+            if (GUILayout.Button(buttonText,
+                    settings.toolbarMode == ToolbarMode.Compact ? GUILayout.Width(25) : GUILayout.Width(100)))
             {
                 if (isServer)
                 {
@@ -204,6 +219,7 @@ namespace PurrNet.Editor
                     else manager?.StartClient();
                 }
             }
+
             GUI.color = Color.white;
             GUI.enabled = true;
         }

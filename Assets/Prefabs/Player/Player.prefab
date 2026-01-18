@@ -2566,7 +2566,7 @@ MonoBehaviour:
   interactableLayer:
     serializedVersion: 2
     m_Bits: 4294967295
-  interactionRange: 5
+  interactionRange: 3
   rightHandTarget: {fileID: 5683889897255429114}
 --- !u!114 &-3716696462591569942
 MonoBehaviour:
