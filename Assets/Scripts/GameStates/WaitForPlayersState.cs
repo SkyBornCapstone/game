@@ -11,7 +11,6 @@ namespace GameStates
         {
             if (!isServer) return;
 
-            Debug.Log("Waiting for players");
             if (networkManager.players.Count >= requiredPlayers)
                 machine.Next();
         }
