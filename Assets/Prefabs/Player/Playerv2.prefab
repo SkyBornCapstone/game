@@ -588,7 +588,7 @@ MonoBehaviour:
   _extrapolateInput: 1
   physicsRoot: {fileID: 4603854437578048995}
   visualRoot: {fileID: 4775051129988162203}
-  moveSpeed: 2
+  moveSpeed: 5
   acceleration: 20
   planarDamping: 10
   jumpForce: 5

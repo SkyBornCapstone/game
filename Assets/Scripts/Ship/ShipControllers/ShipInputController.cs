@@ -1,0 +1,91 @@
+using System;
+using UnityEngine;
+using Player;
+namespace Ship.ShipControllers
+{
+    public class ShipInputController : MonoBehaviour
+    {
+        private PlayerMovement _currentPlayer;
+        public ShipControllerV2 shipController;
+        private ShipInteractType? _currentInteractType;
+
+        private void Update()
+        {
+            if (!_currentPlayer || !_currentInteractType.HasValue)
+                return;
+            
+            switch (_currentInteractType)
+            {
+                case ShipInteractType.Pilot:
+                    HandleYawInput();
+                    break;
+                case ShipInteractType.Throttle:
+                    HandleForwardInput();
+                    break;
+                case ShipInteractType.Updown:
+                    HandleLiftInput();
+                    break;
+            }
+        }
+        
+        private void HandleYawInput()
+        {
+            if (Input.GetKey(KeyCode.E))
+            {
+                shipController.TurnRight();
+            }
+            else if (Input.GetKey(KeyCode.Q))
+            {
+                shipController.TurnLeft();
+            }
+        }
+
+        private void HandleLiftInput()
+        {
+            if (Input.GetKey(KeyCode.E))
+            {
+                shipController.IncreaseLift();
+            }
+            else if (Input.GetKey(KeyCode.Q))
+            {
+                shipController.DecreaseLift();
+            }
+        }
+
+        private void HandleForwardInput()
+        {
+            if (Input.GetKey(KeyCode.E))
+            {
+                shipController.IncreaseForward();
+            }
+            else if (Input.GetKey(KeyCode.Q))
+            {
+                shipController.DecreaseForward();
+            }
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (!other.TryGetComponent(out PlayerMovement player))
+                return;
+            InteractableShipElement interactableShipObject = GetComponent<InteractableShipElement>();
+            if (!interactableShipObject) return;
+            
+            _currentPlayer = player;
+            _currentInteractType = interactableShipObject.shipInteractType;
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            if (other.TryGetComponent(out PlayerMovement player))
+            {
+                if (player == _currentPlayer)
+                {
+                    _currentPlayer = null;
+                    _currentInteractType = null;
+                }
+                
+            }
+        }
+    }
+}

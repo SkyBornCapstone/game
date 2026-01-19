@@ -47,3 +47,7 @@ MonoBehaviour:
     pooling:
       usePooling: 0
       initialSize: 0
+  - prefab: {fileID: 7256822807294633677, guid: f69144ffb726edb47800c30d4993d4a2, type: 3}
+    pooling:
+      usePooling: 0
+      initialSize: 0

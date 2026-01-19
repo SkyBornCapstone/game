@@ -27,12 +27,14 @@ public class MainShipDeckTriggerEnter : MonoBehaviour
             Vector3 localPos = deckProxy.InverseTransformPoint(physics.position);
             visuals.position = transform.TransformPoint(localPos);
             
-            var playerMovement = rider as PlayerMovement;
-            if (playerMovement != null && !playerMovement.isOwner)
-            {
-                Quaternion localRot = Quaternion.Inverse(deckProxy.rotation) * physics.rotation;
-                visuals.rotation = transform.rotation * localRot;
-            }
+            Quaternion localRot = Quaternion.Inverse(deckProxy.rotation) * physics.rotation;
+            visuals.rotation = transform.rotation * localRot;
+            // var playerMovement = rider as PlayerMovement;
+            // if (playerMovement != null && !playerMovement.isOwner)
+            // {
+            //     Quaternion localRot = Quaternion.Inverse(deckProxy.rotation) * physics.rotation;
+            //     visuals.rotation = transform.rotation * localRot;
+            // }
         }
     }
 
