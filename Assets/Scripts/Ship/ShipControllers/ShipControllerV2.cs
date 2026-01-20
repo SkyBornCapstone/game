@@ -2,10 +2,11 @@ using UnityEngine;
 
 public class ShipControllerV2 : MonoBehaviour
 {
-    [Header("Main Ship Variables")] public Transform mainShip;
+    [Header("Main Ship Variables")]
+    public Transform mainShip;
     public Rigidbody mainShipRB;
-   
-    [Header("Movement Forces")]
+
+    [Header("Movement Velocities")]
     public float maxLiftForce = 1f;
     public float maxForwardForce = 1f;
 
@@ -16,37 +17,66 @@ public class ShipControllerV2 : MonoBehaviour
     [Header("Rotation")]
     public float maxYawTorque = 1f;
     public float yawChangeRate = 0.1f;
+    
+    [Header("Acceleration")]
+    public float forwardAcceleration = 2f;
 
     private float liftThrottle;
     private float forwardThrottle;
     private float yawThrottle;
+
     private void FixedUpdate()
     {
         ApplyLift();
         ApplyForward();
         ApplyYaw();
     }
+
     private void ApplyYaw()
     {
-        float yawTorque = yawThrottle * maxYawTorque;
-        mainShipRB.AddTorque(
-            Vector3.up * yawTorque,
-            ForceMode.Force
-        );
+        mainShipRB.angularVelocity =
+            Vector3.up * (yawThrottle * maxYawTorque);
     }
 
     private void ApplyForward()
     {
-        float forwardForce = forwardThrottle * maxForwardForce;
-        mainShipRB.AddForce(
-            transform.right * forwardForce,
-            ForceMode.Force);
+        Vector3 currentVelocity = mainShipRB.linearVelocity;
+
+        // Current speed along the ship's forward axis
+        float currentForwardSpeed =
+            Vector3.Dot(currentVelocity, transform.right);
+
+        // Desired speed from throttle
+        float targetForwardSpeed =
+            forwardThrottle * maxForwardForce;
+
+        // Smooth acceleration toward target speed
+        float newForwardSpeed = Mathf.MoveTowards(
+            currentForwardSpeed,
+            targetForwardSpeed,
+            forwardAcceleration * Time.fixedDeltaTime
+        );
+
+        // Rebuild velocity
+        Vector3 forwardVelocity = transform.right * newForwardSpeed;
+
+        mainShipRB.linearVelocity = new Vector3(
+            forwardVelocity.x,
+            currentVelocity.y,
+            forwardVelocity.z
+        );
     }
+
 
     private void ApplyLift()
     {
-        float liftForce = liftThrottle * maxLiftForce;
-        mainShipRB.AddForce(Vector3.up * liftForce, ForceMode.Force);
+        Vector3 currentVelocity = mainShipRB.linearVelocity;
+
+        mainShipRB.linearVelocity = new Vector3(
+            currentVelocity.x,
+            liftThrottle * maxLiftForce,
+            currentVelocity.z
+        );
     }
 
     public void IncreaseForward()
@@ -54,18 +84,17 @@ public class ShipControllerV2 : MonoBehaviour
         forwardThrottle += forwardChargeRate * Time.deltaTime;
         forwardThrottle = Mathf.Clamp(forwardThrottle, -1f, 1f);
     }
-    
+
     public void DecreaseForward()
     {
         forwardThrottle -= forwardChargeRate * Time.deltaTime;
         forwardThrottle = Mathf.Clamp(forwardThrottle, -1f, 1f);
     }
-    
+
     public void IncreaseLift()
     {
         liftThrottle += liftChangeRate * Time.deltaTime;
         liftThrottle = Mathf.Clamp(liftThrottle, -1f, 1f);
-       
     }
 
     public void DecreaseLift()
@@ -74,6 +103,7 @@ public class ShipControllerV2 : MonoBehaviour
         liftThrottle = Mathf.Clamp(liftThrottle, -1f, 1f);
         print(liftThrottle);
     }
+
     public void TurnRight()
     {
         yawThrottle += yawChangeRate * Time.deltaTime;
@@ -85,11 +115,13 @@ public class ShipControllerV2 : MonoBehaviour
         yawThrottle -= yawChangeRate * Time.deltaTime;
         yawThrottle = Mathf.Clamp(yawThrottle, -1f, 1f);
     }
-    
+
     public void CenterYaw()
     {
-        yawThrottle = Mathf.MoveTowards(yawThrottle, 0f, yawChangeRate * Time.deltaTime);
+        yawThrottle = Mathf.MoveTowards(
+            yawThrottle,
+            0f,
+            yawChangeRate * Time.deltaTime
+        );
     }
-
-
 }
