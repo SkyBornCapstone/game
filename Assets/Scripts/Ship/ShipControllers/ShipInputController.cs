@@ -9,7 +9,7 @@ namespace Ship.ShipControllers
         public ShipControllerV2 shipController;
         private ShipInteractType? _currentInteractType;
         public SteeringWheelViual steeringWheel;
-
+        public ThrottleVIsual throttleVisual;
         private void Update()
         {
             if (!_currentPlayer || !_currentInteractType.HasValue)
@@ -74,12 +74,20 @@ namespace Ship.ShipControllers
         {
             if (Input.GetKey(KeyCode.E))
             {
-                shipController.IncreaseForward();
+                throttleVisual.IncreaseThrottle();
             }
             else if (Input.GetKey(KeyCode.Q))
             {
-                shipController.DecreaseForward();
+                throttleVisual.DecreaseThrottle();
             }
+            UpdateShipForwardFromThrottle();
+        }
+
+        private void UpdateShipForwardFromThrottle()
+        {
+            float throttleAngle = throttleVisual.CurrentAngle;
+            float throttle = (throttleAngle / throttleVisual.maxRotation);
+            shipController.SetForwardThrottle(throttle);
         }
 
         private void OnTriggerEnter(Collider other)

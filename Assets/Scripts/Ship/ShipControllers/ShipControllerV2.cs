@@ -130,6 +130,11 @@ public class ShipControllerV2 : MonoBehaviour
     {
         yawThrottle = Mathf.Clamp(value, -1f, 1f);
     }
+
+    public void SetForwardThrottle(float value)
+    {
+        forwardThrottle = Mathf.Clamp(value, -1f, 1f);
+    }
     
 
 }

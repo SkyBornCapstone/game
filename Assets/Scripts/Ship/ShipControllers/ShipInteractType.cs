@@ -6,6 +6,8 @@ namespace Ship.ShipControllers
     {
         Pilot,
         Updown,
-        Throttle
+        Throttle,
+        Floor,
+        Detector
     }
 }
