@@ -8,6 +8,7 @@ namespace Ship.ShipControllers
         private PlayerMovement _currentPlayer;
         public ShipControllerV2 shipController;
         private ShipInteractType? _currentInteractType;
+        public SteeringWheelViual steeringWheel;
 
         private void Update()
         {
@@ -32,13 +33,30 @@ namespace Ship.ShipControllers
         {
             if (Input.GetKey(KeyCode.E))
             {
-                shipController.TurnRight();
+                steeringWheel.TurnWheelRight();
             }
             else if (Input.GetKey(KeyCode.Q))
             {
-                shipController.TurnLeft();
+                steeringWheel.TurnWheelLeft();
             }
+            UpdateShipYawFromWheel();
         }
+
+        private void UpdateShipYawFromWheel()
+        {
+            float wheelAngle = -steeringWheel.CurrentAngle;
+            if (Mathf.Abs(wheelAngle) <= 15f)
+            {
+                shipController.SetYawThrottle(0f);
+                return;
+            }
+            float effectiveAngle = wheelAngle - (Mathf.Sign(wheelAngle) * 15f);
+            float maxEffectiveAngle = steeringWheel.maxRotation - 15f;
+            float throttle = effectiveAngle / maxEffectiveAngle;
+            throttle *= .25f;
+            shipController.SetYawThrottle(throttle);
+        }
+        
 
         private void HandleLiftInput()
         {

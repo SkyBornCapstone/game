@@ -15,7 +15,7 @@ public class ShipControllerV2 : MonoBehaviour
     public float forwardChargeRate = 0.1f;
 
     [Header("Rotation")]
-    public float maxYawTorque = 1f;
+    public float maxYawTorque = 10f;
     public float yawChangeRate = 0.1f;
     
     [Header("Acceleration")]
@@ -24,7 +24,8 @@ public class ShipControllerV2 : MonoBehaviour
     private float liftThrottle;
     private float forwardThrottle;
     private float yawThrottle;
-
+    public float YawThrottle => yawThrottle;
+    public float ForwardThrottle => forwardThrottle;
     private void FixedUpdate()
     {
         ApplyLift();
@@ -124,4 +125,11 @@ public class ShipControllerV2 : MonoBehaviour
             yawChangeRate * Time.deltaTime
         );
     }
+    
+    public void SetYawThrottle(float value)
+    {
+        yawThrottle = Mathf.Clamp(value, -1f, 1f);
+    }
+    
+
 }
