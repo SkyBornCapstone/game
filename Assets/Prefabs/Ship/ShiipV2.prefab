@@ -28,12 +28,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 102031807145609215}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -3.15, y: 2.88, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5905735023735640316}
+  m_Father: {fileID: 7162115036211051839}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &6750357571126032711
 BoxCollider:
@@ -89,7 +89,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1ba87bc899fd3148ba577bcffc458cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shipController: {fileID: 7185840604973197228}
 --- !u!114 &7716035480662879585
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -245,7 +244,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5242150989823853174}
   m_Layer: 0
-  m_Name: Ship 1
+  m_Name: ShiipV2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -363,12 +362,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4790777289988041739}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -8.83, y: 2.82, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5905735023735640316}
+  m_Father: {fileID: 7162115036211051839}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!135 &4952164170106137915
 SphereCollider:
@@ -424,7 +423,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1ba87bc899fd3148ba577bcffc458cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shipController: {fileID: 7185840604973197228}
 --- !u!114 &4631755591204669374
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -521,6 +519,7 @@ MonoBehaviour:
   forwardChargeRate: 1
   maxYawTorque: 1
   yawChangeRate: 0.1
+  forwardAcceleration: 2
 --- !u!1 &6689938165763273824
 GameObject:
   m_ObjectHideFlags: 0
@@ -781,7 +780,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5905735023735640316}
+  m_Father: {fileID: 7162115036211051839}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!135 &2448812234042786349
 SphereCollider:
@@ -837,7 +836,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1ba87bc899fd3148ba577bcffc458cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shipController: {fileID: 7185840604973197228}
 --- !u!114 &2613460753703065295
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -851,6 +849,40 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shipInteractType: 1
+--- !u!1 &8326714584524063573
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7162115036211051839}
+  m_Layer: 0
+  m_Name: ShipInteractables
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7162115036211051839
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8326714584524063573}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3872814813427112643}
+  - {fileID: 6302370502149006235}
+  - {fileID: 5371904139266701775}
+  m_Father: {fileID: 5905735023735640316}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8350728346027825828
 GameObject:
   m_ObjectHideFlags: 0
@@ -1035,9 +1067,7 @@ Transform:
   m_Children:
   - {fileID: 9174145867947031913}
   - {fileID: 7783176873115384436}
-  - {fileID: 3872814813427112643}
-  - {fileID: 6302370502149006235}
-  - {fileID: 5371904139266701775}
+  - {fileID: 7162115036211051839}
   m_Father: {fileID: 5242150989823853174}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &146895443506948731

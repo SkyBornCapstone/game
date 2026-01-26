@@ -24,6 +24,7 @@ public class ShipControllerV2 : MonoBehaviour
     private float liftThrottle;
     private float forwardThrottle;
     private float yawThrottle;
+    public float LiftThrottle => liftThrottle;
     public float YawThrottle => yawThrottle;
     public float ForwardThrottle => forwardThrottle;
     private void FixedUpdate()
@@ -134,6 +135,11 @@ public class ShipControllerV2 : MonoBehaviour
     public void SetForwardThrottle(float value)
     {
         forwardThrottle = Mathf.Clamp(value, -1f, 1f);
+    }
+
+    public void SetLiftThrottle(float value)
+    {
+        liftThrottle = Mathf.Clamp(value, -1f, 1f);
     }
     
 
