@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using PurrNet.Packing;
 
 namespace PurrNet.Pooling
@@ -11,7 +12,7 @@ namespace PurrNet.Pooling
 
         public HashSet<T> set => _set;
 
-        [Obsolete( "Use DisposableHashSet<T>.Create() instead")]
+        [Obsolete("Use DisposableHashSet<T>.Create() instead")]
         public DisposableHashSet(int capacity)
         {
             var newSet = HashSetPool<T>.Instantiate();
@@ -181,6 +182,17 @@ namespace PurrNet.Pooling
 
         public DisposableHashSet<T> Duplicate()
         {
+            if (isDisposed)
+                return default;
+
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                var res = Create();
+                foreach (var value in this)
+                    res.Add(Packer.Copy(value));
+                return res;
+            }
+
             return Create(this);
         }
     }

@@ -11,14 +11,14 @@ namespace PurrNet.Modules
 {
     public delegate void ValueModifier<T>(ref T oldValue);
 
-    public class DeltaModule : INetworkModule, IPostFixedUpdate
+    public class DeltaModule : INetworkModule, IPostFixedUpdate, IPromoteToServerModule
     {
         private readonly PlayersManager _players;
         private readonly PlayersBroadcaster _broadcaster;
         private readonly Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>> _receivingTrackers;
         private readonly Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>> _sendingTrackers;
 
-        private readonly List<DeltaAcknowledgeBatch> _acknowledgements = new ();
+        private readonly List<DeltaAcknowledgeBatch> _acknowledgements = new();
 
         private bool _asServer;
 
@@ -28,6 +28,17 @@ namespace PurrNet.Modules
             _broadcaster = broadcaster;
             _receivingTrackers = new Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>>();
             _sendingTrackers = new Dictionary<PlayerID, Dictionary<uint, ClientDeltaTracker>>();
+        }
+
+        public void PromoteToServerModule()
+        {
+            _asServer = true;
+            _acknowledgements.Clear();
+            ClearTrackers();
+        }
+
+        public void PostPromoteToServerModule()
+        {
         }
 
         public void Enable(bool asServer)
@@ -46,6 +57,11 @@ namespace PurrNet.Modules
             _broadcaster.Unsubscribe<DeltaAcknowledge>(Acknowledge);
             _broadcaster.Unsubscribe<DeltaCleanup>(Cleanup);
 
+            ClearTrackers();
+        }
+
+        private void ClearTrackers()
+        {
             foreach (var player in _sendingTrackers.Keys)
             {
                 if (_sendingTrackers.TryGetValue(player, out var clientDict))
@@ -91,6 +107,7 @@ namespace PurrNet.Modules
                 clientDict = new Dictionary<uint, ClientDeltaTracker>();
                 dictionary[player] = clientDict;
             }
+
             return clientDict.GetValueOrDefault(key);
         }
 
@@ -117,13 +134,15 @@ namespace PurrNet.Modules
             return typedTracker;
         }
 
-        public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue) where Key : struct, IStableHashable
+        public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue)
+            where Key : struct, IStableHashable
         {
             PackedUInt cache = default;
             return Write(packer, player, key, newValue, ref cache);
         }
 
-        public bool WriteReliableWithModifier<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue, ValueModifier<T> modifier) where Key : struct, IStableHashable
+        public bool WriteReliableWithModifier<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue,
+            ValueModifier<T> modifier) where Key : struct, IStableHashable
         {
             var hash = GetKeyHash(key);
             var tracker = GetOrCreateTracker<T>(player, hash, true);
@@ -167,7 +186,8 @@ namespace PurrNet.Modules
             return changed;
         }
 
-        public bool WriteReliable<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue) where Key : struct, IStableHashable
+        public bool WriteReliable<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue)
+            where Key : struct, IStableHashable
         {
             var hash = GetKeyHash(key);
             var tracker = GetOrCreateTracker<T>(player, hash, true);
@@ -205,7 +225,8 @@ namespace PurrNet.Modules
             return changed;
         }
 
-        public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue, ref PackedUInt cachedKey) where Key : struct, IStableHashable
+        public bool Write<Key, T>(BitPacker packer, PlayerID player, Key key, T newValue, ref PackedUInt cachedKey)
+            where Key : struct, IStableHashable
         {
             var hash = GetKeyHash(key);
             var tracker = GetOrCreateTracker<T>(player, hash, true);
@@ -249,7 +270,8 @@ namespace PurrNet.Modules
             return changed;
         }
 
-        public void Read<Key, T>(BitPacker packer, Key key, PlayerID sender, ref T newValue) where Key : struct, IStableHashable
+        public void Read<Key, T>(BitPacker packer, Key key, PlayerID sender, ref T newValue)
+            where Key : struct, IStableHashable
         {
             PackedUInt cachedKey = default;
             Read(packer, key, sender, ref newValue, ref cachedKey);
@@ -277,7 +299,8 @@ namespace PurrNet.Modules
             }
         }
 
-        public void ReadReliableWithModifier<Key, T>(BitPacker packer, Key key, ref T newValue, ValueModifier<T> modifier) where Key : struct, IStableHashable
+        public void ReadReliableWithModifier<Key, T>(BitPacker packer, Key key, ref T newValue,
+            ValueModifier<T> modifier) where Key : struct, IStableHashable
         {
             var player = _players.localPlayerId ?? default;
 
@@ -308,7 +331,8 @@ namespace PurrNet.Modules
             }
         }
 
-        public void Read<Key, T>(BitPacker packer, Key key, PlayerID sender, ref T newValue, ref PackedUInt cachedKey) where Key : struct, IStableHashable
+        public void Read<Key, T>(BitPacker packer, Key key, PlayerID sender, ref T newValue, ref PackedUInt cachedKey)
+            where Key : struct, IStableHashable
         {
             var player = _players.localPlayerId ?? default;
 
@@ -332,7 +356,9 @@ namespace PurrNet.Modules
                 {
                     if (tracker.TryGetValue(lastConfirmedId, out var confirmedValue))
                         oldValue = confirmedValue;
-                    else PurrLogger.LogError($"Confirmed value not found for key {keyHash} and {lastConfirmedId.value} and player {player}");
+                    else
+                        PurrLogger.LogError(
+                            $"Confirmed value not found for key {keyHash} and {lastConfirmedId.value} and player {player}");
                 }
 
                 DeltaPacker<T>.Read(packer, oldValue, ref newValue);
@@ -355,7 +381,8 @@ namespace PurrNet.Modules
                     newValue = Packer.Copy(confirmedValue);
                 else
                 {
-                    PurrLogger.LogError($"Confirmed value not found for key {keyHash} and {lastConfirmedId.value} and player {player}");
+                    PurrLogger.LogError(
+                        $"Confirmed value not found for key {keyHash} and {lastConfirmedId.value} and player {player}");
                     newValue = default;
                 }
             }
@@ -369,7 +396,7 @@ namespace PurrNet.Modules
             {
                 var entry = _acknowledgements[i];
                 if (entry.playerId != sender)
-                     continue;
+                    continue;
 
                 // add sorted
                 for (int j = 0; j < entry.entries.Count; j++)

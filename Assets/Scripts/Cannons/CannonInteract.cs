@@ -1,57 +1,32 @@
-using System;
-using UnityEngine;
-
+using Interaction;
 using Player;
+using UnityEngine;
 
 namespace Cannons
 {
-    public class CannonInteract : MonoBehaviour
+    public class CannonInteract : AInteractable
     {
-        public Transform controlPosition;
-
-        public float interactDistance = 1f;
+        [SerializeField] private Transform controlPosition;
         [SerializeField] private CannonController cannonController;
+
         private PlayerMovement _currentPlayer;
-        
-        // Update is called once per frame
-        void Update()
-        {
-            if (!_currentPlayer) return;
 
-            if (Input.GetKeyDown(KeyCode.E))
+        public override void Interact(InteractionController interactionController)
+        {
+            if (!_currentPlayer)
             {
-                if (!_currentPlayer.isUsingCannon)
-                {
-                    _currentPlayer.EnterCannon(controlPosition);
-                    cannonController.EnterCannon(_currentPlayer);
-                }
-                else
-                {
-                    _currentPlayer.ExitCannon();
-                    cannonController.ExitCannon();
-                }
+                _currentPlayer = interactionController.GetComponent<PlayerMovement>();
+                GiveOwnership(_currentPlayer.owner);
+                cannonController.EnterCannon(_currentPlayer);
+                _currentPlayer.SetLockedPosition(controlPosition);
             }
-        }
-
-        private void OnTriggerEnter(Collider other)
-        {
-            if (other.TryGetComponent(out PlayerMovement player))
+            else if (_currentPlayer && isOwner)
             {
-                _currentPlayer = player;
-            }
-        }
-
-        private void OnTriggerExit(Collider other)
-        {
-            if (other.TryGetComponent(out PlayerMovement player))
-            {
-                if (player == _currentPlayer)
-                {
-                    _currentPlayer = null;
-                }
-                
+                _currentPlayer.SetLockedPosition(null);
+                cannonController.ExitCannon();
+                _currentPlayer = null;
+                RemoveOwnership();
             }
         }
     }
 }
-

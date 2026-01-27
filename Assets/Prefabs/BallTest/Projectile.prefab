@@ -246,8 +246,7 @@ GameObject:
   - component: {fileID: 5756870132191999958}
   - component: {fileID: 5222038563615610679}
   - component: {fileID: 1777629040659074677}
-  - component: {fileID: 4420128683175891372}
-  - component: {fileID: 1558194599791813083}
+  - component: {fileID: -6913742453515828291}
   - component: {fileID: 1498779537735612968}
   m_Layer: 0
   m_Name: Projectile
@@ -320,7 +319,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &4420128683175891372
+--- !u!114 &-6913742453515828291
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -329,30 +328,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 6289854327993585241}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 98dbb08343eac044895b9b52872bcb49, type: 3}
+  m_Script: {fileID: 11500000, guid: 817fe5016bd0a2a49a95b6eb338bb132, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _graphics: {fileID: 1615304707026519869}
-  _floatAccuracy: 1
-  _interpolationSettings: {fileID: 11400000, guid: 4a8aa8e44e23cfd4a8d4387ef3f36173, type: 2}
-  _unparentGraphics: 0
-  _characterControllerPatch: 1
---- !u!114 &1558194599791813083
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6289854327993585241}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 939517533de889a4f948d4e2041fb798, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _rigidbody: {fileID: 1777629040659074677}
-  _floatAccuracy: 1
-  _eventMask: 63
-  _ignoreTriggerOnTrigger: 0
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _syncPosition: 1
+  _syncRotation: 1
+  _syncScale: 1
+  _syncParent: 1
+  _interpolateSettings: 7
+  _minBufferSize: 1
+  _maxBufferSize: 2
+  _characterControllerPatch: 0
+  _ownerAuth: 0
+  _interpolationTiming: 0
 --- !u!114 &1498779537735612968
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -365,6 +362,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c709bcfa3623ad4ca8a65130d0a573a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  predictedRigidbody: {fileID: 1558194599791813083}
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  rb: {fileID: 1777629040659074677}
   damage: 20
   lifetime: 3

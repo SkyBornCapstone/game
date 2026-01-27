@@ -16,16 +16,13 @@ namespace PurrNet
         [SerializeField]
         private StartFlags _startServerFlags = StartFlags.ServerBuild | StartFlags.Editor;
 
-        [Tooltip("The flags to determine when the client should automatically start.")]
-        [SerializeField]
+        [Tooltip("The flags to determine when the client should automatically start.")] [SerializeField]
         private StartFlags _startClientFlags = StartFlags.ClientBuild | StartFlags.Editor | StartFlags.Clone;
 
-        [Header("Network Settings")]
-        [SerializeField] private GenericTransport _transport;
+        [Header("Network Settings")] [SerializeField]
+        private GenericTransport _transport;
 
-        [Tooltip("Number of target ticks per second.")]
-        [Range(1, 128)]
-        [SerializeField, PurrLock]
+        [Tooltip("Number of target ticks per second.")] [Range(1, 128)] [SerializeField, PurrLock]
         private int _tickRate = 20;
 
         private ModulesCollection _serverModules;
@@ -162,6 +159,7 @@ namespace PurrNet
                     QualitySettings.vSyncCount = 0;
                     Application.targetFrameRate = _tickRate;
                 }
+
                 StartServer();
             }
 
@@ -315,7 +313,6 @@ namespace PurrNet
 
         public void InternalUnregisterServerModules()
         {
-
         }
 
         /// <summary>
@@ -379,7 +376,7 @@ namespace PurrNet
             var broadcasting = new BroadcastModule(this, asServer);
 
             if (asServer)
-                 _serverBroadcastModule = broadcasting;
+                _serverBroadcastModule = broadcasting;
             else _clientBroadcastModule = broadcasting;
 
             modules.AddModule(tickManager);
@@ -387,6 +384,12 @@ namespace PurrNet
 
             RenewSubscriptions(asServer);
         }
+
+        public bool isPromotingToServer => false;
+
+        public bool isTranferingToNewServer => false;
+
+        public ITransport currentTransport => _transport ? _transport.transport : null;
 
         private void RenewSubscriptions(bool asServer)
         {

@@ -19,8 +19,7 @@ namespace PurrNet.Modules
 
         public void Apply(Transform trs)
         {
-            trs.SetLocalPositionAndRotation(localPosition, localRotation);
-            trs.localScale = localScale;
+            HierarchyV2.SetLocalPosAndRot(trs, localPosition, localRotation, localScale);
         }
     }
 
@@ -34,10 +33,11 @@ namespace PurrNet.Modules
 
         public readonly LocalTransform localTransform;
 
-        public GameObjectFrameworkPiece(LocalTransform trs, PrefabPieceID pid, NetworkID id, int childCount, bool isActive,
+        public GameObjectFrameworkPiece(LocalTransform trs, PrefabPieceID pid, NetworkID id, int childCount,
+            bool isActive,
             int[] path)
         {
-            this.localTransform  = trs;
+            this.localTransform = trs;
             this.pid = pid;
             this.id = id;
             this.childCount = childCount;

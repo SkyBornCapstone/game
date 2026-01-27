@@ -1,55 +1,51 @@
-using System;
-using PurrNet.Prediction;
+using PurrNet;
 using UnityEngine;
-using balltest;
-public class Projectile : PredictedIdentity<Projectile.State>
+
+namespace BallTest
 {
-    [SerializeField] private PredictedRigidbody predictedRigidbody;
-    [SerializeField] private int damage = 20;
-    [SerializeField] private float lifetime = 5;
-
-    private void OnEnable()
+    public class Projectile : NetworkIdentity
     {
-        predictedRigidbody.onCollisionEnter += OnHit;
-    }
+        [SerializeField] private Rigidbody rb;
+        [SerializeField] private int damage = 20;
+        [SerializeField] private float lifetime = 5;
 
-    private void OnDisable()
-    {
-        predictedRigidbody.onCollisionEnter -= OnHit;
-    }
+        private float ttl;
 
-    protected override State GetInitialState()
-    {
-        var state = new State();
-        state.TimeToLive = lifetime;
-        return state;
-    }
+        private int _frames = 0;
 
-    private void OnHit(GameObject other, PhysicsCollision physicsEvent)
-    {
-        if (!other.TryGetComponent(out PlayerHealth playerHealth))
-            return;
-        
-        playerHealth.TakeDamage(damage);
-        predictionManager.hierarchy.Delete(gameObject);
-    }
-
-    protected override void Simulate(ref State state, float delta)
-    {
-        if (state.TimeToLive > 0)
+        private void Awake()
         {
-            state.TimeToLive -= delta;
+            ttl = lifetime;
         }
-        else
-        {
-            predictionManager.hierarchy.Delete(gameObject);
-        }
-    }
 
-    public struct State : IPredictedData<State>
-    {
-        public float TimeToLive;
-        
-        public void Dispose() { }
+        private void FixedUpdate()
+        {
+            _frames++;
+            if (_frames <= 5)
+            {
+                Debug.Log(
+                    $"[Frame {_frames}] Velocity: {rb.linearVelocity} (Mag: {rb.linearVelocity.magnitude}) | Pos: {transform.position}");
+                //TODO fix
+            }
+
+            if (!isServer) return;
+
+            ttl -= Time.fixedDeltaTime;
+
+            if (ttl <= 0)
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        private void OnCollisionEnter(Collision other)
+        {
+            if (!isServer) return;
+
+            if (!other.transform.TryGetComponent(out PlayerHealth playerHealth))
+                return;
+
+            playerHealth.TakeDamage(damage);
+        }
     }
 }

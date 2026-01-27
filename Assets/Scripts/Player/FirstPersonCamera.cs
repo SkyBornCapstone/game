@@ -1,41 +1,52 @@
-using Unity.Cinemachine;
+using PurrNet;
 using UnityEngine;
 
 namespace Player
 {
-    public class FirstPersonCamera : MonoBehaviour
+    public class FirstPersonCamera : NetworkBehaviour
     {
-        [SerializeField] private float lookSensitivity = 2f;
-        [SerializeField] private float maxLookAngle = 80f;
-        [SerializeField] private CinemachineCamera cinemachineCamera;
+        [SerializeField] private Transform target;
 
         private Vector2 _currentRotation;
         private bool _initialized;
+        private Camera _mainCamera;
+        private Rigidbody _rb;
 
-        public Vector3 Forward => Quaternion.Euler(_currentRotation.x, _currentRotation.y, 0) * Vector3.forward;
-
-        private void Awake()
+        protected override void OnSpawned()
         {
-            cinemachineCamera.Priority.Value = -1;
+            if (!isOwner)
+            {
+                enabled = false;
+                return;
+            }
+
+            InstanceHandler.GetInstance<MainCamera>().SetTarget(target);
         }
 
-        public void Init()
+        private void Start()
         {
-            _initialized = true;
-            cinemachineCamera.Priority.Value = 10;
+            _mainCamera = Camera.main;
+            _rb = GetComponent<Rigidbody>();
         }
 
-        private void LateUpdate()
+        private void Update()
         {
-            if (!_initialized) return;
+            RotatePlayerTowardsCamera();
+        }
 
-            float mouseX = Input.GetAxis("Mouse X") * lookSensitivity;
-            float mouseY = Input.GetAxis("Mouse Y") * lookSensitivity;
+        private void RotatePlayerTowardsCamera()
+        {
+            if (_mainCamera && _rb)
+            {
+                Vector3 cameraForward = _mainCamera.transform.forward;
+                cameraForward.y = 0f;
 
-            _currentRotation.x = Mathf.Clamp(_currentRotation.x - mouseY, -maxLookAngle, maxLookAngle);
-            _currentRotation.y += mouseX;
-
-            transform.localRotation = Quaternion.Euler(_currentRotation.x, 0, 0);
+                if (cameraForward != Vector3.zero)
+                {
+                    Quaternion newRotation = Quaternion.LookRotation(cameraForward);
+                    _rb.MoveRotation(newRotation);
+                }
+            }
         }
     }
 }

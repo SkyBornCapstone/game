@@ -1,55 +1,26 @@
-using System;
-using UnityEngine;
-using PurrNet.Prediction;
 using player;
+using PurrNet;
+using UnityEngine;
 
 namespace Damage
 {
-    public class Projectile : PredictedIdentity<Projectile.State>
+    public class Projectile : NetworkBehaviour
     {
         [SerializeField] private int damage = 20;
         [SerializeField] private bool destroyOnHit = true;
-        [SerializeField] private PredictedRigidbody predictedRigidbody;
+        [SerializeField] private Rigidbody rb;
 
-        private void OnEnable()
+        private void OnCollisionEnter(Collision other)
         {
-            predictedRigidbody.onCollisionEnter += OnHit;
-            
-            // predictedRigidbody.onTriggerEnter += OnHit;
-        }
-
-        private void OnDisable()
-        {
-            predictedRigidbody.onCollisionEnter -= OnHit;
-            // predictedRigidbody.onTriggerEnter -= OnHit;
-        }
-
-
-        private void OnHit(GameObject other, PhysicsCollision collision)
-        {
-            // Debug.Log($"TryGetComponent: {other.TryGetComponent(out PlayerHealth playerHalth)} on object: {other.name}");
-            Debug.Log("Projectile collided with: " + other.name);
-            if (other.TryGetComponent(out PlayerHealth playerHealth))
+            if (other.gameObject.TryGetComponent(out PlayerHealth playerHealth))
             {
                 playerHealth.TakeDamage(damage);
             }
 
             if (destroyOnHit)
             {
-                predictionManager.hierarchy.Delete(gameObject);
+                Destroy(gameObject);
             }
-        }
-
-        protected override State GetInitialState()
-        {
-            return new State();
-        }
-        
-        
-
-        public struct State : IPredictedData<State>
-        {
-            public void Dispose() { }
         }
     }
 }

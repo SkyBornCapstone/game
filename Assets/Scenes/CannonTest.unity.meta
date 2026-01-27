@@ -1,10 +1,6 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Scenes/CannonTest.unity.meta
-guid: eaa026a3652ef1741a72a32ad8cb26cf
-========
-guid: 0c9aa9d75bba471469c44af1617b8644
+guid: 495e41bc4bf9b6d4f8b7aed1ab92dbfa
 folderAsset: yes
->>>>>>>> c57be9a (Reorganize project files):Assets/Scripts/Player.meta
 DefaultImporter:
   externalObjects: {}
   userData: 

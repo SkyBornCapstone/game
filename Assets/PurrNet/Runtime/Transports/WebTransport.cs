@@ -8,12 +8,13 @@ using UnityEngine;
 
 namespace PurrNet.Transports
 {
-    public class WebTransport : GenericTransport, ITransport
+    public partial class WebTransport : GenericTransport, ITransport
     {
         [SerializeField] private AutomaticCloudSetups _automaticCloudSetups;
 
-        [Header("Server Settings")]
-        [SerializeField] private ushort _serverPort = 5001;
+        [Header("Server Settings")] [SerializeField]
+        private ushort _serverPort = 5001;
+
         [SerializeField] private int _maxConnections = 100;
         [SerializeField] private bool _forceIpv4;
 
@@ -122,6 +123,18 @@ namespace PurrNet.Transports
         public override bool isSupported => true;
 
         readonly TcpConfig _tcpConfig = new(noDelay: true, sendTimeout: 0, receiveTimeout: 0);
+
+        public bool SupportsChannel(Channel channel)
+        {
+            if (channel != Channel.ReliableOrdered)
+                return false;
+            return true;
+        }
+
+        public int GetMTU(Connection target, Channel channel, bool asServer)
+        {
+            return 8192 * 2;
+        }
 
         private void Awake()
         {
@@ -234,7 +247,9 @@ namespace PurrNet.Transports
             onConnected?.Invoke(new Connection(0), false);
         }
 
-        public void SendMessages(float delta) { }
+        public void SendMessages(float delta)
+        {
+        }
 
         public void ReceiveMessages(float delta)
         {

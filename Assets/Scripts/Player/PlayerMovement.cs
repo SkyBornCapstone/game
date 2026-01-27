@@ -1,27 +1,31 @@
-using PurrNet.Prediction;
 using Ship;
+using JetBrains.Annotations;
+using PurrNet;
 using UnityEngine;
 
 namespace Player
 {
-    public class PlayerMovement : PredictedIdentity<PlayerMovement.MoveInput, PlayerMovement.MoveState>, IShipProxyRider
+    public class PlayerMovement : NetworkBehaviour
     {
         [SerializeField] private Transform physicsRoot;
         [SerializeField] private Transform visualRoot;
         
         public Transform PhysicsRoot => physicsRoot;
         public Transform VisualRoot => visualRoot;
-        
-        [SerializeField] private float moveSpeed = 7;
+    
+        [Header("Movement")]
+        [SerializeField] private float moveSpeed = 5;
+        [SerializeField] private float sprintSpeed = 8;
         [SerializeField] private float acceleration = 20;
         [SerializeField] private float planarDamping = 10f;
         [SerializeField] private float jumpForce = 7f;
         [SerializeField] private float groundCheckRadius = 0.2f;
         [SerializeField] private LayerMask groundLayer;
 
-        [SerializeField] private new FirstPersonCamera camera;
-        [SerializeField] private PredictedRigidbody predictedRigidbody;
-        [SerializeField] private Animator animator;
+        [Header("References")] [SerializeField]
+        private Rigidbody rb;
+
+        [SerializeField] private NetworkAnimator animator;
 
         private static readonly int VelocityXHash = Animator.StringToHash("Velocity X");
         private static readonly int VelocityZHash = Animator.StringToHash("Velocity Z");
@@ -30,94 +34,37 @@ namespace Player
 
         [Header("Ship Interaction Variables")]
         public bool isOnProxyShip;
-        private Transform shipAnchor;
-        [Header("Cannon Variables")] public bool isUsingCannon;
-        private Transform cannonSeat;
         public bool isOnShipDeck;
 
+        private Transform _lockedPosition;
 
-        protected override void LateAwake()
+        protected override void OnSpawned()
         {
-            if (isOwner)
-                camera.Init();
+            enabled = isOwner;
         }
 
-        protected override void Simulate(MoveInput moveInput, ref MoveState moveState, float delta)
+        private void Update()
         {
-            if (isUsingCannon)
-            {
-                predictedRigidbody.velocity = Vector3.zero;
-                predictedRigidbody.angularVelocity = Vector3.zero;
-                moveState.velocity = Vector3.zero;
-                moveState.isGrounded = true;
-                moveState.jump = false;
+            bool isGrounded = IsGrounded();
 
-                if (moveInput.cameraForward.HasValue)
-                {
-                    var camForward = moveInput.cameraForward.Value;
-                    camForward.y = 0;
-                    if (camForward.sqrMagnitude > 0.0001f)
-                        predictedRigidbody.MoveRotation(Quaternion.LookRotation(camForward.normalized));
-                }
+            if (_lockedPosition)
+            {
+                transform.position = _lockedPosition.position;
+                UpdateAnimatorParameters(true);
                 return;
             }
-            Vector3 targetVel =
-                (transform.forward * moveInput.moveDirection.y + transform.right * moveInput.moveDirection.x) *
-                moveSpeed;
-            predictedRigidbody.AddForce(targetVel * acceleration);
 
-            var horizontal = new Vector3(predictedRigidbody.linearVelocity.x, 0, predictedRigidbody.linearVelocity.z);
-            predictedRigidbody.AddForce(-horizontal * planarDamping);
-            if (horizontal.magnitude > moveSpeed)
-                predictedRigidbody.velocity = new Vector3(targetVel.x, predictedRigidbody.velocity.y, targetVel.z);
-
-            // moveState.isWalking = horizontal.sqrMagnitude > 0.0001f;
-            moveState.velocity = horizontal;
-            var isGrounded = IsGrounded();
-            moveState.isGrounded = isGrounded;
-
-            if (moveInput.jump && isGrounded)
+            if (Input.GetButtonDown("Jump") && isGrounded)
             {
-                predictedRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-                moveState.jump = true;
-            }
-            else
-            {
-                moveState.jump = false;
-            }
-
-            if (moveInput.cameraForward.HasValue)
-            {
-                var camForward = moveInput.cameraForward.Value;
-                camForward.y = 0;
-                if (camForward.sqrMagnitude > 0.0001f)
-                    predictedRigidbody.MoveRotation(Quaternion.LookRotation(camForward.normalized));
-            }
-        }
-
-        protected override void UpdateView(MoveState viewState, MoveState? verified)
-        {
-            if (!animator)
-                return;
-            
-            
-            Vector3 worldVelocity = viewState.velocity;
-
-            Vector3 localVelocity = transform.InverseTransformDirection(worldVelocity);
-
-            float deltaTime = Time.deltaTime;
-            animator.SetFloat(VelocityXHash, localVelocity.x, .1f, deltaTime);
-            animator.SetFloat(VelocityZHash, localVelocity.z, .1f, deltaTime);
-            animator.SetBool(IsGroundedHash, viewState.isGrounded);
-
-            if (verified.HasValue && verified.Value.jump)
-            {
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
                 animator.SetBool(JumpHash, true);
             }
             else
             {
                 animator.SetBool(JumpHash, false);
             }
+
+            UpdateAnimatorParameters(isGrounded);
             
             if (isOnShipDeck)
             {
@@ -126,19 +73,38 @@ namespace Player
             
             visualRoot.position = physicsRoot.position;
             visualRoot.rotation = physicsRoot.rotation;
-        
         }
 
-        protected override void UpdateInput(ref MoveInput input)
+        private void UpdateAnimatorParameters(bool isGrounded)
         {
-            if (isUsingCannon)
-            {
-                input.moveDirection = Vector2.zero;
-                input.jump = false;
-                return;
-            }
+            Vector3 localVelocity = transform.InverseTransformDirection(rb.linearVelocity);
 
-            input.jump |= Input.GetKeyDown(KeyCode.Space);
+            animator.SetFloat(VelocityXHash, localVelocity.x);
+            animator.SetFloat(VelocityZHash, localVelocity.z);
+            animator.SetBool(IsGroundedHash, isGrounded);
+        }
+
+        private void FixedUpdate()
+        {
+            Vector2 moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+
+            float currentSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : moveSpeed;
+
+            Vector3 targetVel =
+                (transform.forward * moveInput.y + transform.right * moveInput.x) *
+                currentSpeed;
+            rb.AddForce(targetVel * acceleration);
+
+            var horizontal = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+            rb.AddForce(-horizontal * planarDamping);
+            if (horizontal.magnitude > currentSpeed)
+                rb.linearVelocity = new Vector3(targetVel.x, rb.linearVelocity.y, targetVel.z);
+        }
+
+        public void SetLockedPosition([CanBeNull] Transform lockedPosition)
+        {
+            this._lockedPosition = lockedPosition;
+            rb.isKinematic = lockedPosition != null;
         }
 
         private static readonly Collider[] _groundCheckColliders = new Collider[16];
@@ -150,50 +116,10 @@ namespace Player
             return hit > 0;
         }
 
-        protected override void GetFinalInput(ref MoveInput moveInput)
-        {
-            if (isUsingCannon)
-            {
-                moveInput.moveDirection = Vector2.zero;
-                moveInput.cameraForward = camera.Forward;
-                return;
-            }
-            moveInput.moveDirection = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-            moveInput.cameraForward = camera.Forward;
-        }
-
-        protected override void SanitizeInput(ref MoveInput input)
-        {
-            if (input.moveDirection.sqrMagnitude > 1)
-                input.moveDirection.Normalize();
-        }
-
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, groundCheckRadius);
-        }
-
-        public struct MoveState : IPredictedData<MoveState>
-        {
-            public Vector3 velocity;
-            public bool jump;
-            public bool isGrounded;
-
-            public void Dispose()
-            {
-            }
-        }
-
-        public struct MoveInput : IPredictedData
-        {
-            public Vector2 moveDirection;
-            public Vector3? cameraForward;
-            public bool jump;
-
-            public void Dispose()
-            {
-            }
         }
 
         public void EnterShip()
@@ -204,25 +130,6 @@ namespace Player
         public void ExitShip()
         {
             isOnProxyShip = false;
-        }
-
-        public void EnterCannon(Transform seat)
-        {
-            isUsingCannon = true;
-            cannonSeat = seat;
-            transform.position = cannonSeat.position;
-            predictedRigidbody.angularVelocity = Vector3.zero;
-            transform.rotation = cannonSeat.rotation;
-            
-            predictedRigidbody.velocity = Vector3.zero;
-            
-        }
-
-        public void ExitCannon()
-        {
-            
-            isUsingCannon = false;
-            cannonSeat = null;
         }
 
         public void OnEnterShipProxy(Transform proxy, Transform realShip)
