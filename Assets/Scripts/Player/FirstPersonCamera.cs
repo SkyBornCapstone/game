@@ -5,8 +5,6 @@ namespace Player
 {
     public class FirstPersonCamera : NetworkBehaviour
     {
-        [SerializeField] private float lookSensitivity = 2f;
-        [SerializeField] private float maxLookAngle = 80f;
         [SerializeField] private Transform target;
 
         private Vector2 _currentRotation;

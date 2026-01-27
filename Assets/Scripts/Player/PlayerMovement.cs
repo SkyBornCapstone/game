@@ -1,9 +1,10 @@
+using JetBrains.Annotations;
 using PurrNet;
 using UnityEngine;
 
 namespace Player
 {
-    public class PlayerMovement : NetworkIdentity
+    public class PlayerMovement : NetworkBehaviour
     {
         [Header("Movement")] [SerializeField] private float moveSpeed = 5;
         [SerializeField] private float sprintSpeed = 8;
@@ -23,10 +24,7 @@ namespace Player
         private static readonly int JumpHash = Animator.StringToHash("Jump");
         private static readonly int IsGroundedHash = Animator.StringToHash("Is Grounded");
 
-        [Header("Ship Interaction Variables")] public bool isUsingShip;
-        private Transform shipAnchor;
-        [Header("Cannon Variables")] public bool isUsingCannon;
-        private Transform cannonSeat;
+        private Transform _lockedPosition;
 
         protected override void OnSpawned()
         {
@@ -36,6 +34,13 @@ namespace Player
         private void Update()
         {
             bool isGrounded = IsGrounded();
+
+            if (_lockedPosition)
+            {
+                transform.position = _lockedPosition.position;
+                UpdateAnimatorParameters(true);
+                return;
+            }
 
             if (Input.GetButtonDown("Jump") && isGrounded)
             {
@@ -47,6 +52,11 @@ namespace Player
                 animator.SetBool(JumpHash, false);
             }
 
+            UpdateAnimatorParameters(isGrounded);
+        }
+
+        private void UpdateAnimatorParameters(bool isGrounded)
+        {
             Vector3 localVelocity = transform.InverseTransformDirection(rb.linearVelocity);
 
             animator.SetFloat(VelocityXHash, localVelocity.x);
@@ -69,6 +79,12 @@ namespace Player
             rb.AddForce(-horizontal * planarDamping);
             if (horizontal.magnitude > currentSpeed)
                 rb.linearVelocity = new Vector3(targetVel.x, rb.linearVelocity.y, targetVel.z);
+        }
+
+        public void SetLockedPosition([CanBeNull] Transform lockedPosition)
+        {
+            this._lockedPosition = lockedPosition;
+            rb.isKinematic = lockedPosition != null;
         }
 
         private static readonly Collider[] _groundCheckColliders = new Collider[16];

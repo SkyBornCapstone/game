@@ -20,6 +20,8 @@ namespace Interaction
 
         private void Update()
         {
+            if (!isOwner) return;
+
             if (!Input.GetKeyDown(KeyCode.E))
                 return;
 
