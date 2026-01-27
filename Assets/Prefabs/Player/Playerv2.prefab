@@ -584,11 +584,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0a8948660a2462aa4b241edb5ce246a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _repeatInputFactor: 0.2
-  _extrapolateInput: 1
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
   physicsRoot: {fileID: 4603854437578048995}
   visualRoot: {fileID: 4775051129988162203}
   moveSpeed: 5
+  sprintSpeed: 8
   acceleration: 20
   planarDamping: 10
   jumpForce: 5
@@ -596,11 +604,9 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 24887
-  camera: {fileID: 4809315219122779261}
-  predictedRigidbody: {fileID: 9034071791271709436}
+  rb: {fileID: 7287300719547383103}
   animator: {fileID: 6683935804289596046}
   isOnProxyShip: 0
-  isUsingCannon: 0
   isOnShipDeck: 0
 --- !u!54 &7287300719547383103
 Rigidbody:
@@ -697,9 +703,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 770498be24b165d438eca57a95af6452, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
   maxHealth: 100
   healthRegen: 5
   healthRegenDelay: 1
+  health:
+    _value: 100
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
 --- !u!114 &3516724410386982309
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -712,6 +731,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df2987b2f647ec146aa7db64ff0b2d8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
 --- !u!114 &7078373361109659963
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -724,15 +752,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 039989336c69a1e44a2672634d9aefcf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _repeatInputFactor: 0.8
-  _extrapolateInput: 1
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
   armIKController: {fileID: 2446885187711335661}
   leftHandTarget: {fileID: 8457547769390138494}
   rightHandTarget: {fileID: 6395633537383068611}
-  grabDistance: 3
-  grabbableMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!1 &1700858584912450868
 GameObject:
   m_ObjectHideFlags: 0
@@ -942,9 +973,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d05e71d7733a464287873820ef2ac11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lookSensitivity: 2
-  maxLookAngle: 80
-  cinemachineCamera: {fileID: 7487349684390795707}
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  target: {fileID: 0}
 --- !u!1 &1800007665874637020
 GameObject:
   m_ObjectHideFlags: 0
@@ -1219,10 +1257,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43a8e9446ae947d38126f57d0d745696, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
   animator: {fileID: 6683935804289596046}
   ikTransitionSpeed: 4
-  leftHandTarget: {fileID: 0}
-  rightHandTarget: {fileID: 0}
+  rightHandTarget:
+    _value: {fileID: 0}
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
 --- !u!1 &2798250286367792441
 GameObject:
   m_ObjectHideFlags: 0

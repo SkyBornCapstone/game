@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Player
 {
-    public class PlayerMovement : NetworkBehaviour
+    public class PlayerMovement : NetworkBehaviour, IShipProxyRider
     {
         [SerializeField] private Transform physicsRoot;
         [SerializeField] private Transform visualRoot;
@@ -31,7 +31,7 @@ namespace Player
         private static readonly int VelocityZHash = Animator.StringToHash("Velocity Z");
         private static readonly int JumpHash = Animator.StringToHash("Jump");
         private static readonly int IsGroundedHash = Animator.StringToHash("Is Grounded");
-
+        
         [Header("Ship Interaction Variables")]
         public bool isOnProxyShip;
         public bool isOnShipDeck;
