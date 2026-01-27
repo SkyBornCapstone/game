@@ -5,29 +5,32 @@ namespace Ship.ShipControllers
 {
     public class LiftControl : MonoBehaviour
     {
-        [Header("References")]
-        [SerializeField] private ShipControllerV2 ship;
+        [Header("References")] [SerializeField]
+        private ShipControllerV2 ship;
+
         [SerializeField] private ParticleSystem thrusterParticles;
-        
-        [Header("Lift Settings")]
-        [SerializeField] private int maxLevel = 2;
+
+        [Header("Lift Settings")] [SerializeField]
+        private int maxLevel = 2;
+
         [SerializeField] private int minLevel = -2;
-        [SerializeField] private float level1Speed = .25f;   // Speed at level ±1
-        [SerializeField] private float level2Speed = .75f;   // Speed at level ±2
+        [SerializeField] private float level1Speed = .25f; // Speed at level ±1
+        [SerializeField] private float level2Speed = .75f; // Speed at level ±2
         [SerializeField] private float inputCooldown = 0.3f;
-        [Header("Visual Feedback")]
-        [SerializeField] private float particleEmissionMultiplier = 10f;
-        
+
+        [Header("Visual Feedback")] [SerializeField]
+        private float particleEmissionMultiplier = 10f;
+
         public int CurrentLevel => currentLevel;
-        
+
         private int currentLevel = 0;
         private PlayerMovement currentPlayer;
         private float lastInputTime;
+
         void Update()
         {
             if (!currentPlayer || !ship)
                 return;
-            print(currentLevel);
             HandleInput();
             UpdateShipLift();
             UpdateVisuals();
@@ -49,7 +52,6 @@ namespace Ship.ShipControllers
                 DecreaseLevel();
                 lastInputTime = Time.time;
             }
-
         }
 
         private void IncreaseLevel()
@@ -93,15 +95,15 @@ namespace Ship.ShipControllers
         {
             if (!thrusterParticles)
                 return;
-                
+
             var emission = thrusterParticles.emission;
-            
+
             // Only show particles when ascending (positive levels)
             if (currentLevel > 0)
             {
                 if (!thrusterParticles.isPlaying)
                     thrusterParticles.Play();
-                    
+
                 emission.rateOverTime = currentLevel * particleEmissionMultiplier;
             }
             else

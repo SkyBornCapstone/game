@@ -1,12 +1,11 @@
-using UnityEngine;
-using Player;
-using Ship;
 using System.Collections.Generic;
+using PurrNet;
+using Ship;
+using UnityEngine;
 
-public class MainShipDeckTriggerEnter : MonoBehaviour
+public class MainShipDeckTriggerEnter : NetworkBehaviour
 {
-    [Header("References")]
-    public Transform deckProxy;        // ProxyShip transform
+    [Header("References")] public Transform deckProxy; // ProxyShip transform
 
     private readonly HashSet<IShipProxyRider> riders = new();
 
@@ -15,18 +14,22 @@ public class MainShipDeckTriggerEnter : MonoBehaviour
         Debug.Log($"[MainShip] Initialized. DeckProxy: {(deckProxy ? deckProxy.name : "NULL")}");
     }
 
+    // protected override void OnSpawned()
+    // {
+    //     enabled = isServer;
+    // }
+
     void LateUpdate()
     {
         foreach (var rider in riders)
         {
-        
             Transform physics = rider.PhysicsRoot;
             Transform visuals = rider.VisualRoot;
 
             // Sync position
             Vector3 localPos = deckProxy.InverseTransformPoint(physics.position);
             visuals.position = transform.TransformPoint(localPos);
-            
+
             Quaternion localRot = Quaternion.Inverse(deckProxy.rotation) * physics.rotation;
             visuals.rotation = transform.rotation * localRot;
             // var playerMovement = rider as PlayerMovement;
@@ -41,7 +44,7 @@ public class MainShipDeckTriggerEnter : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         Debug.Log($"[MainShip OnTriggerEnter] Collider: {other.gameObject.name}");
-        
+
         var rider = other.GetComponent<IShipProxyRider>();
         if (rider == null)
         {
@@ -69,17 +72,17 @@ public class MainShipDeckTriggerEnter : MonoBehaviour
     void EnterDeck(IShipProxyRider rider)
     {
         Debug.Log($"[MainShip EnterDeck] START - Position: {rider.PhysicsRoot.position}");
-        
+
         rider.OnEnterShipProxy(deckProxy, transform);
 
         // Get position relative to MainShip
         Vector3 localPos = transform.InverseTransformPoint(rider.PhysicsRoot.position);
         Quaternion localRot = Quaternion.Inverse(transform.rotation) * rider.PhysicsRoot.rotation;
-        
+
         // Teleport to ProxyShip
         rider.PhysicsRoot.position = deckProxy.TransformPoint(localPos);
         rider.PhysicsRoot.rotation = deckProxy.rotation * localRot;
-        
+
         Debug.Log($"[MainShip EnterDeck] Teleported to ProxyShip: {rider.PhysicsRoot.position}");
 
         Physics.IgnoreLayerCollision(
@@ -87,23 +90,23 @@ public class MainShipDeckTriggerEnter : MonoBehaviour
             LayerMask.NameToLayer("Ship"),
             true
         );
-        
+
         Debug.Log($"[MainShip EnterDeck] COMPLETE");
     }
 
     public void ExitDeck(IShipProxyRider rider)
     {
         Debug.Log($"[MainShip ExitDeck] START - Position: {rider.PhysicsRoot.position}");
-        
+
         rider.OnExitShipProxy();
-        
+
         // Transfer from ProxyShip back to MainShip
         Vector3 localPos = deckProxy.InverseTransformPoint(rider.PhysicsRoot.position);
         Quaternion localRot = Quaternion.Inverse(deckProxy.rotation) * rider.PhysicsRoot.rotation;
-        
+
         rider.PhysicsRoot.position = transform.TransformPoint(localPos);
         rider.PhysicsRoot.rotation = transform.rotation * localRot;
-        
+
         Debug.Log($"[MainShip ExitDeck] Teleported back to MainShip: {rider.PhysicsRoot.position}");
 
         Physics.IgnoreLayerCollision(
@@ -111,7 +114,7 @@ public class MainShipDeckTriggerEnter : MonoBehaviour
             LayerMask.NameToLayer("Ship"),
             false
         );
-        
+
         Debug.Log($"[MainShip ExitDeck] COMPLETE");
     }
 }

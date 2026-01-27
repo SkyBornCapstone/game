@@ -1,25 +1,21 @@
+using PurrNet;
 using UnityEngine;
 
-public class ShipControllerV2 : MonoBehaviour
+public class ShipControllerV2 : NetworkBehaviour
 {
-    [Header("Main Ship Variables")]
-    public Transform mainShip;
+    [Header("Main Ship Variables")] public Transform mainShip;
     public Rigidbody mainShipRB;
 
-    [Header("Movement Velocities")]
-    public float maxLiftForce = 1f;
+    [Header("Movement Velocities")] public float maxLiftForce = 1f;
     public float maxForwardForce = 1f;
 
-    [Header("Throttle Rates")]
-    public float liftChangeRate = 0.1f;
+    [Header("Throttle Rates")] public float liftChangeRate = 0.1f;
     public float forwardChargeRate = 0.1f;
 
-    [Header("Rotation")]
-    public float maxYawTorque = 10f;
+    [Header("Rotation")] public float maxYawTorque = 10f;
     public float yawChangeRate = 0.1f;
-    
-    [Header("Acceleration")]
-    public float forwardAcceleration = 2f;
+
+    [Header("Acceleration")] public float forwardAcceleration = 2f;
 
     private float liftThrottle;
     private float forwardThrottle;
@@ -27,6 +23,7 @@ public class ShipControllerV2 : MonoBehaviour
     public float LiftThrottle => liftThrottle;
     public float YawThrottle => yawThrottle;
     public float ForwardThrottle => forwardThrottle;
+
     private void FixedUpdate()
     {
         ApplyLift();
@@ -126,21 +123,22 @@ public class ShipControllerV2 : MonoBehaviour
             yawChangeRate * Time.deltaTime
         );
     }
-    
+
+    [ServerRpc]
     public void SetYawThrottle(float value)
     {
         yawThrottle = Mathf.Clamp(value, -1f, 1f);
     }
 
+    [ServerRpc]
     public void SetForwardThrottle(float value)
     {
         forwardThrottle = Mathf.Clamp(value, -1f, 1f);
     }
 
+    [ServerRpc]
     public void SetLiftThrottle(float value)
     {
         liftThrottle = Mathf.Clamp(value, -1f, 1f);
     }
-    
-
 }

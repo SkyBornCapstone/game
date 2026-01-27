@@ -1,6 +1,6 @@
-using Ship;
 using JetBrains.Annotations;
 using PurrNet;
+using Ship;
 using UnityEngine;
 
 namespace Player
@@ -9,12 +9,11 @@ namespace Player
     {
         [SerializeField] private Transform physicsRoot;
         [SerializeField] private Transform visualRoot;
-        
+
         public Transform PhysicsRoot => physicsRoot;
         public Transform VisualRoot => visualRoot;
-    
-        [Header("Movement")]
-        [SerializeField] private float moveSpeed = 5;
+
+        [Header("Movement")] [SerializeField] private float moveSpeed = 5;
         [SerializeField] private float sprintSpeed = 8;
         [SerializeField] private float acceleration = 20;
         [SerializeField] private float planarDamping = 10f;
@@ -31,46 +30,47 @@ namespace Player
         private static readonly int VelocityZHash = Animator.StringToHash("Velocity Z");
         private static readonly int JumpHash = Animator.StringToHash("Jump");
         private static readonly int IsGroundedHash = Animator.StringToHash("Is Grounded");
-        
-        [Header("Ship Interaction Variables")]
-        public bool isOnProxyShip;
-        public bool isOnShipDeck;
+
+        [Header("Ship Interaction Variables")] public SyncVar<bool> isOnShipDeck;
 
         private Transform _lockedPosition;
 
         protected override void OnSpawned()
         {
-            enabled = isOwner;
+            // enabled = isOwner;
         }
 
         private void Update()
         {
-            bool isGrounded = IsGrounded();
-
-            if (_lockedPosition)
+            if (isOwner)
             {
-                transform.position = _lockedPosition.position;
-                UpdateAnimatorParameters(true);
-                return;
+                bool isGrounded = IsGrounded();
+
+                if (_lockedPosition)
+                {
+                    transform.position = _lockedPosition.position;
+                    UpdateAnimatorParameters(true);
+                    return;
+                }
+
+                if (Input.GetButtonDown("Jump") && isGrounded)
+                {
+                    rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+                    animator.SetBool(JumpHash, true);
+                }
+                else
+                {
+                    animator.SetBool(JumpHash, false);
+                }
+
+                UpdateAnimatorParameters(isGrounded);
             }
 
-            if (Input.GetButtonDown("Jump") && isGrounded)
-            {
-                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-                animator.SetBool(JumpHash, true);
-            }
-            else
-            {
-                animator.SetBool(JumpHash, false);
-            }
-
-            UpdateAnimatorParameters(isGrounded);
-            
             if (isOnShipDeck)
             {
                 return;
             }
-            
+
             visualRoot.position = physicsRoot.position;
             visualRoot.rotation = physicsRoot.rotation;
         }
@@ -86,6 +86,8 @@ namespace Player
 
         private void FixedUpdate()
         {
+            if (!isOwner) return;
+
             Vector2 moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
             float currentSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : moveSpeed;
@@ -122,26 +124,14 @@ namespace Player
             Gizmos.DrawWireSphere(transform.position, groundCheckRadius);
         }
 
-        public void EnterShip()
-        {
-            isOnProxyShip = true;
-        }
-
-        public void ExitShip()
-        {
-            isOnProxyShip = false;
-        }
-
         public void OnEnterShipProxy(Transform proxy, Transform realShip)
         {
-            isOnProxyShip = true;
-            isOnShipDeck = true;
+            isOnShipDeck.value = true;
         }
 
         public void OnExitShipProxy()
         {
-            isOnShipDeck = false;
-            isOnProxyShip = false;
+            isOnShipDeck.value = false;
             visualRoot.position = physicsRoot.position;
             visualRoot.rotation = physicsRoot.rotation;
         }
