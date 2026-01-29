@@ -50,6 +50,8 @@ namespace Player
                 {
                     transform.position = _lockedPosition.position;
                     UpdateAnimatorParameters(true);
+                    visualRoot.position = physicsRoot.position;
+                    visualRoot.rotation = physicsRoot.rotation;
                     return;
                 }
 
@@ -105,8 +107,8 @@ namespace Player
 
         public void SetLockedPosition([CanBeNull] Transform lockedPosition)
         {
-            this._lockedPosition = lockedPosition;
-            rb.isKinematic = lockedPosition != null;
+            _lockedPosition = lockedPosition;
+            rb.isKinematic = lockedPosition is not null;
         }
 
         private static readonly Collider[] _groundCheckColliders = new Collider[16];
@@ -126,11 +128,15 @@ namespace Player
 
         public void OnEnterShipProxy(Transform proxy, Transform realShip)
         {
+            if (!isOwner) return;
+
             isOnShipDeck.value = true;
         }
 
         public void OnExitShipProxy()
         {
+            if (!isOwner) return;
+
             isOnShipDeck.value = false;
             visualRoot.position = physicsRoot.position;
             visualRoot.rotation = physicsRoot.rotation;

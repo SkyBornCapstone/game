@@ -970,7 +970,7 @@ MonoBehaviour:
   _maxBufferSize: 2
   _characterControllerPatch: 0
   _ownerAuth: 1
-  _interpolationTiming: 0
+  _interpolationTiming: 1
 --- !u!1 &4130345148873951015
 GameObject:
   m_ObjectHideFlags: 0

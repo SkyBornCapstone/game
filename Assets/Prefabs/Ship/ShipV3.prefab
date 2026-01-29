@@ -113,7 +113,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4db52214e42a82b4fbf8c8f4bf79d097, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
   deckProxy: {fileID: 7208766757862904600}
+  visualShipRoot: {fileID: 0}
 --- !u!1 &1260969013464832982
 GameObject:
   m_ObjectHideFlags: 0
@@ -222,6 +232,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 385b3addfc726d04db2cde5bbc3d90c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
   mainShip: {fileID: 5990408370922185504}
   mainShipRB: {fileID: 1591959771851922410}
   maxLiftForce: 3
@@ -5377,7 +5396,7 @@ GameObject:
   - component: {fileID: 5686456782705539145}
   - component: {fileID: 6761176998902371357}
   - component: {fileID: 2286393700741058874}
-  m_Layer: 13
+  m_Layer: 14
   m_Name: DeckTrigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}

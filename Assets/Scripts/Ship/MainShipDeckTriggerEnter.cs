@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Player;
 using PurrNet;
 using Ship;
 using UnityEngine;
@@ -6,6 +7,7 @@ using UnityEngine;
 public class MainShipDeckTriggerEnter : NetworkBehaviour
 {
     [Header("References")] public Transform deckProxy; // ProxyShip transform
+    public Transform visualShipRoot; // The Main Ship Root (Visual world)
 
     private readonly HashSet<IShipProxyRider> riders = new();
 
@@ -28,10 +30,10 @@ public class MainShipDeckTriggerEnter : NetworkBehaviour
 
             // Sync position
             Vector3 localPos = deckProxy.InverseTransformPoint(physics.position);
-            visuals.position = transform.TransformPoint(localPos);
+            visuals.position = visualShipRoot.TransformPoint(localPos);
 
             Quaternion localRot = Quaternion.Inverse(deckProxy.rotation) * physics.rotation;
-            visuals.rotation = transform.rotation * localRot;
+            visuals.rotation = visualShipRoot.rotation * localRot;
             // var playerMovement = rider as PlayerMovement;
             // if (playerMovement != null && !playerMovement.isOwner)
             // {
@@ -73,15 +75,17 @@ public class MainShipDeckTriggerEnter : NetworkBehaviour
     {
         Debug.Log($"[MainShip EnterDeck] START - Position: {rider.PhysicsRoot.position}");
 
-        rider.OnEnterShipProxy(deckProxy, transform);
+        rider.OnEnterShipProxy(deckProxy, visualShipRoot);
 
         // Get position relative to MainShip
-        Vector3 localPos = transform.InverseTransformPoint(rider.PhysicsRoot.position);
-        Quaternion localRot = Quaternion.Inverse(transform.rotation) * rider.PhysicsRoot.rotation;
+        Vector3 localPos = visualShipRoot.InverseTransformPoint(rider.PhysicsRoot.position);
+        Quaternion localRot = Quaternion.Inverse(visualShipRoot.rotation) * rider.PhysicsRoot.rotation;
 
         // Teleport to ProxyShip
         rider.PhysicsRoot.position = deckProxy.TransformPoint(localPos);
         rider.PhysicsRoot.rotation = deckProxy.rotation * localRot;
+
+        rider.PhysicsRoot.GetComponent<FirstPersonCamera>().SetShipContext(visualShipRoot, deckProxy);
 
         Debug.Log($"[MainShip EnterDeck] Teleported to ProxyShip: {rider.PhysicsRoot.position}");
 
@@ -104,8 +108,10 @@ public class MainShipDeckTriggerEnter : NetworkBehaviour
         Vector3 localPos = deckProxy.InverseTransformPoint(rider.PhysicsRoot.position);
         Quaternion localRot = Quaternion.Inverse(deckProxy.rotation) * rider.PhysicsRoot.rotation;
 
-        rider.PhysicsRoot.position = transform.TransformPoint(localPos);
-        rider.PhysicsRoot.rotation = transform.rotation * localRot;
+        rider.PhysicsRoot.position = visualShipRoot.TransformPoint(localPos);
+        rider.PhysicsRoot.rotation = visualShipRoot.rotation * localRot;
+
+        rider.PhysicsRoot.GetComponent<FirstPersonCamera>().ClearShipContext();
 
         Debug.Log($"[MainShip ExitDeck] Teleported back to MainShip: {rider.PhysicsRoot.position}");
 
