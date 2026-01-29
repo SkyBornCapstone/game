@@ -68,45 +68,70 @@ public class MusicController : MonoBehaviour
     private IEnumerator EnterCombatRoutine()
     {
         Debug.Log("MusicController: Entering Combat Routine");
-        // 1. Fade out current BGM while fading in Intro
-        // We'll play Intro on the free source
-        AudioSource activeSource = GetActiveSource();
-        AudioSource nextSource = GetInactiveSource();
         
-        // Play intro (not looping)
-        nextSource.clip = combatIntro;
-        nextSource.loop = false;
-        nextSource.Play();
+        // 1. Identify sources
+        AudioSource bgmSource = GetActiveSource();
+        AudioSource introSource = GetInactiveSource();
+        // We will reuse the bgmSource for the Loop after it fades out
         
-        // Crossfade
-        yield return StartCoroutine(CrossFade(activeSource, nextSource, crossFadeDuration));
-        
-        // Toggle active source tracking
-        ToggleActiveSource();
+        // Calculate precise timings
+        double introDuration = (double)combatIntro.samples / combatIntro.frequency;
+        double now = AudioSettings.dspTime + 0.05; // Small buffer for scheduling
+        double loopStartTime = now + introDuration;
 
-        // 2. Wait for intro to finish (minus a small buffer if needed? no, seamlessly)
-        // Actually, for seamless intro->loop, playScheduled is best, but let's try simple wait first.
-        double duration = (double)combatIntro.samples / combatIntro.frequency;
-        // We already waited crossFadeDuration. 
-        // Remaining time:
-        double remaining = duration - crossFadeDuration;
+        // 2. Schedule Intro (on inactive source)
+        introSource.clip = combatIntro;
+        introSource.loop = false;
+        introSource.PlayScheduled(now);
+
+        // 3. Schedule Loop (on CURRENT source, which will fade out first)
+        // We need to commit the clip and loop setting ahead of time, which is tricky 
+        // because it's currently playing BGM.
+        // Actually, we can't swap the clip on bgmSource until it stops playing BGM.
+        // If PlayScheduled is called on a source, it queues? No, it replaces if playing?
+        // Wait, AudioSource can only have ONE clip. Changing .clip stops the current one?
+        // Yes, changing .clip usually stops play unless we are careful?
+        // Unity allows setting clip while playing? No, usually swaps.
         
+        // BETTER APPROACH:
+        // We ideally need THREE sources for perfect crossfade + scheduled gapless.
+        // Source A: BGM (Fading Out)
+        // Source B: Intro (Playing)
+        // Source A: Loop (Waiting to Play) -> WE CANNOT DO THIS simultaneously on Source A.
+        
+        // If BGM fades out in 1s, and Intro is 3s.
+        // Source A is silent from t=1s to t=3s.
+        // We can swap clip on Source A at t=1.1s (after fade).
+        // Then Schedule Play at t=3s.
+        
+        // Start Crossfade Logic (handled manually to avoid conflict)
+        StartCoroutine(CrossFade(bgmSource, introSource, crossFadeDuration));
+        
+        // We switch "Active" to IntroSource for now so logic holds
+        ToggleActiveSource(); 
+        
+        // Wait until BGM fade is definitely done
+        yield return new WaitForSeconds(crossFadeDuration + 0.1f);
+        
+        // Now bgmSource (old A) is silent and free.
+        bgmSource.clip = combatMain;
+        bgmSource.loop = true;
+        // Schedule it to start exactly when Intro ends
+        bgmSource.PlayScheduled(loopStartTime);
+        
+        // Wait for the rest of the intro
+        double remaining = loopStartTime - AudioSettings.dspTime;
         if (remaining > 0)
             yield return new WaitForSeconds((float)remaining);
-
-        // 3. Play Combat Loop
-        // We can just switch the clip on the NOW active source (which finished the intro)
-        // But to be perfectly seamless, we might want to schedule it.
-        // Let's keep it simple: Play the Loop on the SAME source immediately.
-        // Or if we want to crossfade? User didn't ask for crossfade INTRO->LOOP, usually it's a direct cut.
+            
+        // At this point, Intro finishes, Loop starts on bgmSource.
+        // We need to ensure bgmSource volume is UP.
+        // The CrossFade faded it to 0.
+        bgmSource.volume = musicVolume;
         
-        if (_inCombat) // Check if we are still in combat
-        {
-            activeSource = GetActiveSource(); // This is the one that played the intro
-            activeSource.clip = combatMain;
-            activeSource.loop = true;
-            activeSource.Play();
-        }
+        // Now the "Active" source is bgmSource (Loop) again!
+        // We toggled once before (A->B). Now we need to toggle back (B->A).
+        ToggleActiveSource();
     }
 
     private IEnumerator ExitCombatRoutine()
