@@ -1,8 +1,8 @@
-using UnityEngine;
+using PurrNet;
 
 namespace Ship.ShipControllers
 {
-    public class InteractableShipElement : MonoBehaviour
+    public abstract class InteractableShipElement : NetworkBehaviour
     {
         public ShipInteractType shipInteractType;
     }
