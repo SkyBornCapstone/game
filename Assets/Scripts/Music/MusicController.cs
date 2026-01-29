@@ -13,7 +13,7 @@ public class MusicController : MonoBehaviour
     public float crossFadeDuration = 1.0f;
     public float outroCrossFadeDuration = 3.0f;
     [Range(0f, 1f)] public float musicVolume = 0.5f;
-    [Range(0f, 1f)] public float outroVolumeScale = 0.7f;
+    [Range(0f, 1f)] public float outroVolumeScale = musicVolume * 0.6f;
 
     private AudioSource _sourceA;
     private AudioSource _sourceB;
