@@ -458,7 +458,9 @@ MonoBehaviour:
   combatMain: {fileID: 8300000, guid: 99bfe5c5a7baa4cc997c4b669679c7c8, type: 3}
   combatOutro: {fileID: 8300000, guid: 45911e8cbe26d445988c3b1dff540310, type: 3}
   crossFadeDuration: 1
+  outroCrossFadeDuration: 3
   musicVolume: 0.5
+  outroVolumeScale: 0.3
 --- !u!4 &2067357485
 Transform:
   m_ObjectHideFlags: 0

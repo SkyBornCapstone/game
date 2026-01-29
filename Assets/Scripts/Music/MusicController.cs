@@ -11,10 +11,13 @@ public class MusicController : MonoBehaviour
 
     [Header("Settings")]
     public float crossFadeDuration = 1.0f;
+    public float outroCrossFadeDuration = 3.0f;
     [Range(0f, 1f)] public float musicVolume = 0.5f;
+    [Range(0f, 1f)] public float outroVolumeScale = 0.7f;
 
     private AudioSource _sourceA;
     private AudioSource _sourceB;
+
     private bool _usingSourceA = true;
     private Coroutine _activeCoroutine;
     private bool _inCombat = false;
@@ -105,7 +108,7 @@ public class MusicController : MonoBehaviour
         // Then Schedule Play at t=3s.
         
         // Start Crossfade Logic (handled manually to avoid conflict)
-        StartCoroutine(CrossFade(bgmSource, introSource, crossFadeDuration));
+        StartCoroutine(CrossFade(bgmSource, introSource, crossFadeDuration, musicVolume));
         
         // We switch "Active" to IntroSource for now so logic holds
         ToggleActiveSource(); 
@@ -136,37 +139,56 @@ public class MusicController : MonoBehaviour
 
     private IEnumerator ExitCombatRoutine()
     {
+        Debug.Log("MusicController: Exiting Combat Routine");
+        
         // 1. Fade to combat outro
         AudioSource activeSource = GetActiveSource();
         AudioSource nextSource = GetInactiveSource();
 
         nextSource.clip = combatOutro;
-        nextSource.loop = false;
+        // User wants it looped twice. We can set loop=true and manage timing manually.
+        nextSource.loop = true; 
         nextSource.Play();
 
-        // Crossfade from Combat Loop -> Outro
-        yield return StartCoroutine(CrossFade(activeSource, nextSource, crossFadeDuration));
+        // Crossfade from Combat Loop -> Outro using longer duration
+        yield return StartCoroutine(CrossFade(activeSource, nextSource, outroCrossFadeDuration, musicVolume * outroVolumeScale));
         ToggleActiveSource();
 
-        // 2. Wait for outro to finish
-        double duration = (double)combatOutro.samples / combatOutro.frequency;
-        double remaining = duration - crossFadeDuration;
+        // 2. Wait for outro to loop twice
+        // We want to hear the outro twice.
+        // Total duration we want to occupy is 2 * ClipLength.
+        // However, we just spent 'outroCrossFadeDuration' transition into it.
+        // We should wait until we are near the end of the 2nd loop to start fading to BGM.
         
-        if (remaining > 0)
-            yield return new WaitForSeconds((float)remaining);
+        double outroDuration = (double)combatOutro.samples / combatOutro.frequency;
+        double totalOutroPlayTime = outroDuration * 2.0;
+        
+        // We start fading OUT of the outro slightly before it ends the 2nd time, 
+        // to crossfade into BGM? Or fade BGM in while Outro finishes?
+        // "fade back to the start of the looping background music"
+        // Let's assume standard crossfade duration for Outro -> BGM.
+        
+        // Time to wait = TotalPlayTime - (TimeAlreadySpentInFadeIn + TimeNeededForFadeOutToBGM)
+        // Wait, 'TimeAlreadySpentInFadeIn' (outroCrossFadeDuration) was while Outro was playing.
+        // So we are at t = outroCrossFadeDuration.
+        // We want to start next fade at t = totalOutroPlayTime - crossFadeDuration (standard fade).
+        
+        double timeToWait = totalOutroPlayTime - outroCrossFadeDuration - crossFadeDuration;
+        
+        if (timeToWait > 0)
+            yield return new WaitForSeconds((float)timeToWait);
 
         // 3. Fade back to start of looping background music
         if (!_inCombat) // Ensure we haven't re-entered combat
         {
-            activeSource = GetActiveSource(); // This is the one playing Outro (finishing now)
+            activeSource = GetActiveSource(); // Currently playing Outro
             nextSource = GetInactiveSource();
 
             nextSource.clip = backgroundMusic;
             nextSource.loop = true;
             nextSource.Play(); // Starts from beginning
 
-            // "Fade back to start" - imply crossfade? User said "Fade back to"
-            yield return StartCoroutine(CrossFade(activeSource, nextSource, crossFadeDuration));
+            yield return StartCoroutine(CrossFade(activeSource, nextSource, crossFadeDuration, musicVolume));
             ToggleActiveSource();
         }
     }
@@ -188,7 +210,7 @@ public class MusicController : MonoBehaviour
     private AudioSource GetInactiveSource() => _usingSourceA ? _sourceB : _sourceA;
     private void ToggleActiveSource() => _usingSourceA = !_usingSourceA;
 
-    private IEnumerator CrossFade(AudioSource from, AudioSource to, float duration)
+    private IEnumerator CrossFade(AudioSource from, AudioSource to, float duration, float targetVolume)
     {
         float timer = 0f;
         float startVolFrom = from.volume;
@@ -199,7 +221,7 @@ public class MusicController : MonoBehaviour
             float t = timer / duration;
             
             from.volume = Mathf.Lerp(startVolFrom, 0f, t);
-            to.volume = Mathf.Lerp(0f, musicVolume, t);
+            to.volume = Mathf.Lerp(0f, targetVolume, t);
             
             yield return null;
         }
@@ -207,7 +229,7 @@ public class MusicController : MonoBehaviour
         Debug.Log($"MusicController: CrossFade Finished. Stopping {from.clip.name}.");
         from.volume = 0f;
         from.Stop();
-        to.volume = musicVolume;
+        to.volume = targetVolume;
     }
 
     private IEnumerator FadeIn(AudioSource source, float duration)
