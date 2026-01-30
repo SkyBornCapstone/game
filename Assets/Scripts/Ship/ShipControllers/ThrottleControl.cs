@@ -1,25 +1,24 @@
 using Player;
+using PurrNet;
 using UnityEngine;
 
 namespace Ship.ShipControllers
 {
-    public class ThrottleControl : MonoBehaviour
+    public class ThrottleControl : NetworkBehaviour
     {
-        [Header("References")]
-        [SerializeField] private ShipControllerV2 ship;
+        [Header("References")] [SerializeField]
+        private ShipControllerV2 ship;
+
         [SerializeField] private Transform throttleVisual;
-        
-        [Header("Settings")]
-        [SerializeField] private float maxRotation = 270f;
+
+        [Header("Settings")] [SerializeField] private float maxRotation = 270f;
         [SerializeField] private float throttleTurnRate = 90f;
-        
-        public float CurrentAngle => currentAngle;
-        
-        private float currentAngle;
+
+        private SyncVar<float> currentAngle = new();
         private Quaternion initialRotation;
         private PlayerMovement currentPlayer;
         private const float minRotation = 0f;
-        
+
         void Awake()
         {
             if (throttleVisual)
@@ -28,9 +27,9 @@ namespace Ship.ShipControllers
 
         void Update()
         {
-            if (!currentPlayer)
+            if (!currentPlayer || !currentPlayer.isOwner)
                 return;
-                
+
             HandleInput();
             UpdateVisual();
         }
@@ -38,24 +37,26 @@ namespace Ship.ShipControllers
         private void HandleInput()
         {
             float input = ShipInputManager.Instance.GetControlInput();
-            
+
             if (input > 0)
                 IncreaseThrottle();
             else if (input < 0)
                 DecreaseThrottle();
         }
 
+        [ServerRpc]
         private void IncreaseThrottle()
         {
-            currentAngle += throttleTurnRate * Time.deltaTime;
-            currentAngle = Mathf.Clamp(currentAngle, minRotation, maxRotation);
+            currentAngle.value += throttleTurnRate * Time.deltaTime;
+            currentAngle.value = Mathf.Clamp(currentAngle, minRotation, maxRotation);
             UpdateShip();
         }
 
+        [ServerRpc]
         private void DecreaseThrottle()
         {
-            currentAngle -= throttleTurnRate * Time.deltaTime;
-            currentAngle = Mathf.Clamp(currentAngle, minRotation, maxRotation);
+            currentAngle.value -= throttleTurnRate * Time.deltaTime;
+            currentAngle.value = Mathf.Clamp(currentAngle, minRotation, maxRotation);
             UpdateShip();
         }
 
@@ -63,7 +64,7 @@ namespace Ship.ShipControllers
         {
             if (!ship)
                 return;
-                
+
             float throttle = currentAngle / maxRotation;
             ship.SetForwardThrottle(throttle);
         }
