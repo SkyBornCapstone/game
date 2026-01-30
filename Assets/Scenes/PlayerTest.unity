@@ -648,7 +648,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 332e746c3c3253246aacad4d5559f1fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _masterServer: http://10.0.0.150:8080/
+  _masterServer: http://73.164.246.48:8080
   _roomName: devTest
   _region: potato-server
   _host: 73.164.246.48
