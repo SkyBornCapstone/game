@@ -7,10 +7,11 @@ namespace Player
     {
         [SerializeField] private Transform target;
 
-        private Vector2 _currentRotation;
-        private bool _initialized;
         private Camera _mainCamera;
         private Rigidbody _rb;
+
+        private Transform _currentShipVisuals;
+        private Transform _currentShipProxy;
 
         protected override void OnSpawned()
         {
@@ -34,13 +35,40 @@ namespace Player
             RotatePlayerTowardsCamera();
         }
 
+        public void SetShipContext(Transform visualShipRoot, Transform proxyShipRoot)
+        {
+            _currentShipVisuals = visualShipRoot;
+            _currentShipProxy = proxyShipRoot;
+        }
+
+        public void ClearShipContext()
+        {
+            _currentShipVisuals = null;
+            _currentShipProxy = null;
+        }
+
         private void RotatePlayerTowardsCamera()
         {
-            if (_mainCamera && _rb)
-            {
-                Vector3 cameraForward = _mainCamera.transform.forward;
-                cameraForward.y = 0f;
+            if (!_mainCamera || !_rb) return;
 
+            Vector3 cameraForward = _mainCamera.transform.forward;
+
+            if (_currentShipVisuals && _currentShipProxy)
+            {
+                Vector3 localDir = Quaternion.Inverse(_currentShipVisuals.rotation) * cameraForward;
+
+                localDir.y = 0;
+                localDir.Normalize();
+
+                if (localDir != Vector3.zero)
+                {
+                    Quaternion targetRot = _currentShipProxy.rotation * Quaternion.LookRotation(localDir);
+                    _rb.MoveRotation(targetRot);
+                }
+            }
+            else
+            {
+                cameraForward.y = 0f;
                 if (cameraForward != Vector3.zero)
                 {
                     Quaternion newRotation = Quaternion.LookRotation(cameraForward);

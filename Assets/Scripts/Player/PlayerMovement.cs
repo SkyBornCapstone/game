@@ -1,11 +1,18 @@
 using JetBrains.Annotations;
 using PurrNet;
+using Ship;
 using UnityEngine;
 
 namespace Player
 {
-    public class PlayerMovement : NetworkBehaviour
+    public class PlayerMovement : NetworkBehaviour, IShipProxyRider
     {
+        [SerializeField] private Transform physicsRoot;
+        [SerializeField] private Transform visualRoot;
+
+        public Transform PhysicsRoot => physicsRoot;
+        public Transform VisualRoot => visualRoot;
+
         [Header("Movement")] [SerializeField] private float moveSpeed = 5;
         [SerializeField] private float sprintSpeed = 8;
         [SerializeField] private float acceleration = 20;
@@ -24,35 +31,50 @@ namespace Player
         private static readonly int JumpHash = Animator.StringToHash("Jump");
         private static readonly int IsGroundedHash = Animator.StringToHash("Is Grounded");
 
+        [Header("Ship Interaction Variables")] public SyncVar<bool> isOnShipDeck;
+
         private Transform _lockedPosition;
 
         protected override void OnSpawned()
         {
-            enabled = isOwner;
+            // enabled = isOwner;
         }
 
         private void Update()
         {
-            bool isGrounded = IsGrounded();
-
-            if (_lockedPosition)
+            if (isOwner)
             {
-                transform.position = _lockedPosition.position;
-                UpdateAnimatorParameters(true);
+                bool isGrounded = IsGrounded();
+
+                if (_lockedPosition)
+                {
+                    transform.position = _lockedPosition.position;
+                    UpdateAnimatorParameters(true);
+                    visualRoot.position = physicsRoot.position;
+                    visualRoot.rotation = physicsRoot.rotation;
+                    return;
+                }
+
+                if (Input.GetButtonDown("Jump") && isGrounded)
+                {
+                    rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+                    animator.SetBool(JumpHash, true);
+                }
+                else
+                {
+                    animator.SetBool(JumpHash, false);
+                }
+
+                UpdateAnimatorParameters(isGrounded);
+            }
+
+            if (isOnShipDeck)
+            {
                 return;
             }
 
-            if (Input.GetButtonDown("Jump") && isGrounded)
-            {
-                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-                animator.SetBool(JumpHash, true);
-            }
-            else
-            {
-                animator.SetBool(JumpHash, false);
-            }
-
-            UpdateAnimatorParameters(isGrounded);
+            visualRoot.position = physicsRoot.position;
+            visualRoot.rotation = physicsRoot.rotation;
         }
 
         private void UpdateAnimatorParameters(bool isGrounded)
@@ -66,6 +88,8 @@ namespace Player
 
         private void FixedUpdate()
         {
+            if (!isOwner) return;
+
             Vector2 moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
             float currentSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : moveSpeed;
@@ -83,8 +107,8 @@ namespace Player
 
         public void SetLockedPosition([CanBeNull] Transform lockedPosition)
         {
-            this._lockedPosition = lockedPosition;
-            rb.isKinematic = lockedPosition != null;
+            _lockedPosition = lockedPosition;
+            rb.isKinematic = lockedPosition is not null;
         }
 
         private static readonly Collider[] _groundCheckColliders = new Collider[16];
@@ -100,6 +124,22 @@ namespace Player
         {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, groundCheckRadius);
+        }
+
+        public void OnEnterShipProxy(Transform proxy, Transform realShip)
+        {
+            if (!isOwner) return;
+
+            isOnShipDeck.value = true;
+        }
+
+        public void OnExitShipProxy()
+        {
+            if (!isOwner) return;
+
+            isOnShipDeck.value = false;
+            visualRoot.position = physicsRoot.position;
+            visualRoot.rotation = physicsRoot.rotation;
         }
     }
 }
