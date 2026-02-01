@@ -8,6 +8,7 @@ namespace Interaction
         [SerializeField] private LayerMask interactableLayer;
         [SerializeField] private float interactionRange = 5f;
         [SerializeField] private Transform rightHandTarget;
+        [SerializeField] private Transform head;
 
         private Camera _cam;
         private AInteractable _hoveredInteractable;
@@ -25,13 +26,23 @@ namespace Interaction
             if (!Input.GetKeyDown(KeyCode.E))
                 return;
 
-            if (!Physics.Raycast(_cam.transform.position, _cam.transform.forward, out RaycastHit hit, interactionRange,
+            if (!Physics.Raycast(head.position,
+                    new Vector3(head.transform.forward.x, _cam.transform.forward.y, head.transform.forward.z),
+                    out RaycastHit hit, interactionRange,
                     interactableLayer))
                 return;
 
             var interactable = hit.collider.GetComponent<AInteractable>();
-            if (interactable && interactable.CanInteract())
+            if (interactable && interactable.CanInteract(this))
                 interactable.Interact(this);
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            Gizmos.DrawLine(head.position,
+                head.position +
+                new Vector3(head.transform.forward.x, _cam.transform.forward.y, head.transform.forward.z) *
+                interactionRange);
         }
     }
 
@@ -47,7 +58,7 @@ namespace Interaction
         {
         }
 
-        public virtual bool CanInteract()
+        public virtual bool CanInteract(InteractionController interactionController)
         {
             return true;
         }

@@ -1,9 +1,9 @@
-using Player;
+using PurrNet;
 using UnityEngine;
 
 namespace Ship.ShipControllers
 {
-    public class LiftControl : MonoBehaviour
+    public class LiftControl : ShipControlStation
     {
         [Header("References")] [SerializeField]
         private ShipControllerV2 ship;
@@ -16,82 +16,54 @@ namespace Ship.ShipControllers
         [SerializeField] private int minLevel = -2;
         [SerializeField] private float level1Speed = .25f; // Speed at level ±1
         [SerializeField] private float level2Speed = .75f; // Speed at level ±2
-        [SerializeField] private float inputCooldown = 0.3f;
 
         [Header("Visual Feedback")] [SerializeField]
         private float particleEmissionMultiplier = 10f;
 
-        public int CurrentLevel => currentLevel;
+        public SyncVar<int> _currentLevel = new();
 
-        private int currentLevel = 0;
-        private PlayerMovement currentPlayer;
-        private float lastInputTime;
-
-        void Update()
+        protected override void OnSpawned()
         {
-            if (!currentPlayer || !ship)
-                return;
-            HandleInput();
-            UpdateShipLift();
-            UpdateVisuals();
+            _currentLevel.onChanged += UpdateVisuals;
         }
 
-        private void HandleInput()
+        protected override void HandleInput()
         {
-            if (Time.time - lastInputTime < inputCooldown)
-                return;
-            float input = ShipInputManager.Instance.GetControlInput();
-
-            if (input > 0)
+            if (Input.GetKeyDown(KeyCode.W))
             {
-                IncreaseLevel();
-                lastInputTime = Time.time;
+                ChangeLiftLevel(1);
             }
-            else if (input < 0)
+
+            if (Input.GetKeyDown(KeyCode.S))
             {
-                DecreaseLevel();
-                lastInputTime = Time.time;
+                ChangeLiftLevel(-1);
             }
         }
 
-        private void IncreaseLevel()
+        [ServerRpc]
+        private void ChangeLiftLevel(int levelChange)
         {
-            currentLevel++;
-            currentLevel = Mathf.Clamp(currentLevel, minLevel, maxLevel);
-        }
+            _currentLevel.value += levelChange;
+            _currentLevel.value = Mathf.Clamp(_currentLevel.value, minLevel, maxLevel);
 
-        private void DecreaseLevel()
-        {
-            currentLevel--;
-            currentLevel = Mathf.Clamp(currentLevel, minLevel, maxLevel);
-        }
-
-        private void UpdateShipLift()
-        {
-            float liftSpeed = GetLiftSpeedForLevel(currentLevel);
+            float liftSpeed = GetLiftSpeedForLevel(_currentLevel.value);
             ship.SetLiftThrottle(liftSpeed);
         }
 
         private float GetLiftSpeedForLevel(int level)
         {
-            switch (level)
+            return level switch
             {
-                case 2:
-                    return level2Speed;
-                case 1:
-                    return level1Speed;
-                case 0:
-                    return 0f;
-                case -1:
-                    return -level1Speed;
-                case -2:
-                    return -level2Speed;
-                default:
-                    return 0f;
-            }
+                2 => level2Speed,
+                1 => level1Speed,
+                0 => 0f,
+                -1 => -level1Speed,
+                -2 => -level2Speed,
+                _ => 0f
+            };
         }
 
-        private void UpdateVisuals()
+        private void UpdateVisuals(int newLevel)
         {
             if (!thrusterParticles)
                 return;
@@ -99,31 +71,19 @@ namespace Ship.ShipControllers
             var emission = thrusterParticles.emission;
 
             // Only show particles when ascending (positive levels)
-            if (currentLevel > 0)
+            if (_currentLevel.value >= 0)
             {
                 if (!thrusterParticles.isPlaying)
                     thrusterParticles.Play();
 
-                emission.rateOverTime = currentLevel * particleEmissionMultiplier;
+                var main = thrusterParticles.main;
+                main.startLifetime = 2 + _currentLevel.value;
+                emission.rateOverTime = (_currentLevel.value + 1) * particleEmissionMultiplier;
             }
             else
             {
                 if (thrusterParticles.isPlaying)
                     thrusterParticles.Stop();
-            }
-        }
-
-        private void OnTriggerEnter(Collider other)
-        {
-            if (other.TryGetComponent(out PlayerMovement player))
-                currentPlayer = player;
-        }
-
-        private void OnTriggerExit(Collider other)
-        {
-            if (other.TryGetComponent(out PlayerMovement player) && player == currentPlayer)
-            {
-                currentPlayer = null;
             }
         }
     }

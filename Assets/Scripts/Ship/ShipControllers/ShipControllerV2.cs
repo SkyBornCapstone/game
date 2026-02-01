@@ -22,9 +22,6 @@ namespace Ship.ShipControllers
         private float liftThrottle;
         private float forwardThrottle;
         private float yawThrottle;
-        public float LiftThrottle => liftThrottle;
-        public float YawThrottle => yawThrottle;
-        public float ForwardThrottle => forwardThrottle;
 
         private void FixedUpdate()
         {
@@ -77,52 +74,6 @@ namespace Ship.ShipControllers
                 currentVelocity.x,
                 liftThrottle * maxLiftForce,
                 currentVelocity.z
-            );
-        }
-
-        public void IncreaseForward()
-        {
-            forwardThrottle += forwardChargeRate * Time.deltaTime;
-            forwardThrottle = Mathf.Clamp(forwardThrottle, -1f, 1f);
-        }
-
-        public void DecreaseForward()
-        {
-            forwardThrottle -= forwardChargeRate * Time.deltaTime;
-            forwardThrottle = Mathf.Clamp(forwardThrottle, -1f, 1f);
-        }
-
-        public void IncreaseLift()
-        {
-            liftThrottle += liftChangeRate * Time.deltaTime;
-            liftThrottle = Mathf.Clamp(liftThrottle, -1f, 1f);
-        }
-
-        public void DecreaseLift()
-        {
-            liftThrottle -= liftChangeRate * Time.deltaTime;
-            liftThrottle = Mathf.Clamp(liftThrottle, -1f, 1f);
-            print(liftThrottle);
-        }
-
-        public void TurnRight()
-        {
-            yawThrottle += yawChangeRate * Time.deltaTime;
-            yawThrottle = Mathf.Clamp(yawThrottle, -1f, 1f);
-        }
-
-        public void TurnLeft()
-        {
-            yawThrottle -= yawChangeRate * Time.deltaTime;
-            yawThrottle = Mathf.Clamp(yawThrottle, -1f, 1f);
-        }
-
-        public void CenterYaw()
-        {
-            yawThrottle = Mathf.MoveTowards(
-                yawThrottle,
-                0f,
-                yawChangeRate * Time.deltaTime
             );
         }
 

@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4597100814786407767}
-  - component: {fileID: 516474944457506065}
   m_Layer: 0
   m_Name: ShipInteractables
   m_TagString: Untagged
@@ -35,18 +34,6 @@ Transform:
   - {fileID: 3759247045955462777}
   m_Father: {fileID: 7208766757862904600}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &516474944457506065
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 307557589255318422}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b1ba87bc899fd3148ba577bcffc458cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &332705172180894080
 GameObject:
   m_ObjectHideFlags: 0
@@ -406,8 +393,10 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
+  seatPosition: {fileID: 0}
   ship: {fileID: 1997279557342100889}
   throttleVisual: {fileID: 3733495307817663060}
+  minRotation: 0
   maxRotation: 270
   throttleTurnRate: 90
 --- !u!1 &2848494042334923877
@@ -5481,6 +5470,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b06423729ed959e4b96e21f8faaec187, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  seatPosition: {fileID: 0}
   ship: {fileID: 1997279557342100889}
   wheelVisual: {fileID: 6770941487869604842}
   maxRotation: 360
@@ -5991,14 +5990,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f41d2f8bbbbeb3e43967011cf7098b1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  seatPosition: {fileID: 0}
   ship: {fileID: 1997279557342100889}
   thrusterParticles: {fileID: 2848250281983141819}
   maxLevel: 2
   minLevel: -2
   level1Speed: 0.25
   level2Speed: 0.75
-  inputCooldown: 0.3
   particleEmissionMultiplier: 10
+  _currentLevel:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
 --- !u!1 &9093114503548631769
 GameObject:
   m_ObjectHideFlags: 0
