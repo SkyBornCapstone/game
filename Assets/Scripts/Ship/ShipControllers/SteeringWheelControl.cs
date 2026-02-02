@@ -1,103 +1,77 @@
-using Player;
+using PurrNet;
 using UnityEngine;
 
 namespace Ship.ShipControllers
 {
-    public class SteeringWheelControl : MonoBehaviour
+    public class SteeringWheelControl : ShipControlStation
     {
-        [Header("References")]
-        [SerializeField] private ShipControllerV2 ship;
+        [Header("References")] [SerializeField]
+        private ShipControllerV2 ship;
+
         [SerializeField] private Transform wheelVisual;
-        
-        [Header("Settings")]
-        [SerializeField] private float maxRotation = 360f;
+
+        [Header("Settings")] [SerializeField] private float maxRotation = 360f;
         [SerializeField] private float wheelTurnRate = 90f;
         [SerializeField] private float deadzone = 15f;
         [SerializeField] private float yawSensitivity = 0.25f;
-        
-        public float CurrentAngle => currentAngle;
-        
-        private float currentAngle;
-        private Quaternion initialRotation;
-        private PlayerMovement currentPlayer;
+
+        private readonly SyncVar<float> _currentAngle = new();
+        private Quaternion _initialRotation;
 
         void Awake()
         {
             if (wheelVisual)
-                initialRotation = wheelVisual.localRotation;
+                _initialRotation = wheelVisual.localRotation;
         }
-        
-        void Update()
+
+        protected override void Update()
         {
-            if (!currentPlayer)
-                return;
-            
-            HandleInput();
+            base.Update();
             UpdateVisual();
         }
 
-        private void HandleInput()
+        protected override void HandleInput()
         {
-            float input = ShipInputManager.Instance.GetControlInput();
-            
-            if (input > 0)
-                TurnWheelRight();
-            else if (input < 0)
-                TurnWheelLeft();
-        }
-        
-        private void TurnWheelRight()
-        {
-            currentAngle -= wheelTurnRate * Time.deltaTime;
-            currentAngle = Mathf.Clamp(currentAngle, -maxRotation, maxRotation);
-            UpdateShip();
-        }
-        
-        private void TurnWheelLeft()
-        {
-            currentAngle += wheelTurnRate * Time.deltaTime;
-            currentAngle = Mathf.Clamp(currentAngle, -maxRotation, maxRotation);
-            UpdateShip();
+            float input = Input.GetAxisRaw("Horizontal");
+
+            MoveWheel(input);
         }
 
-        private void UpdateShip()
+        [ServerRpc]
+        private void MoveWheel(float input)
         {
-            if (!ship)
-                return;
-                
-            float wheelAngle = -currentAngle;
-            
+            _currentAngle.value += wheelTurnRate * Time.deltaTime * input;
+            _currentAngle.value = Mathf.Clamp(_currentAngle, -maxRotation, maxRotation);
+
+            float wheelAngle = _currentAngle.value;
+
             // Apply deadzone
             if (Mathf.Abs(wheelAngle) <= deadzone)
             {
                 ship.SetYawThrottle(0f);
                 return;
             }
-            
+
             // Calculate effective angle beyond deadzone
             float effectiveAngle = wheelAngle - (Mathf.Sign(wheelAngle) * deadzone);
             float maxEffectiveAngle = maxRotation - deadzone;
             float yawThrottle = (effectiveAngle / maxEffectiveAngle) * yawSensitivity;
-            
+
             ship.SetYawThrottle(yawThrottle);
         }
 
         private void UpdateVisual()
         {
             if (wheelVisual)
-                wheelVisual.localRotation = initialRotation * Quaternion.Euler(currentAngle, 0f, 0f);
-        }
-        
-        private void OnTriggerEnter(Collider other)
-        {
-            if (other.TryGetComponent(out PlayerMovement player))
-                currentPlayer = player;
-        }
+            {
+                Quaternion targetRotation = _initialRotation * Quaternion.Euler(-_currentAngle, 0f, 0f);
 
-        private void OnTriggerExit(Collider other)
-        {
-            if (other.TryGetComponent(out PlayerMovement player) && player == currentPlayer)
-                currentPlayer = null;
+                wheelVisual.localRotation = Quaternion.RotateTowards(
+                    wheelVisual.localRotation,
+                    targetRotation,
+                    wheelTurnRate * Time.deltaTime
+                );
+            }
         }
     }
 }

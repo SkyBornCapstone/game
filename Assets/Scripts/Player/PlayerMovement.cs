@@ -35,11 +35,6 @@ namespace Player
 
         private Transform _lockedPosition;
 
-        protected override void OnSpawned()
-        {
-            // enabled = isOwner;
-        }
-
         private void Update()
         {
             if (isOwner)
@@ -49,26 +44,26 @@ namespace Player
                 if (_lockedPosition)
                 {
                     transform.position = _lockedPosition.position;
+                    rb.linearVelocity = Vector3.zero;
                     UpdateAnimatorParameters(true);
-                    visualRoot.position = physicsRoot.position;
-                    visualRoot.rotation = physicsRoot.rotation;
-                    return;
-                }
-
-                if (Input.GetButtonDown("Jump") && isGrounded)
-                {
-                    rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-                    animator.SetBool(JumpHash, true);
                 }
                 else
                 {
-                    animator.SetBool(JumpHash, false);
-                }
+                    if (Input.GetButtonDown("Jump") && isGrounded)
+                    {
+                        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+                        animator.SetBool(JumpHash, true);
+                    }
+                    else
+                    {
+                        animator.SetBool(JumpHash, false);
+                    }
 
-                UpdateAnimatorParameters(isGrounded);
+                    UpdateAnimatorParameters(isGrounded);
+                }
             }
 
-            if (isOnShipDeck)
+            if (isOnShipDeck.value)
             {
                 return;
             }
@@ -89,6 +84,7 @@ namespace Player
         private void FixedUpdate()
         {
             if (!isOwner) return;
+            if (_lockedPosition) return;
 
             Vector2 moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
@@ -108,7 +104,8 @@ namespace Player
         public void SetLockedPosition([CanBeNull] Transform lockedPosition)
         {
             _lockedPosition = lockedPosition;
-            rb.isKinematic = lockedPosition is not null;
+            // TODO changing kinematic fires trigger events. Replace triggers with more stable raycast system
+            // rb.isKinematic = lockedPosition is not null;
         }
 
         private static readonly Collider[] _groundCheckColliders = new Collider[16];

@@ -28,5 +28,10 @@ namespace Cannons
                 RemoveOwnership();
             }
         }
+
+        public override bool CanInteract(InteractionController interactionController)
+        {
+            return !hasOwner || isOwner;
+        }
     }
 }

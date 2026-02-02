@@ -579,7 +579,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 298838697}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fc64ff707d914a64e95f2ac0bf554c09, type: 3}
   m_Name: 
@@ -608,7 +608,7 @@ MonoBehaviour:
   _startClientFlags: 7
   _cookieScope: 1
   _dontDestroyOnLoad: 0
-  _transport: {fileID: 298838699}
+  _transport: {fileID: 298838702}
   _networkPrefabs: {fileID: 11400000, guid: ec59f87c0d921594c930a427397b5c54, type: 2}
   _networkAssets: {fileID: 11400000, guid: d0caf7c74d9812e489e1a22097328ba3, type: 2}
   _networkRules: {fileID: 11400000, guid: d8799083b96579a42b8b2d03e4ceae98, type: 2}
@@ -1220,14 +1220,6 @@ PrefabInstance:
     - target: {fileID: 1693965578479121219, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5990408370922185504, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -2.23
-      objectReference: {fileID: 0}
-    - target: {fileID: 5990408370922185504, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 14.19
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2143,7 +2135,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  requiredPlayers: 1
+  requiredPlayers: 2
 --- !u!4 &2062012814
 Transform:
   m_ObjectHideFlags: 0

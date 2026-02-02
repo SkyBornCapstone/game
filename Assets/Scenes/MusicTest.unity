@@ -406,7 +406,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73c2b498b0da3491da264c4a415ef4b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  musicController: {fileID: 0}
+  musicController: {fileID: 2067357484}
   enterCombatKey: 99
   exitCombatKey: 120
 --- !u!4 &1786584021
@@ -454,9 +454,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   backgroundMusic: {fileID: 8300000, guid: c72cd9014169745d7b8f9be2d802a6c6, type: 3}
-  combatIntro: {fileID: 8300000, guid: abac805a24cd7438cb14c06966f5b56b, type: 3}
-  combatMain: {fileID: 8300000, guid: 99bfe5c5a7baa4cc997c4b669679c7c8, type: 3}
-  combatOutro: {fileID: 8300000, guid: 45911e8cbe26d445988c3b1dff540310, type: 3}
+  combatIntro: {fileID: 8300000, guid: f75cdc6115a9752478357eb6c466905e, type: 3}
+  combatMain: {fileID: 8300000, guid: 5b243fcc6063a13418a6e9d6b152ad63, type: 3}
+  combatOutro: {fileID: 8300000, guid: b993b537a33e4ed42aa86eeeae5ebe3c, type: 3}
   crossFadeDuration: 1
   outroCrossFadeDuration: 3
   musicVolume: 0.4
