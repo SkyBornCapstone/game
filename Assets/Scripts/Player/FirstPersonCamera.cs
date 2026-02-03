@@ -81,10 +81,10 @@ namespace Player
             }
         }
 
-        public void AddRotationOffset(float yaw, float pitch)
+        public void AddRotationOffset(Vector3 delta)
         {
-            _panTilt.PanAxis.Value += yaw;
-            _panTilt.TiltAxis.Value += pitch;
+            _panTilt.PanAxis.Value += delta.y % 360f;
+            _panTilt.TiltAxis.Value += delta.x % 360f;
         }
     }
 }

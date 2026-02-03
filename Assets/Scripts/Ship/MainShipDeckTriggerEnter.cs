@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Player;
 using PurrNet;
@@ -13,6 +14,7 @@ namespace Ship
         private readonly HashSet<IShipProxyRider> _riders = new();
 
         private Quaternion _lastShipRotation;
+        private Action<Vector3> _onRotationChanged;
 
         void Start()
         {
@@ -22,9 +24,6 @@ namespace Ship
 
         void LateUpdate()
         {
-            Quaternion currentShipRot = visualShipRoot.rotation;
-            Quaternion shipDeltaRotation = currentShipRot * Quaternion.Inverse(_lastShipRotation);
-
             foreach (var rider in _riders)
             {
                 Transform physics = rider.PhysicsRoot;
@@ -36,25 +35,13 @@ namespace Ship
 
                 Quaternion localRot = Quaternion.Inverse(deckProxy.rotation) * physics.rotation;
                 visuals.rotation = visualShipRoot.rotation * localRot;
-
-                if (physics.TryGetComponent<FirstPersonCamera>(out var cam) && cam.enabled)
-                {
-                    Vector3 eulerDelta = shipDeltaRotation.eulerAngles;
-
-                    float deltaYaw = WrapAngle(eulerDelta.y);
-                    float deltaPitch = WrapAngle(eulerDelta.x);
-
-                    cam.AddRotationOffset(deltaYaw, deltaPitch);
-                }
             }
 
-            _lastShipRotation = currentShipRot;
-        }
+            Quaternion currentShipRot = visualShipRoot.rotation;
+            Quaternion shipDeltaRotation = currentShipRot * Quaternion.Inverse(_lastShipRotation);
 
-        private float WrapAngle(float angle)
-        {
-            if (angle > 180) angle -= 360;
-            return angle;
+            _onRotationChanged?.Invoke(shipDeltaRotation.eulerAngles);
+            _lastShipRotation = currentShipRot;
         }
 
         void OnTriggerEnter(Collider other)
@@ -88,7 +75,11 @@ namespace Ship
             rider.PhysicsRoot.position = deckProxy.TransformPoint(localPos);
             rider.PhysicsRoot.rotation = deckProxy.rotation * localRot;
 
-            rider.PhysicsRoot.GetComponent<FirstPersonCamera>().SetShipContext(visualShipRoot, deckProxy);
+            if (rider.PhysicsRoot.TryGetComponent<FirstPersonCamera>(out var cam))
+            {
+                cam.SetShipContext(visualShipRoot, deckProxy);
+                _onRotationChanged += cam.AddRotationOffset;
+            }
         }
 
         [ObserversRpc(runLocally: true, requireServer: false)]
@@ -110,7 +101,11 @@ namespace Ship
             rider.PhysicsRoot.position = visualShipRoot.TransformPoint(localPos);
             rider.PhysicsRoot.rotation = visualShipRoot.rotation * localRot;
 
-            rider.PhysicsRoot.GetComponent<FirstPersonCamera>().ClearShipContext();
+            if (rider.PhysicsRoot.TryGetComponent<FirstPersonCamera>(out var cam))
+            {
+                cam.ClearShipContext();
+                _onRotationChanged -= cam.AddRotationOffset;
+            }
         }
 
         [ObserversRpc(runLocally: true, requireServer: false)]
