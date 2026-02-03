@@ -12,8 +12,19 @@ namespace Ship
 
         private readonly HashSet<IShipProxyRider> _riders = new();
 
+        private Quaternion _lastShipRotation;
+
+        void Start()
+        {
+            if (visualShipRoot != null)
+                _lastShipRotation = visualShipRoot.rotation;
+        }
+
         void LateUpdate()
         {
+            Quaternion currentShipRot = visualShipRoot.rotation;
+            Quaternion shipDeltaRotation = currentShipRot * Quaternion.Inverse(_lastShipRotation);
+
             foreach (var rider in _riders)
             {
                 Transform physics = rider.PhysicsRoot;
@@ -25,7 +36,25 @@ namespace Ship
 
                 Quaternion localRot = Quaternion.Inverse(deckProxy.rotation) * physics.rotation;
                 visuals.rotation = visualShipRoot.rotation * localRot;
+
+                if (physics.TryGetComponent<FirstPersonCamera>(out var cam) && cam.enabled)
+                {
+                    Vector3 eulerDelta = shipDeltaRotation.eulerAngles;
+
+                    float deltaYaw = WrapAngle(eulerDelta.y);
+                    float deltaPitch = WrapAngle(eulerDelta.x);
+
+                    cam.AddRotationOffset(deltaYaw, deltaPitch);
+                }
             }
+
+            _lastShipRotation = currentShipRot;
+        }
+
+        private float WrapAngle(float angle)
+        {
+            if (angle > 180) angle -= 360;
+            return angle;
         }
 
         void OnTriggerEnter(Collider other)

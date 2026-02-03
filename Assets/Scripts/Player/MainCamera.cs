@@ -6,7 +6,7 @@ namespace Player
 {
     public class MainCamera : NetworkBehaviour
     {
-        [SerializeField] private CinemachineCamera cinemachineCamera;
+        [SerializeField] public CinemachineCamera cinemachineCamera;
 
         private void Awake()
         {
