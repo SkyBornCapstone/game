@@ -2143,7 +2143,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  requiredPlayers: 2
+  requiredPlayers: 1
 --- !u!4 &2062012814
 Transform:
   m_ObjectHideFlags: 0
