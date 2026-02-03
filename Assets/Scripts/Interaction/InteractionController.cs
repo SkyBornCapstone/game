@@ -27,7 +27,7 @@ namespace Interaction
                 return;
 
             if (!Physics.Raycast(head.position,
-                    new Vector3(head.transform.forward.x, _cam.transform.forward.y, head.transform.forward.z),
+                    GetProxyForward(),
                     out RaycastHit hit, interactionRange,
                     interactableLayer))
                 return;
@@ -39,10 +39,14 @@ namespace Interaction
 
         private void OnDrawGizmosSelected()
         {
-            Gizmos.DrawLine(head.position,
-                head.position +
-                new Vector3(head.transform.forward.x, _cam.transform.forward.y, head.transform.forward.z) *
-                interactionRange);
+            Gizmos.DrawLine(head.position, head.position + GetProxyForward() * interactionRange);
+        }
+
+        private Vector3 GetProxyForward()
+        {
+            float cameraPitch = _cam.transform.localEulerAngles.x;
+            Quaternion pitchRotation = Quaternion.Euler(cameraPitch, 0, 0);
+            return head.rotation * pitchRotation * Vector3.forward;
         }
     }
 
