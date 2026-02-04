@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Player;
 using PurrNet;
@@ -11,6 +12,15 @@ namespace Ship
         public Transform visualShipRoot; // The Main Ship Root (Visual world)
 
         private readonly HashSet<IShipProxyRider> _riders = new();
+
+        private Quaternion _lastShipRotation;
+        private Action<Vector3> _onRotationChanged;
+
+        void Start()
+        {
+            if (visualShipRoot != null)
+                _lastShipRotation = visualShipRoot.rotation;
+        }
 
         void LateUpdate()
         {
@@ -26,6 +36,12 @@ namespace Ship
                 Quaternion localRot = Quaternion.Inverse(deckProxy.rotation) * physics.rotation;
                 visuals.rotation = visualShipRoot.rotation * localRot;
             }
+
+            Quaternion currentShipRot = visualShipRoot.rotation;
+            Quaternion shipDeltaRotation = currentShipRot * Quaternion.Inverse(_lastShipRotation);
+
+            _onRotationChanged?.Invoke(shipDeltaRotation.eulerAngles);
+            _lastShipRotation = currentShipRot;
         }
 
         void OnTriggerEnter(Collider other)
@@ -59,7 +75,11 @@ namespace Ship
             rider.PhysicsRoot.position = deckProxy.TransformPoint(localPos);
             rider.PhysicsRoot.rotation = deckProxy.rotation * localRot;
 
-            rider.PhysicsRoot.GetComponent<FirstPersonCamera>().SetShipContext(visualShipRoot, deckProxy);
+            if (rider.PhysicsRoot.TryGetComponent<FirstPersonCamera>(out var cam))
+            {
+                cam.SetShipContext(visualShipRoot, deckProxy);
+                _onRotationChanged += cam.AddRotationOffset;
+            }
         }
 
         [ObserversRpc(runLocally: true, requireServer: false)]
@@ -81,7 +101,11 @@ namespace Ship
             rider.PhysicsRoot.position = visualShipRoot.TransformPoint(localPos);
             rider.PhysicsRoot.rotation = visualShipRoot.rotation * localRot;
 
-            rider.PhysicsRoot.GetComponent<FirstPersonCamera>().ClearShipContext();
+            if (rider.PhysicsRoot.TryGetComponent<FirstPersonCamera>(out var cam))
+            {
+                cam.ClearShipContext();
+                _onRotationChanged -= cam.AddRotationOffset;
+            }
         }
 
         [ObserversRpc(runLocally: true, requireServer: false)]

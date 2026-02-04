@@ -1,4 +1,5 @@
 using PurrNet;
+using Unity.Cinemachine;
 using UnityEngine;
 
 namespace Player
@@ -8,6 +9,7 @@ namespace Player
         [SerializeField] private Transform target;
 
         private Camera _mainCamera;
+        private CinemachinePanTilt _panTilt;
         private Rigidbody _rb;
 
         private Transform _currentShipVisuals;
@@ -21,7 +23,9 @@ namespace Player
                 return;
             }
 
-            InstanceHandler.GetInstance<MainCamera>().SetTarget(target);
+            var mainCamera = InstanceHandler.GetInstance<MainCamera>();
+            mainCamera.TryGetComponent(out _panTilt);
+            mainCamera.SetTarget(target);
         }
 
         private void Start()
@@ -75,6 +79,12 @@ namespace Player
                     _rb.MoveRotation(newRotation);
                 }
             }
+        }
+
+        public void AddRotationOffset(Vector3 delta)
+        {
+            _panTilt.PanAxis.Value += delta.y % 360f;
+            _panTilt.TiltAxis.Value += delta.x % 360f;
         }
     }
 }
