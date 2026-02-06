@@ -5,7 +5,8 @@ public class MapGenerator : MonoBehaviour
     public enum DrawMode
     {
         NoiseMap,
-        ColourMap
+        ColourMap,
+        Mesh
     };
 
     public DrawMode drawMode;
@@ -14,61 +15,54 @@ public class MapGenerator : MonoBehaviour
     public int mapLength;
     public float noiseScale;
     public int octaves;
-    [Range(0, 1)]
-    public float persistance;
+    [Range(0, 1)] public float persistance;
     public float lacunarity;
     public bool autoUpdate;
     public int seed;
     public Vector2 offset;
-    
+    [Range(0, 1)] public float heightMeshMultiplier = 0f;
+    public AnimationCurve heightCurve;
     public TerrainType[] regions;
+
     public void GenerateMap()
     {
-        Color[] colorMap = new Color[mapWidth * mapLength];
-        if (meshFilter != null && meshFilter.sharedMesh != null)
+        if (drawMode == DrawMode.Mesh)
         {
-            Bounds bounds = meshFilter.sharedMesh.bounds;
-            Vector3 scale = meshFilter.transform.localScale;
-        
-            // This will give you the actual world-space size
-            float worldWidth = bounds.size.x * scale.x;
-            float worldLength = bounds.size.y * scale.y;
-        
-            // Use these directly (will be large numbers like 200, 200)
-            mapWidth = Mathf.RoundToInt(worldWidth);
-            mapLength = Mathf.RoundToInt(worldLength);
-        
-            Debug.Log($"Plane dimensions - Width: {mapWidth}, Length: {mapLength}");
-        }
-        float[,] noiseMap = Noise.GenerateNoise(mapWidth, mapLength, seed, noiseScale,  octaves, persistance, lacunarity, offset);
-        
-        
-        for (int y = 0; y < mapLength; y++)
-        {
-            for (int x = 0; x < mapWidth; x++)
-            {
-                Debug.Log($"Position: ({x},{y})");
-                Debug.Log($"NoiseMap dimensions: {noiseMap.GetLength(0)} x {noiseMap.GetLength(1)}");
-                Debug.Log($"Value at ({x},{y}): {noiseMap[x, y]}");
-                float currentHeight =  noiseMap[x, y];
-                for (int i = 0; i < regions.Length; i++)
-                {
-                    if (currentHeight < regions[i].height)
-                    {
-                        colorMap[y * mapWidth + x] = regions[i].colour;
-                        break;
-                    }
-                }
+            System.Random prng = new System.Random(seed);
+            Vector2[] octaveOffsets = new Vector2[octaves];
+            for (int i = 0; i < octaves; i++) {
+                float offsetX = prng.Next(-100000, 100000) + offset.x;
+                float offsetY = prng.Next(-100000, 100000) + offset.y;
+                octaveOffsets[i] = new Vector2(offsetX, offsetY);
             }
-        }
-        MapDisplay display = FindObjectOfType<MapDisplay>();
-        if (drawMode == DrawMode.NoiseMap)
-            display.DrawTexture(TextureGenerator.TextureFromHeightMap(noiseMap));
-        else if (drawMode == DrawMode.ColourMap)
-            display.DrawTexture(TextureGenerator.TextureFromColourMap(colorMap,  mapWidth, mapLength));
-            
-    }
+            Mesh mesh = meshFilter.sharedMesh;
+            Vector3[] originalvertices = mesh.vertices;
+            Vector3[] modifiedvertices = new Vector3[originalvertices.Length];
 
+            Bounds bounds = mesh.bounds;
+            float margin = .01f;
+            
+            
+            for (int i = 0; i < originalvertices.Length; i++)
+            {
+                Vector3 v = originalvertices[i];
+                        
+                bool isEdge = (v.x <= bounds.min.x + margin || v.x >= bounds.max.x - margin || 
+                               v.y <= bounds.min.y + margin || v.y >= bounds.max.y - margin);
+                float height = Noise.GenerateHeight(v.x * noiseScale, v.y * noiseScale, persistance, lacunarity, heightMeshMultiplier, octaves, octaveOffsets);
+             
+                float finalHeight = heightCurve.Evaluate(height) * heightMeshMultiplier;
+                if (isEdge)
+                    finalHeight = 0f;
+                modifiedvertices[i] = new Vector3(v.x, v.y, finalHeight);
+            }
+
+            mesh.vertices = modifiedvertices;
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+        }
+    }
+    
     void OnValidate()
     {
         if (mapWidth < 1)
@@ -90,15 +84,16 @@ public class MapGenerator : MonoBehaviour
         {
             octaves = 0;
         }
-        
-    }
-}
 
-[System.Serializable]
-public struct TerrainType
-{
-    public string name;
-    public float height;
-    
-    public Color colour;
+    }
+
+
+    [System.Serializable]
+    public struct TerrainType
+    {
+        public string name;
+        public float height;
+
+        public Color colour;
+    }
 }

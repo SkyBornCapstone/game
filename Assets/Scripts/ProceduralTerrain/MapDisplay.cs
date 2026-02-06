@@ -8,5 +8,6 @@ public class MapDisplay : MonoBehaviour
     {
         textureRenderer.sharedMaterial.mainTexture = texture;
         textureRenderer.transform.localScale = new Vector3(texture.width, 100f, texture.height);
+        print(texture.width + ":" + texture.height);
     }
 }
