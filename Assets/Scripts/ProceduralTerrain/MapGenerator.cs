@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using System.Collections.Generic;
 public class MapGenerator : MonoBehaviour
 {
     public enum DrawMode
@@ -38,22 +38,26 @@ public class MapGenerator : MonoBehaviour
             Mesh mesh = meshFilter.sharedMesh;
             Vector3[] originalvertices = mesh.vertices;
             Vector3[] modifiedvertices = new Vector3[originalvertices.Length];
-
+            
+            Color[] colors = mesh.colors;
+           
             Bounds bounds = mesh.bounds;
-            float margin = .01f;
+            // float margin = .01f;
             
             
             for (int i = 0; i < originalvertices.Length; i++)
             {
                 Vector3 v = originalvertices[i];
                         
-                bool isEdge = (v.x <= bounds.min.x + margin || v.x >= bounds.max.x - margin || 
-                               v.y <= bounds.min.y + margin || v.y >= bounds.max.y - margin);
+                // bool isEdge = (v.x <= bounds.min.x + margin || v.x >= bounds.max.x - margin || 
+                //                v.y <= bounds.min.y + margin || v.y >= bounds.max.y - margin);
                 float height = Noise.GenerateHeight(v.x * noiseScale, v.y * noiseScale, persistance, lacunarity, heightMeshMultiplier, octaves, octaveOffsets);
              
                 float finalHeight = heightCurve.Evaluate(height) * heightMeshMultiplier;
-                if (isEdge)
+                if (colors[i].r < 1.0f) 
+                {
                     finalHeight = 0f;
+                }
                 modifiedvertices[i] = new Vector3(v.x, v.y, finalHeight);
             }
 
