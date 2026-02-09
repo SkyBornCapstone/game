@@ -1,32 +1,69 @@
+using System.Collections.Generic;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
 public static class TextureGenerator 
 {
-    public static Texture2D TextureFromColourMap(Color[] colourMap, int width, int length)
+    public static void GenerateColors(Mesh mesh, float minHeight, float maxHeight, Gradient heightGradient, HashSet<int> egdeVertices)
     {
-        Texture2D texture = new Texture2D(width, length);
-        texture.filterMode = FilterMode.Point;
-        texture.wrapMode = TextureWrapMode.Clamp;
-        texture.SetPixels(colourMap);
-        texture.Apply();
-        return texture;
-    }
-
-    public static Texture2D TextureFromHeightMap(float[,] heightMap)
-    {
-        int width = heightMap.GetLength(0);
-        int length = heightMap.GetLength(1);
+        Vector3[] oldVertices = mesh.vertices;
+        int[] oldTriangles = mesh.triangles;
         
-        Texture2D texture = new Texture2D(width, length);
-        Color[] colorMap = new Color[width * length];
-
-        for (int y = 0; y < length; y++)
+        Vector3[] newVertices = new Vector3[oldTriangles.Length];
+        int[] newTriangles = new int[oldTriangles.Length];
+        
+        Color[] colors = new Color[oldTriangles.Length];
+        Color[] oldColors = mesh.colors;
+        for (int i = 0; i < oldTriangles.Length; i+=3)
         {
-            for (int x = 0; x < width; x++)
+            Vector3 v1 =  oldVertices[oldTriangles[i]];
+            Vector3 v2 = oldVertices[oldTriangles[i+1]];
+            Vector3 v3 = oldVertices[oldTriangles[i+2]];
+            
+            float avgHeight = (v1.z + v2.z + v3.z) / 3;
+            float t = Mathf.InverseLerp(minHeight, maxHeight, avgHeight);
+            
+            Color triangleColor = heightGradient.Evaluate(t);
+            newVertices[i] = v1;
+            newVertices[i + 1] = v2;
+            newVertices[i + 2] = v3;
+            Color col1 = triangleColor;
+            Color col2 = triangleColor;
+            Color col3 = triangleColor;
+
+            if (oldColors[oldTriangles[i]].g == 0f)
             {
-                colorMap[y * width + x] = Color.Lerp(Color.black, Color.white, heightMap[x, y]);
+                col1 = Color.black;
             }
+
+            if (oldColors[oldTriangles[i + 1]].g == 0f)
+            {
+                col2 = Color.black;
+            }
+
+            if (oldColors[oldTriangles[i + 2]].g == 0f)
+            {
+                col3 = Color.black;
+            }
+
+
+
+            colors[i] = col1;
+            colors[i + 1] = col2;
+            colors[i + 2] = col3;
+            
+
+            newTriangles[i] = i;
+            newTriangles[i + 1] = i + 1;
+            newTriangles[i + 2] = i + 2;
         }
-        return TextureFromColourMap(colorMap, width, length);
+        mesh.vertices = newVertices;
+        mesh.triangles = newTriangles;
+        mesh.colors = colors;
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+        
+        
+        
     }
 }

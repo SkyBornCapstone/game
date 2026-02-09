@@ -8,7 +8,7 @@ public class MapGenerator : MonoBehaviour
         ColourMap,
         Mesh
     };
-
+    [Header("NoiseMap")]
     public DrawMode drawMode;
     public MeshFilter meshFilter;
     public int mapWidth;
@@ -23,7 +23,10 @@ public class MapGenerator : MonoBehaviour
     [Range(0, 1)] public float heightMeshMultiplier = 0f;
     public AnimationCurve heightCurve;
     public TerrainType[] regions;
-
+    [Header("Colors")] public Gradient colorGradient;
+    
+    private HashSet<int> edgeVertices = new HashSet<int>();
+    private bool edgeVerticesInitialized = false;
     public void GenerateMap()
     {
         if (drawMode == DrawMode.Mesh)
@@ -42,29 +45,56 @@ public class MapGenerator : MonoBehaviour
             Color[] colors = mesh.colors;
            
             Bounds bounds = mesh.bounds;
-            // float margin = .01f;
-            
-            
+
+            if (!edgeVerticesInitialized)
+            {
+                IntializeEdgeVertices(mesh);
+            }
+            float minHeight = float.MaxValue;
+            float maxHeight = float.MinValue;
             for (int i = 0; i < originalvertices.Length; i++)
             {
                 Vector3 v = originalvertices[i];
-                        
-                // bool isEdge = (v.x <= bounds.min.x + margin || v.x >= bounds.max.x - margin || 
-                //                v.y <= bounds.min.y + margin || v.y >= bounds.max.y - margin);
                 float height = Noise.GenerateHeight(v.x * noiseScale, v.y * noiseScale, persistance, lacunarity, heightMeshMultiplier, octaves, octaveOffsets);
              
                 float finalHeight = heightCurve.Evaluate(height) * heightMeshMultiplier;
-                if (colors[i].r < 1.0f) 
+                if (colors[i].r == 0.0f && colors[i].g == 0.0f && colors[i].b == 0.0f)
                 {
                     finalHeight = 0f;
                 }
                 modifiedvertices[i] = new Vector3(v.x, v.y, finalHeight);
+                if (finalHeight < minHeight)
+                {
+                    minHeight = finalHeight;
+                }else if (finalHeight > maxHeight)
+                {
+                    maxHeight = finalHeight;
+                }
             }
 
             mesh.vertices = modifiedvertices;
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
+            
+            TextureGenerator.GenerateColors(mesh, minHeight, maxHeight, colorGradient, edgeVertices);
+            
         }
+    }
+
+    private void IntializeEdgeVertices(Mesh mesh)
+    {
+        edgeVertices.Clear();
+        edgeVerticesInitialized = true;
+
+        Color[] colors = mesh.colors;
+        for (int i = 0; i < colors.Length; i++)
+        {
+            if (colors[i].r == 0.0f && colors[i].g == 0.0f && colors[i].b == 0.0f)
+            {
+                edgeVertices.Add(i);
+            }
+        }
+        edgeVerticesInitialized = true;
     }
     
     void OnValidate()
