@@ -1,5 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
+
 public class MapGenerator : MonoBehaviour
 {
     public enum DrawMode
@@ -11,8 +14,6 @@ public class MapGenerator : MonoBehaviour
     [Header("NoiseMap")]
     public DrawMode drawMode;
     public MeshFilter meshFilter;
-    public int mapWidth;
-    public int mapLength;
     public float noiseScale;
     public int octaves;
     [Range(0, 1)] public float persistance;
@@ -24,13 +25,15 @@ public class MapGenerator : MonoBehaviour
     public AnimationCurve heightCurve;
     public TerrainType[] regions;
     [Header("Colors")] public Gradient colorGradient;
-    
+    public Material material;
     private HashSet<int> edgeVertices = new HashSet<int>();
     private bool edgeVerticesInitialized = false;
+ 
     public void GenerateMap()
     {
         if (drawMode == DrawMode.Mesh)
         {
+            
             System.Random prng = new System.Random(seed);
             Vector2[] octaveOffsets = new Vector2[octaves];
             for (int i = 0; i < octaves; i++) {
@@ -38,11 +41,42 @@ public class MapGenerator : MonoBehaviour
                 float offsetY = prng.Next(-100000, 100000) + offset.y;
                 octaveOffsets[i] = new Vector2(offsetX, offsetY);
             }
-            Mesh mesh = meshFilter.sharedMesh;
+
+            string terrainName = meshFilter.gameObject.name + "Terrain";
+            Transform parent =  meshFilter.transform.parent;
+            Transform existingTerrain = parent != null ? parent.Find(terrainName) : meshFilter.transform.Find(terrainName);
+
+            GameObject terrainObject;
+            MeshFilter newMeshFilter;
+            MeshRenderer newMeshRenderer;
+
+            if (existingTerrain != null)
+            {
+                terrainObject = existingTerrain.gameObject;
+                newMeshFilter = existingTerrain.GetComponent<MeshFilter>();
+                newMeshRenderer = existingTerrain.GetComponent<MeshRenderer>();
+            }
+            else
+            {
+                terrainObject = new GameObject(terrainName);
+                terrainObject.transform.SetParent(parent);
+                terrainObject.transform.position = meshFilter.transform.position;
+                terrainObject.transform.rotation = meshFilter.transform.rotation;
+                terrainObject.transform.localScale = meshFilter.transform.localScale;
+               newMeshFilter = terrainObject.AddComponent<MeshFilter>();
+               newMeshRenderer = terrainObject.AddComponent<MeshRenderer>();
+            }
+            
+            
+
+            newMeshRenderer.sharedMaterial = material;
+            Mesh mesh = Instantiate(meshFilter.sharedMesh);
+            mesh.name = terrainName + " Mesh";
+            newMeshFilter.mesh = mesh;
             Vector3[] originalvertices = mesh.vertices;
             Vector3[] modifiedvertices = new Vector3[originalvertices.Length];
             
-            Color[] colors = mesh.colors;
+            Color[] colors = meshFilter.sharedMesh.colors;
            
             Bounds bounds = mesh.bounds;
 
@@ -58,7 +92,7 @@ public class MapGenerator : MonoBehaviour
                 float height = Noise.GenerateHeight(v.x * noiseScale, v.y * noiseScale, persistance, lacunarity, heightMeshMultiplier, octaves, octaveOffsets);
              
                 float finalHeight = heightCurve.Evaluate(height) * heightMeshMultiplier;
-                if (colors[i].r == 0.0f && colors[i].g == 0.0f && colors[i].b == 0.0f)
+                if (colors[i].r < 1.0f)
                 {
                     finalHeight = 0f;
                 }
@@ -71,13 +105,13 @@ public class MapGenerator : MonoBehaviour
                     maxHeight = finalHeight;
                 }
             }
-
+            
             mesh.vertices = modifiedvertices;
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
             
             TextureGenerator.GenerateColors(mesh, minHeight, maxHeight, colorGradient, edgeVertices);
-            
+
         }
     }
 
@@ -99,15 +133,7 @@ public class MapGenerator : MonoBehaviour
     
     void OnValidate()
     {
-        if (mapWidth < 1)
-        {
-            mapWidth = 1;
-        }
 
-        if (mapLength < 1)
-        {
-            mapLength = 1;
-        }
 
         if (lacunarity < 1)
         {

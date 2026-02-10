@@ -31,21 +31,6 @@ public static class TextureGenerator
             Color col2 = triangleColor;
             Color col3 = triangleColor;
 
-            if (oldColors[oldTriangles[i]].g == 0f)
-            {
-                col1 = Color.black;
-            }
-
-            if (oldColors[oldTriangles[i + 1]].g == 0f)
-            {
-                col2 = Color.black;
-            }
-
-            if (oldColors[oldTriangles[i + 2]].g == 0f)
-            {
-                col3 = Color.black;
-            }
-
 
 
             colors[i] = col1;
