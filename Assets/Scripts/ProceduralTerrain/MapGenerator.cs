@@ -49,12 +49,13 @@ public class MapGenerator : MonoBehaviour
             GameObject terrainObject;
             MeshFilter newMeshFilter;
             MeshRenderer newMeshRenderer;
-
+            MeshCollider meshCollider;
             if (existingTerrain != null)
             {
                 terrainObject = existingTerrain.gameObject;
                 newMeshFilter = existingTerrain.GetComponent<MeshFilter>();
                 newMeshRenderer = existingTerrain.GetComponent<MeshRenderer>();
+                meshCollider = existingTerrain.GetComponent<MeshCollider>();
             }
             else
             {
@@ -65,6 +66,8 @@ public class MapGenerator : MonoBehaviour
                 terrainObject.transform.localScale = meshFilter.transform.localScale;
                newMeshFilter = terrainObject.AddComponent<MeshFilter>();
                newMeshRenderer = terrainObject.AddComponent<MeshRenderer>();
+               meshCollider = terrainObject.AddComponent<MeshCollider>();
+               meshCollider.sharedMesh = newMeshFilter.sharedMesh;
             }
             
             
@@ -109,7 +112,8 @@ public class MapGenerator : MonoBehaviour
             mesh.vertices = modifiedvertices;
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
-            
+            meshCollider.sharedMesh = null; 
+            meshCollider.sharedMesh = mesh;
             TextureGenerator.GenerateColors(mesh, minHeight, maxHeight, colorGradient, edgeVertices);
 
         }

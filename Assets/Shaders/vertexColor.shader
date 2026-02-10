@@ -1,49 +1,75 @@
-Shader "Custom/VertexColor"
+Shader "Custom/URP_VertexColor_Lit"
 {
+    Properties
+    {
+        // No textures needed as we are using Vertex Colors
+    }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
-        
+        Tags { "RenderPipeline" = "UniversalPipeline" "RenderType"="Opaque" }
+
         Pass
         {
-            CGPROGRAM
+            // This tag is CRITICAL for URP lighting to work
+            Name "ForwardLit"
+            Tags { "LightMode" = "UniversalForward" }
+
+            HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            #include "UnityCG.cginc"
             
-            struct appdata
+            // Standard URP Includes
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+
+            struct Attributes
             {
-                float4 vertex : POSITION;
-                float4 color : COLOR;
-                float3 normal : NORMAL;
+                float4 positionOS : POSITION;
+                float4 color      : COLOR;
+                float3 normalOS    : NORMAL;
             };
-            
-            struct v2f
+
+            struct Varyings
             {
-                float4 vertex : SV_POSITION;
-                float4 color : COLOR;
-                float3 normal : NORMAL;
+                float4 positionCS : SV_POSITION;
+                float4 color      : COLOR;
+                float3 normalWS    : TEXCOORD0;
             };
-            
-            v2f vert (appdata v)
+
+            Varyings vert (Attributes IN)
             {
-                v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.color = v.color;
-                o.normal = UnityObjectToWorldNormal(v.normal);
-                return o;
+                Varyings OUT;
+                // Transform position to Clip Space
+                OUT.positionCS = TransformObjectToHClip(IN.positionOS.xyz);
+                // Pass vertex color
+                OUT.color = IN.color;
+                // Transform normal to World Space
+                OUT.normalWS = TransformObjectToWorldNormal(IN.normalOS);
+                return OUT;
             }
-            
-            fixed4 frag (v2f i) : SV_Target
+
+            half4 frag (Varyings IN) : SV_Target
             {
-                // Simple directional lighting
-                float3 lightDir = normalize(_WorldSpaceLightPos0.xyz);
-                float ndotl = max(0, dot(i.normal, lightDir));
-                float lighting = ndotl * 0.5 + 0.5; // Half Lambert
+                // Get the main light data (Directional Light)
+                Light mainLight = GetMainLight();
                 
-                return i.color * lighting;
+                // Standard NdotL lighting (Lambert)
+                float3 normal = normalize(IN.normalWS);
+                float3 lightDir = normalize(mainLight.direction);
+                float ndotl = saturate(dot(normal, lightDir));
+                
+                // Combine Light Color and Vertex Color
+                // mainLight.distanceAttenuation handles shadows/falloff
+                float3 radiance = mainLight.color * (ndotl * mainLight.distanceAttenuation);
+                
+                float3 finalColor = IN.color.rgb * radiance;
+                
+                // Add a small amount of Ambient light so it's not pitch black in shadows
+                finalColor += IN.color.rgb * half3(0.1, 0.1, 0.1);
+
+                return half4(finalColor, IN.color.a);
             }
-            ENDCG
+            ENDHLSL
         }
     }
 }
