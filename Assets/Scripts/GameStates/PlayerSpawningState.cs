@@ -16,23 +16,27 @@ namespace GameStates
 
         public override void Enter()
         {
+            SetupClientUI();
+            networkManager.FlushBatchedRPCs();
+
+            for (var i = 0; i < networkManager.players.Count; i++)
+            {
+                var player = networkManager.players[i];
+                var spawnPoint = spawnPoints[i];
+                var spawnedPlayer = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
+                spawnedPlayer.TryGetComponent(out NetworkIdentity networkIdentity);
+                networkIdentity.GiveOwnership(player);
+            }
+
+            machine.Next();
+        }
+
+        [ObserversRpc(bufferLast: true, runLocally: true)]
+        private void SetupClientUI()
+        {
             firstPersonCamera.gameObject.SetActive(true);
             lobbyUI.gameObject.SetActive(false);
             gameUI.gameObject.SetActive(true);
-
-            if (isServer)
-            {
-                for (var i = 0; i < networkManager.players.Count; i++)
-                {
-                    var player = networkManager.players[i];
-                    var spawnPoint = spawnPoints[i];
-                    var spawnedPlayer = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
-                    spawnedPlayer.TryGetComponent(out NetworkIdentity networkIdentity);
-                    networkIdentity.GiveOwnership(player);
-                }
-
-                machine.Next();
-            }
         }
     }
 }
