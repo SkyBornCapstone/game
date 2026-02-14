@@ -269,17 +269,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c12d03890543a4cef9f67bea2d91ba54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  worldSize: 100
-  spawnProbability: 0.1
-  minHeight: -2
-  maxHeight: 2
+  worldSize: 1000
+  spawnProbability: 0.01
+  minHeight: -25
+  maxHeight: 25
   startingIsland:
     prefab: {fileID: 919132149155446097, guid: 8a66a4b9db6547c4d906d9912f5e7bbc, type: 3}
     weight: 0
   islandTypes:
   - prefab: {fileID: 919132149155446097, guid: 8a66a4b9db6547c4d906d9912f5e7bbc, type: 3}
-    weight: 10
-  exclusionRadius: 5
+    weight: 0
+  exclusionRadius: 75
 --- !u!4 &1511661337
 Transform:
   m_ObjectHideFlags: 0

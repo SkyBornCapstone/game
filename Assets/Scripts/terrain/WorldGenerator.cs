@@ -7,15 +7,15 @@ namespace Terrain
     {
         [Header("World Settings")]
         [Tooltip("The size of the world grid (square).")]
-        public int worldSize = 100;
+        public int worldSize = 1000;
         
         [Tooltip("Probability of attempting to spawn an island at any given valid point (0.0 to 1.0).")]
         [Range(0f, 1f)]
-        public float spawnProbability = 0.1f;
+        public float spawnProbability = 0.01f;
 
         [Header("Vertical Variation")]
-        public float minHeight = -2f;
-        public float maxHeight = 2f;
+        public float minHeight = -25f;
+        public float maxHeight = 25f;
 
         [Header("Island Configuration")]
         [Tooltip("The specific island to always spawn at (0,0,0).")]
@@ -26,10 +26,16 @@ namespace Terrain
 
         [Header("Placement Settings")]
         [Tooltip("Minimum distance required between any two islands.")]
-        public float exclusionRadius = 5f;
+        public float exclusionRadius = 75f;
 
         // Internal list to track placed islands for exclusion checking
         private List<Vector3> placedIslands = new List<Vector3>();
+
+        // Trigger worldgen on start
+        private void Start()
+        {
+            GenerateWorld();
+        }
 
         [ContextMenu("Generate World")]
         public void GenerateWorld()
