@@ -57,7 +57,7 @@ namespace Terrain
             // Ex: instead of checking 100 points with a 10% spawn probability, we will check 10 random
             // points with a 100% spawn probability
             Shuffle(availablePoints);
-            float totalWeight = GetTotalWeight();
+            int totalWeight = GetTotalWeight();
             int attempts = Mathf.RoundToInt(availablePoints.Count * spawnProbability);
             for (int i = 0; i < attempts; i++)
             {
