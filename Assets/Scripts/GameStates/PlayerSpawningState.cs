@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using PurrNet;
 using PurrNet.StateMachine;
+using Unity.Cinemachine;
 using UnityEngine;
 
 namespace GameStates
@@ -9,10 +10,14 @@ namespace GameStates
     {
         [SerializeField] private GameObject playerPrefab;
         [SerializeField] private List<Transform> spawnPoints = new();
+        [SerializeField] private CinemachineCamera firstPersonCamera;
+        [SerializeField] private Canvas lobbyUI;
+        [SerializeField] private Canvas gameUI;
 
         public override void Enter()
         {
-            if (!isServer) return;
+            SetupClientUI();
+            networkManager.FlushBatchedRPCs();
 
             for (var i = 0; i < networkManager.players.Count; i++)
             {
@@ -24,6 +29,14 @@ namespace GameStates
             }
 
             machine.Next();
+        }
+
+        [ObserversRpc(bufferLast: true, runLocally: true)]
+        private void SetupClientUI()
+        {
+            firstPersonCamera.gameObject.SetActive(true);
+            lobbyUI.gameObject.SetActive(false);
+            gameUI.gameObject.SetActive(true);
         }
     }
 }
