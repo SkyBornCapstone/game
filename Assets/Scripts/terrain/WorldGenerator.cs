@@ -24,9 +24,6 @@ namespace Terrain
         [Tooltip("List of available island types to generate.")]
         public List<IslandData> islandTypes;
 
-        [Header("Placement Settings")]
-        // Global exclusion radius removed in favor of per-island settings
-
         // Internal list to track placed islands for exclusion checking
         private struct PlacedIsland
         {
@@ -209,8 +206,6 @@ namespace Terrain
                 new Keyframe(0f, 0f),
                 new Keyframe(1f, 1f)
             );
-            
-        }
             
         }
 
