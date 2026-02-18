@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-
+using ProceduralTerrain;
 namespace Terrain
 {
     public class WorldGenerator : MonoBehaviour
@@ -31,6 +31,7 @@ namespace Terrain
         // Internal list to track placed islands for exclusion checking
         private List<Vector3> placedIslands = new List<Vector3>();
 
+        private bool startingIslandSet = false;
         // Trigger worldgen on start
         private void Start()
         {
@@ -93,13 +94,22 @@ namespace Terrain
         private void SpawnIsland(IslandData data, Vector3 position)
         {
             if (data.prefab == null) return;
-
+            
             // Apply random rotation
             Quaternion rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
             
             GameObject instance = Instantiate(data.prefab, position, rotation, this.transform);
             instance.name = $"{data.prefab.name}_{position}";
+            GenerateTerrain(ref data.terrainData);
+            if (startingIslandSet)
+            {
+                TerrainGenerator terrainGenerator = GetComponent<TerrainGenerator>();
+                terrainGenerator.GenerateMap(data.terrainData, instance);
+            }
 
+            if(!startingIslandSet ) startingIslandSet = true;
+            TerrainNoiseData t = data.terrainData;
+            print($"[{data.prefab.name}_{position}] seed={t.seed} scale={t.noiseScale:F2} persistence={t.persistence:F2} lacunarity={t.lacunarity:F2} heightMult={t.heightMeshMultiplier:F2} octaves={t.octaves} offset={t.offset}");
             // Record placement
             placedIslands.Add(position);
         }
@@ -170,6 +180,22 @@ namespace Terrain
                 DestroyImmediate(transform.GetChild(i).gameObject);
             }
             placedIslands.Clear();
+        }
+
+        private void GenerateTerrain(ref TerrainNoiseData terrainData)
+        {
+            terrainData.noiseScale = Random.Range(1.0f, 6.0f);
+            terrainData.persistence = Random.Range(0f, 0f);
+            terrainData.lacunarity = Random.Range(1f, 2f);
+            terrainData.heightMeshMultiplier = Random.Range(.25f, 0.75f);
+            terrainData.octaves = Random.Range(1, 4);
+            terrainData.seed = Random.Range(0, int.MaxValue);
+            terrainData.offset = new Vector2(Random.Range(-100f, 100f), Random.Range(-100f, 100f));
+            terrainData.heightCurve = new AnimationCurve(
+                new Keyframe(0f, 0f),
+                new Keyframe(1f, 1f)
+            );
+            
         }
     }
 }
