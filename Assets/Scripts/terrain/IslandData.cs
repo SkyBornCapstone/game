@@ -11,6 +11,9 @@ namespace Terrain
 
         [Tooltip("Likelihood of this island being chosen.")]
         public int weight;
+
+        [Tooltip("Minimum distance from this island center that another island can spawn.")]
+        public float exclusionRadius;
     }
 
     [System.Serializable]

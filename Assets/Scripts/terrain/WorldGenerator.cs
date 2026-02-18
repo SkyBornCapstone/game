@@ -24,12 +24,15 @@ namespace Terrain
         [Tooltip("List of available island types to generate.")]
         public List<IslandData> islandTypes;
 
-        [Header("Placement Settings")]
-        [Tooltip("Minimum distance required between any two islands.")]
-        public float exclusionRadius = 75f;
-
         // Internal list to track placed islands for exclusion checking
-        private List<Vector3> placedIslands = new List<Vector3>();
+        private struct PlacedIsland
+        {
+            public Vector3 position;
+            public float radius;
+            public string name; // Debugging
+        }
+        
+        private List<PlacedIsland> placedIslands = new List<PlacedIsland>();
 
         private bool startingIslandSet = false;
         // Trigger worldgen on start
@@ -73,14 +76,14 @@ namespace Terrain
                 // Convert grid point to world position (on plane y=0 initially)
                 Vector3 candidatePos = new Vector3(point.x, 0, point.y);
 
-                // Check exclusion
-                if (IsPositionObstructed(candidatePos))
+                // Select Island Type
+                IslandData selectedIsland = SelectWeightedIsland(totalWeight);
+
+                // Check exclusion with the specific island's radius
+                if (IsPositionObstructed(candidatePos, selectedIsland.exclusionRadius))
                 {
                     continue; 
                 }
-
-                // Select Island Type
-                IslandData selectedIsland = SelectWeightedIsland(totalWeight);
 
                 // Final Placement with height randomization
                 float height = Random.Range(minHeight, maxHeight);
@@ -111,15 +114,23 @@ namespace Terrain
             TerrainNoiseData t = data.terrainData;
             print($"[{data.prefab.name}_{position}] seed={t.seed} scale={t.noiseScale:F2} persistence={t.persistence:F2} lacunarity={t.lacunarity:F2} heightMult={t.heightMeshMultiplier:F2} octaves={t.octaves} offset={t.offset}");
             // Record placement
-            placedIslands.Add(position);
+            placedIslands.Add(new PlacedIsland { 
+                position = position, 
+                radius = data.exclusionRadius,
+                name = instance.name 
+            });
         }
 
-        // Checks if a position is obstructed by another island's based on exclusion radius
-        private bool IsPositionObstructed(Vector3 pos)
+        // Checks if a position is obstructed by another island's based on both exclusion radii
+        private bool IsPositionObstructed(Vector3 pos, float newRadius)
         {
-            foreach (var existingPos in placedIslands)
+            foreach (var island in placedIslands)
             {
-                if (Vector3.Distance(pos, existingPos) < exclusionRadius)
+                // We check if the distance is less than EITHER the existing island's radius OR the new island's radius.
+                // Effectively: Dist < Max(R_existing, R_new)
+                // This ensures clear space defined by the largest requirement.
+                float dist = Vector3.Distance(pos, island.position);
+                if (dist < island.radius || dist < newRadius)
                 {
                     return true;
                 }
@@ -196,6 +207,15 @@ namespace Terrain
                 new Keyframe(1f, 1f)
             );
             
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            Gizmos.color = Color.red;
+            foreach (var island in placedIslands)
+            {
+                Gizmos.DrawWireSphere(island.position, island.radius);
+            }
         }
     }
 }
