@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
 public static class TextureGenerator 
 {
-    public static void GenerateColors(Mesh mesh, float minHeight, float maxHeight, Gradient heightGradient, HashSet<int> egdeVertices)
+    public static void GenerateColors(Mesh mesh, float minHeight, float maxHeight, Gradient heightGradient)
     {
         Vector3[] oldVertices = mesh.vertices;
         int[] oldTriangles = mesh.triangles;

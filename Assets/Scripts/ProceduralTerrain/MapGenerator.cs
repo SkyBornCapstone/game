@@ -114,7 +114,7 @@ public class MapGenerator : MonoBehaviour
             mesh.RecalculateBounds();
             meshCollider.sharedMesh = null; 
             meshCollider.sharedMesh = mesh;
-            TextureGenerator.GenerateColors(mesh, minHeight, maxHeight, colorGradient, edgeVertices);
+            TextureGenerator.GenerateColors(mesh, minHeight, maxHeight, colorGradient);
 
         }
     }
