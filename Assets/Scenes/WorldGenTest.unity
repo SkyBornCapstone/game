@@ -379,6 +379,7 @@ MonoBehaviour:
         m_PostInfinity: 2
         m_RotationOrder: 4
     weight: 0
+    exclusionRadius: 100
   islandTypes:
   - prefab: {fileID: 9121466822397262638, guid: 954c14b622e1edc4896c9841b21a380d, type: 3}
     terrainData:
@@ -426,7 +427,8 @@ MonoBehaviour:
         m_PreInfinity: 0
         m_PostInfinity: 0
         m_RotationOrder: 0
-    weight: 3
+    weight: 25
+    exclusionRadius: 150
   - prefab: {fileID: 6827968807762418011, guid: 6c560f242b2754f489b4d90033316a44, type: 3}
     terrainData:
       seed: 0
@@ -473,7 +475,8 @@ MonoBehaviour:
         m_PreInfinity: 0
         m_PostInfinity: 0
         m_RotationOrder: 0
-    weight: 0
+    weight: 25
+    exclusionRadius: 150
   - prefab: {fileID: 624731879934046829, guid: e09d2c70092b5ce4586ed18d52d62bd0, type: 3}
     terrainData:
       seed: 0
@@ -520,7 +523,8 @@ MonoBehaviour:
         m_PreInfinity: 0
         m_PostInfinity: 0
         m_RotationOrder: 0
-    weight: 0
+    weight: 20
+    exclusionRadius: 100
   - prefab: {fileID: 6114071567270113844, guid: e057d242fe7813443856b523940e0fd8, type: 3}
     terrainData:
       seed: 0
@@ -567,7 +571,8 @@ MonoBehaviour:
         m_PreInfinity: 0
         m_PostInfinity: 0
         m_RotationOrder: 0
-    weight: 0
+    weight: 20
+    exclusionRadius: 100
   - prefab: {fileID: 2817166868044475523, guid: e45dda9324c180546b1068ae4c0bd747, type: 3}
     terrainData:
       seed: 0
@@ -614,7 +619,8 @@ MonoBehaviour:
         m_PreInfinity: 0
         m_PostInfinity: 0
         m_RotationOrder: 0
-    weight: 0
+    weight: 20
+    exclusionRadius: 100
   - prefab: {fileID: 5024535617655240126, guid: 7ee002808ae34754d9415717db79e55c, type: 3}
     terrainData:
       seed: 0
@@ -661,7 +667,8 @@ MonoBehaviour:
         m_PreInfinity: 0
         m_PostInfinity: 0
         m_RotationOrder: 0
-    weight: 0
+    weight: 10
+    exclusionRadius: 50
   - prefab: {fileID: 4369642502283831528, guid: 003e3facc296c0947b9c3a582d718c1d, type: 3}
     terrainData:
       seed: 0
@@ -708,7 +715,8 @@ MonoBehaviour:
         m_PreInfinity: 0
         m_PostInfinity: 0
         m_RotationOrder: 0
-    weight: 0
+    weight: 10
+    exclusionRadius: 50
   - prefab: {fileID: 1274440987770376288, guid: 8207c3def6873344c971ee2b8b9d76e8, type: 3}
     terrainData:
       seed: 0
@@ -755,7 +763,8 @@ MonoBehaviour:
         m_PreInfinity: 0
         m_PostInfinity: 0
         m_RotationOrder: 0
-    weight: 0
+    weight: 10
+    exclusionRadius: 50
   - prefab: {fileID: 1776027010578781596, guid: 21127ecf81987594a9118074559d12b6, type: 3}
     terrainData:
       seed: 0
@@ -802,8 +811,8 @@ MonoBehaviour:
         m_PreInfinity: 0
         m_PostInfinity: 0
         m_RotationOrder: 0
-    weight: 1
-  exclusionRadius: 176.5
+    weight: 10
+    exclusionRadius: 50
 --- !u!4 &1511661337
 Transform:
   m_ObjectHideFlags: 0
