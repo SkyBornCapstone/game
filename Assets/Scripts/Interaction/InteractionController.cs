@@ -39,7 +39,8 @@ namespace Interaction
 
         private void OnDrawGizmosSelected()
         {
-            Gizmos.DrawLine(head.position, head.position + GetProxyForward() * interactionRange);
+            if (_cam)
+                Gizmos.DrawLine(head.position, head.position + GetProxyForward() * interactionRange);
         }
 
         private Vector3 GetProxyForward()
