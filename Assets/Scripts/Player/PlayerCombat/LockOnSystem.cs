@@ -9,6 +9,7 @@ namespace Player.PlayerCombat
         [Header("Lock-On Settings")] [SerializeField]
         private float detectionRadius = 20f;
 
+        [SerializeField] private float maxLockOnDistnce = 150f;
         [SerializeField] private LayerMask targetLayers;
         [SerializeField] private KeyCode lockOnKey = KeyCode.Q;
 
@@ -22,6 +23,8 @@ namespace Player.PlayerCombat
         private CinemachinePanTilt _panTilt;
         
         private static readonly Collider[] _overlapBuffer = new Collider[32];
+
+        private FirstPersonCamera _firstPersonCamera;
 
         protected override void OnSpawned()
         {
@@ -37,6 +40,8 @@ namespace Player.PlayerCombat
             
             var mainCameraComp = InstanceHandler.GetInstance<MainCamera>();
             mainCameraComp.TryGetComponent(out _panTilt);
+            
+            _firstPersonCamera = GetComponent<FirstPersonCamera>();
         }
 
         private void Update()
@@ -87,8 +92,8 @@ namespace Player.PlayerCombat
                     bestDist = dist;
                 }
             }
-
-            if (bestTarget != null)
+            print(bestDist);
+            if (bestTarget != null )
                 ApplyLockOn(bestTarget);
             
         }
@@ -100,7 +105,7 @@ namespace Player.PlayerCombat
 
             if (_panTilt != null)
             {
-                // _panTilt.PanAxis.
+                _firstPersonCamera?.SetMouseLookEnabled(false);
             }
         }
 
@@ -108,7 +113,7 @@ namespace Player.PlayerCombat
         {
             _isLockedOn = false;
             _lockedTarget = null;
-            
+            _firstPersonCamera?.SetMouseLookEnabled(true);
         }
 
         private void TrackLockedTarget()
@@ -118,8 +123,11 @@ namespace Player.PlayerCombat
             float targetPan = Mathf.Atan2(dirToTarget.x, dirToTarget.z) *  Mathf.Rad2Deg;
             float targetTilt = -Mathf.Asin(dirToTarget.y) *  Mathf.Rad2Deg;
             
-            _panTilt.PanAxis.Value  = Mathf.LerpAngle(_panTilt.PanAxis.Value,  targetPan,  Time.deltaTime * lockOnRotationSpeed);
-            _panTilt.TiltAxis.Value = Mathf.LerpAngle(_panTilt.TiltAxis.Value, targetTilt, Time.deltaTime * lockOnRotationSpeed);
+            // _panTilt.PanAxis.Value  = Mathf.LerpAngle(_panTilt.PanAxis.Value,  targetPan,  Time.deltaTime * lockOnRotationSpeed);
+            // _panTilt.TiltAxis.Value = Mathf.LerpAngle(_panTilt.TiltAxis.Value, targetTilt, Time.deltaTime * lockOnRotationSpeed);
+            
+            _panTilt.PanAxis.Value  = Mathf.MoveTowardsAngle(_panTilt.PanAxis.Value, targetPan,  lockOnRotationSpeed * Time.deltaTime * 100f);
+            _panTilt.TiltAxis.Value = Mathf.MoveTowardsAngle(_panTilt.TiltAxis.Value, targetTilt, lockOnRotationSpeed * Time.deltaTime * 100f);
         }
         
         public bool IsLockedOn => _isLockedOn;

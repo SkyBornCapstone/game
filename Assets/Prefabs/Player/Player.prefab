@@ -2263,6 +2263,7 @@ GameObject:
   - component: {fileID: 5092512020026356301}
   - component: {fileID: 4878605577475276243}
   - component: {fileID: 1966321862831497198}
+  - component: {fileID: 8769520980087233067}
   m_Layer: 10
   m_Name: Physics
   m_TagString: Untagged
@@ -2527,6 +2528,33 @@ MonoBehaviour:
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
   target: {fileID: 2427681044337887929}
+--- !u!114 &8769520980087233067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8175729032478055660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efe3988f879e1c14397da3ae700c1756, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  detectionRadius: 10
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 1024
+  lockOnKey: 113
+  lockOnRotationSpeed: 5
 --- !u!1 &8257578876906045399
 GameObject:
   m_ObjectHideFlags: 0
