@@ -329,8 +329,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   worldSize: 500
   spawnProbability: 0.01
-  minHeight: -50
-  maxHeight: 50
+  minHeight: -100
+  maxHeight: 100
   startingIsland:
     prefab: {fileID: 919132149155446097, guid: 8a66a4b9db6547c4d906d9912f5e7bbc, type: 3}
     terrainData:
@@ -426,7 +426,7 @@ MonoBehaviour:
         m_Curve: []
         m_PreInfinity: 0
         m_PostInfinity: 0
-        m_RotationOrder: 0
+        m_RotationOrder: 4
     weight: 25
     exclusionRadius: 150
   - prefab: {fileID: 6827968807762418011, guid: 6c560f242b2754f489b4d90033316a44, type: 3}
