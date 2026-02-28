@@ -9,7 +9,7 @@ namespace Interaction
         [SerializeField] private ArmIKController armIKController;
         [SerializeField] private Transform leftHandTarget;
         [SerializeField] private Transform rightHandTarget;
-
+        
         private Grabbable _currentGrabbed;
 
         public bool IsGrabbing => _currentGrabbed != null;

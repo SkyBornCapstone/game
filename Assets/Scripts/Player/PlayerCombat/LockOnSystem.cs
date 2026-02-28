@@ -16,6 +16,7 @@ namespace Player.PlayerCombat
         [Header("Camera Smoothing")] [SerializeField]
         private float lockOnRotationSpeed = 5f;
 
+        private LockOnTarget _ownLockOnTarget;
         private bool _isLockedOn;
         private LockOnTarget _lockedTarget;
         
@@ -42,6 +43,7 @@ namespace Player.PlayerCombat
             mainCameraComp.TryGetComponent(out _panTilt);
             
             _firstPersonCamera = GetComponent<FirstPersonCamera>();
+            _ownLockOnTarget = GetComponent<LockOnTarget>();
         }
 
         private void Update()
@@ -69,10 +71,14 @@ namespace Player.PlayerCombat
         private void TryLockOn()
         {
             int count = Physics.OverlapSphereNonAlloc(transform.position, detectionRadius, _overlapBuffer, targetLayers);
-
             if (count == 0) return;
             
-            Vector2 screenCentre = new Vector2(Screen.width / 2, Screen.height / 2);
+            float xMin = Screen.width  * 0.25f;
+            float xMax = Screen.width  * 0.75f;
+            float yMin = Screen.height * 0.25f;
+            float yMax = Screen.height * 0.75f;
+
+            Vector2 screenCentre = new Vector2(Screen.width / 2f, Screen.height / 2f);
             LockOnTarget bestTarget = null;
             float bestDist = float.MaxValue;
 
@@ -80,22 +86,22 @@ namespace Player.PlayerCombat
             {
                 if (!_overlapBuffer[i].TryGetComponent(out LockOnTarget target)) continue;
                 if (!target.CanBeLocked) continue;
-                
-                Vector3 ScreenPos = _mainCamera.WorldToScreenPoint(target.aimPoint.position);
 
-                if (ScreenPos.z < 0) continue;
+                Vector3 screenPos = _mainCamera.WorldToScreenPoint(target.aimPoint.position);
+                if (screenPos.z < 0) continue;
+                if (screenPos.x < xMin || screenPos.x > xMax ||
+                    screenPos.y < yMin || screenPos.y > yMax) continue;
 
-                float dist = Vector2.Distance(new Vector2(ScreenPos.x, ScreenPos.y), screenCentre);
+                float dist = Vector2.Distance(new Vector2(screenPos.x, screenPos.y), screenCentre);
                 if (dist < bestDist)
                 {
                     bestTarget = target;
                     bestDist = dist;
                 }
             }
-            print(bestDist);
-            if (bestTarget != null )
+
+            if (bestTarget != null && bestTarget != _ownLockOnTarget)
                 ApplyLockOn(bestTarget);
-            
         }
 
         private void ApplyLockOn(LockOnTarget target)
