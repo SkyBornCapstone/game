@@ -15,11 +15,12 @@ namespace Enemy
         private bool _walkPointSet;
         public float walkPointRange;
 
+        public float attackDamage;
         public float timeBetweenAttacks;
-        private bool _alreadyAttacked;
+        private float _nextAttack = 0;
 
         public float sightRange, attackRange;
-        public bool playerInSightRange, playerInAttackRange;
+        private bool _playerInSightRange, _playerInAttackRange;
 
         private void Awake()
         {
@@ -28,11 +29,11 @@ namespace Enemy
 
         private void Update()
         {
-            playerInSightRange = Physics.CheckSphere(transform.position, sightRange, playerMask);
-            playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, playerMask);
+            _playerInSightRange = Physics.CheckSphere(transform.position, sightRange, playerMask);
+            _playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, playerMask);
 
             PlayerHealth health = null;
-            if (playerInSightRange)
+            if (_playerInSightRange)
             {
                 int maxColliders = 4;
                 Collider[] hitColliders = new Collider[maxColliders];
@@ -43,9 +44,9 @@ namespace Enemy
                 }
             }
 
-            if (!playerInSightRange && !playerInAttackRange) Patrolling();
-            if (playerInSightRange && !playerInAttackRange) ChasePlayer(health);
-            if (playerInSightRange && playerInAttackRange) AttackPlayer(health);
+            if (!_playerInSightRange && !_playerInAttackRange) Patrolling();
+            if (_playerInSightRange && !_playerInAttackRange) ChasePlayer(health);
+            if (_playerInSightRange && _playerInAttackRange) AttackPlayer(health);
         }
 
         private void Patrolling()
@@ -80,6 +81,11 @@ namespace Enemy
         {
             agent.SetDestination(transform.position);
             transform.LookAt(health.transform);
+            if (Time.time > _nextAttack)
+            {
+                _nextAttack = Time.time + timeBetweenAttacks;
+                health.TakeDamage(attackDamage);
+            }
         }
 
         private void OnDrawGizmosSelected()
