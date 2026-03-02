@@ -32,7 +32,7 @@ namespace player
             {
                 OnDeath?.Invoke(owner);
 
-                Destroy(gameObject);
+                Destroy(gameObject.transform.parent.gameObject);
             }
         }
 
