@@ -24,7 +24,7 @@ namespace Interaction
             if (Input.GetKeyDown(KeyCode.Q) && IsGrabbing)
             {
                 _currentGrabbed.Drop(this);
-                armIKController.rightHandTarget.value = null;
+                armIKController.rightHandTargetGrab.value = null;
                 _currentGrabbed = null;
             }
 
@@ -40,7 +40,7 @@ namespace Interaction
             _currentGrabbed = grabbable;
             grabbable.SetConstraintSource(rightHandTarget);
 
-            armIKController.rightHandTarget.value = rightHandTarget;
+            armIKController.rightHandTargetGrab.value = rightHandTarget;
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Player.PlayerCombat
         [Header("Lock-On Settings")] [SerializeField]
         private float detectionRadius = 20f;
 
-        [SerializeField] private float maxLockOnDistnce = 150f;
+        // [SerializeField] private float maxLockOnDistnce = 150f;
         [SerializeField] private LayerMask targetLayers;
         [SerializeField] private KeyCode lockOnKey = KeyCode.Q;
 

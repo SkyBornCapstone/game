@@ -10,7 +10,8 @@ namespace Player
         [SerializeField] private float ikTransitionSpeed = 4f;
 
         // [SerializeField] public Transform leftHandTarget;
-        [SerializeField] public SyncVar<Transform> rightHandTarget;
+        [SerializeField] public SyncVar<Transform> rightHandTargetSwing;
+        [SerializeField] public SyncVar<Transform> rightHandTargetGrab;
 
         private float _leftHandWeight;
         private float _rightHandWeight;
@@ -24,7 +25,10 @@ namespace Player
         private void Update()
         {
             // var leftTargetWeight = leftHandTarget is not null ? 1.0f : 0.0f;
-            var rightTargetWeight = rightHandTarget.value ? 1.0f : 0.0f;
+            Transform activeTarget = rightHandTargetGrab.value != null 
+                ? rightHandTargetGrab.value 
+                : rightHandTargetSwing.value;
+            var rightTargetWeight = activeTarget != null ? 1.0f : 0.0f;
 
             // _leftHandWeight = Mathf.Lerp(_leftHandWeight, leftTargetWeight, Time.deltaTime * ikTransitionSpeed);
             _rightHandWeight = Mathf.Lerp(_rightHandWeight, rightTargetWeight, Time.deltaTime * ikTransitionSpeed);
@@ -47,8 +51,11 @@ namespace Player
         {
             if (animator)
             {
+                Transform activeTarget = rightHandTargetGrab.value != null
+                    ? rightHandTargetGrab.value
+                    : rightHandTargetSwing.value;
                 // ApplyIK(AvatarIKGoal.LeftHand, leftHandTarget, _leftHandWeight);
-                ApplyIK(AvatarIKGoal.RightHand, rightHandTarget.value, _rightHandWeight);
+                ApplyIK(AvatarIKGoal.RightHand, activeTarget, _rightHandWeight);
             }
         }
     }
