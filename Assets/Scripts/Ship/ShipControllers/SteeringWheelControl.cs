@@ -15,7 +15,7 @@ namespace Ship.ShipControllers
         [SerializeField] private float deadzone = 15f;
         [SerializeField] private float yawSensitivity = 0.25f;
 
-        private readonly SyncVar<float> _currentAngle = new();
+        private readonly SyncVar<float> _currentAngle = new(ownerAuth: true);
         private Quaternion _initialRotation;
 
         void Awake()
@@ -37,7 +37,6 @@ namespace Ship.ShipControllers
             MoveWheel(input);
         }
 
-        [ServerRpc]
         private void MoveWheel(float input)
         {
             _currentAngle.value += wheelTurnRate * Time.deltaTime * input;

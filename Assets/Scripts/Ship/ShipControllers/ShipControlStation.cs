@@ -1,6 +1,5 @@
 ﻿using Interaction;
 using Player;
-using PurrNet;
 using UnityEngine;
 
 namespace Ship.ShipControllers
@@ -10,46 +9,26 @@ namespace Ship.ShipControllers
         [Header("Station Settings")] [SerializeField]
         protected Transform seatPosition;
 
-        private readonly SyncVar<PlayerMovement> _occupyingPlayer = new();
+        private PlayerMovement _occupyingPlayer;
 
         protected virtual void Update()
         {
-            if (_occupyingPlayer.value && _occupyingPlayer.value.isOwner)
-            {
-                if (Input.GetKeyDown(KeyCode.E))
-                {
-                }
-
-                HandleInput();
-            }
+            if (isOwner) HandleInput();
         }
 
         public override void Interact(InteractionController interactionController)
         {
-            if (_occupyingPlayer.value && _occupyingPlayer.value.owner == interactionController.owner)
+            if (isOwner && _occupyingPlayer)
             {
-                _occupyingPlayer.value.SetLockedPosition(null);
-                LeaveStation();
+                _occupyingPlayer.SetLockedPosition(null);
+                _occupyingPlayer = null;
+                RemoveOwnership();
             }
-            else if (interactionController.TryGetComponent(out PlayerMovement player))
+            else if (!hasOwner && !_occupyingPlayer && interactionController.TryGetComponent(out PlayerMovement player))
             {
+                GiveOwnership(player.localPlayer);
                 player.SetLockedPosition(seatPosition);
-                EnterStation(player);
-            }
-        }
-
-        [ServerRpc]
-        protected virtual void EnterStation(PlayerMovement player)
-        {
-            _occupyingPlayer.value = player;
-        }
-
-        [ServerRpc]
-        protected virtual void LeaveStation()
-        {
-            if (_occupyingPlayer.value)
-            {
-                _occupyingPlayer.value = null;
+                _occupyingPlayer = player;
             }
         }
 
@@ -58,9 +37,9 @@ namespace Ship.ShipControllers
         public override bool CanInteract(InteractionController interactionController)
         {
             interactionController.TryGetComponent(out PlayerMovement playerMovement);
-            if (playerMovement == _occupyingPlayer.value) return true;
+            if (playerMovement == _occupyingPlayer) return true;
 
-            return !_occupyingPlayer.value;
+            return !_occupyingPlayer;
         }
     }
 }
