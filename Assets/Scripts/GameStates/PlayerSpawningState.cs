@@ -16,6 +16,8 @@ namespace GameStates
 
         public override void Enter()
         {
+            if (!isServer) return;
+
             SetupClientUI();
             networkManager.FlushBatchedRPCs();
 

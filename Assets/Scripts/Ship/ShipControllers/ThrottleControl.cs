@@ -14,7 +14,7 @@ namespace Ship.ShipControllers
         [SerializeField] private float maxRotation = 270f;
         [SerializeField] private float throttleTurnRate = 90f;
 
-        private readonly SyncVar<float> _currentAngle = new();
+        private readonly SyncVar<float> _currentAngle = new(ownerAuth: true);
         private Quaternion _initialRotation;
 
         void Awake()
@@ -36,7 +36,6 @@ namespace Ship.ShipControllers
             MoveThrottle(input);
         }
 
-        [ServerRpc]
         private void MoveThrottle(float input)
         {
             _currentAngle.value += throttleTurnRate * Time.deltaTime * input;
