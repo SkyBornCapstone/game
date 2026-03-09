@@ -35,8 +35,11 @@ namespace GameStates
         private void SetupClientUI()
         {
             firstPersonCamera.gameObject.SetActive(true);
-            lobbyUI.gameObject.SetActive(false);
-            gameUI.gameObject.SetActive(true);
+            if (lobbyUI && gameUI)
+            {
+                lobbyUI.gameObject.SetActive(false);
+                gameUI.gameObject.SetActive(true);
+            }
         }
     }
 }

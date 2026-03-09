@@ -1,7 +1,6 @@
 using UnityEngine;
 using PurrNet;
 using Unity.Cinemachine;
-using UnityEngine;
 namespace Player.PlayerCombat
 {
     public class LockOnSystem : NetworkBehaviour

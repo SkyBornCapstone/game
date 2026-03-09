@@ -1733,12 +1733,13 @@ MonoBehaviour:
   _visitiblityRules: {fileID: 0}
   lockOnSystem: {fileID: 8769520980087233067}
   armIKController: {fileID: 3553259107749683339}
-  rightHandTarget: {fileID: 3644015317935201178}
-  armAimOrigin: {fileID: 2337313410161098214}
-  mouseSensitivity: 0.002
-  armExtendDistance: 1.5
-  yawClamp: {x: -60, y: 60}
-  pitchClamp: {x: -60, y: 60}
+  animator: {fileID: 458774339894275911}
+  swingTriggerThreshold: -300
+  releaseThreshold: 300
+  cancelThreshold: 50
+  swingFreezeValue: 0.01
+  swingCompleteSpeed: 2
+  swingResetSpeed: 4
 --- !u!1 &6922589410682481098
 GameObject:
   m_ObjectHideFlags: 0
