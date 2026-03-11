@@ -21,8 +21,11 @@ namespace Terrain
         [Tooltip("The specific island to always spawn at (0,0,0).")]
         public IslandData startingIsland;
         
-        [Tooltip("List of available island types to generate.")]
-        public List<IslandData> islandTypes;
+        [Tooltip("List of individual island types to generate.")]
+        public List<IslandData> individualIslands;
+
+        [Tooltip("List of island buckets. A bucket is chosen first by its weight, then an island within it is chosen by its local weight.")]
+        public List<IslandBucket> islandBuckets;
 
         // Internal list to track placed islands for exclusion checking
         private struct PlacedIsland
@@ -141,30 +144,109 @@ namespace Terrain
         private int GetTotalWeight()
         {
             int sum = 0;
-            foreach (var island in islandTypes)
+            if (individualIslands != null)
             {
-                sum += island.weight;
+                foreach (var island in individualIslands)
+                {
+                    sum += island.weight;
+                }
+            }
+            if (islandBuckets != null)
+            {
+                foreach (var bucket in islandBuckets)
+                {
+                    sum += bucket.weight;
+                }
             }
             return sum;
         }
 
-        // Randomly selects an island based on its weight
+        // Randomly selects an island based on its weight, picking either individual or from a bucket
         private IslandData SelectWeightedIsland(int totalWeight)
         {
+            if (totalWeight <= 0)
+            {
+                return GetFallbackIsland();
+            }
+
             int randomValue = Random.Range(0, totalWeight);
             int currentSum = 0;
 
-            foreach (var island in islandTypes)
+            if (individualIslands != null)
             {
-                currentSum += island.weight;
-                if (randomValue <= currentSum)
+                foreach (var island in individualIslands)
                 {
-                    return island;
+                    currentSum += island.weight;
+                    if (randomValue < currentSum)
+                    {
+                        return island;
+                    }
+                }
+            }
+
+            if (islandBuckets != null)
+            {
+                foreach (var bucket in islandBuckets)
+                {
+                    currentSum += bucket.weight;
+                    if (randomValue < currentSum)
+                    {
+                        return SelectIslandFromBucket(bucket);
+                    }
                 }
             }
             
-            // Fallback
-            return islandTypes[Random.Range(0, islandTypes.Count)];
+            return GetFallbackIsland();
+        }
+
+        private IslandData ApplyBucketExclusionRadius(IslandData island, float bucketRadius)
+        {
+            if (bucketRadius > 0f)
+            {
+                island.exclusionRadius = bucketRadius;
+            }
+            return island;
+        }
+
+        private IslandData SelectIslandFromBucket(IslandBucket bucket)
+        {
+            if (bucket.islands == null || bucket.islands.Count == 0) return default;
+            
+            int bucketTotalWeight = 0;
+            foreach (var island in bucket.islands)
+            {
+                bucketTotalWeight += island.weight;
+            }
+
+            if (bucketTotalWeight <= 0)
+            {
+                return ApplyBucketExclusionRadius(bucket.islands[Random.Range(0, bucket.islands.Count)], bucket.exclusionRadius);
+            }
+
+            int randomValue = Random.Range(0, bucketTotalWeight);
+            int currentSum = 0;
+            foreach (var island in bucket.islands)
+            {
+                currentSum += island.weight;
+                if (randomValue < currentSum)
+                {
+                    return ApplyBucketExclusionRadius(island, bucket.exclusionRadius);
+                }
+            }
+            return ApplyBucketExclusionRadius(bucket.islands[Random.Range(0, bucket.islands.Count)], bucket.exclusionRadius);
+        }
+
+        private IslandData GetFallbackIsland()
+        {
+            if (individualIslands != null && individualIslands.Count > 0)
+            {
+                return individualIslands[Random.Range(0, individualIslands.Count)];
+            }
+            if (islandBuckets != null && islandBuckets.Count > 0 && islandBuckets[0].islands != null && islandBuckets[0].islands.Count > 0)
+            {
+                return islandBuckets[0].islands[Random.Range(0, islandBuckets[0].islands.Count)];
+            }
+            return default;
         }
 
         // For shuffling the list of possible island generation points

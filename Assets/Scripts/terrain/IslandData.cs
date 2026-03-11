@@ -1,7 +1,19 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace Terrain
 {
+    [System.Serializable]
+    public struct IslandBucket
+    {
+        public string name;
+        [Tooltip("Weight of this bucket compared to individual islands and other buckets.")]
+        public int weight;
+        [Tooltip("Optional exclusion radius for all islands in this bucket. If greater than 0, this overrides the individual island's exclusion radius.")]
+        public float exclusionRadius;
+        [Tooltip("The island types in this bucket. Their individual weights provide the relative probability of being chosen from within this bucket.")]
+        public List<IslandData> islands;
+    }
     [System.Serializable]
     public struct IslandData
     {
