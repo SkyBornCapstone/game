@@ -69,7 +69,19 @@ namespace ProceduralTerrain
 
 
 
-            newMeshRenderer.sharedMaterial = terrainData.material;
+            if (terrainData.material != null)
+            {
+                newMeshRenderer.sharedMaterial = terrainData.material;
+            }
+            else
+            {
+                MeshRenderer topRenderer = top.GetComponent<MeshRenderer>();
+                if (topRenderer != null)
+                {
+                    newMeshRenderer.sharedMaterial = topRenderer.sharedMaterial;
+                }
+            }
+
             Mesh mesh = Instantiate(topMeshFilter.sharedMesh);
             mesh.name = terrainName + " Mesh";
             newMeshFilter.mesh = mesh;
