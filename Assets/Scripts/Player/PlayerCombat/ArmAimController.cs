@@ -26,7 +26,7 @@ namespace Player.PlayerCombat
 
             if (!isLockedOn)
             {
-                armIKController.rightHandTargetSwing.value = null;
+                // armIKController.rightHandTargetSwing.value = null;
                 
                 return;
             }

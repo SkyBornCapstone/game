@@ -9,7 +9,7 @@ namespace Interaction
         [SerializeField] private ArmIKController armIKController;
         [SerializeField] private Transform leftHandTarget;
         [SerializeField] private Transform rightHandTarget;
-        
+
         private Grabbable _currentGrabbed;
 
         public bool IsGrabbing => _currentGrabbed != null;
@@ -24,7 +24,7 @@ namespace Interaction
             if (Input.GetKeyDown(KeyCode.Q) && IsGrabbing)
             {
                 _currentGrabbed.Drop(this);
-                armIKController.rightHandTargetGrab.value = null;
+                armIKController.rightHandTarget.value = null;
                 _currentGrabbed = null;
             }
 
@@ -40,7 +40,7 @@ namespace Interaction
             _currentGrabbed = grabbable;
             grabbable.SetConstraintSource(rightHandTarget);
 
-            armIKController.rightHandTargetGrab.value = rightHandTarget;
+            armIKController.rightHandTarget.value = rightHandTarget;
         }
     }
 }
