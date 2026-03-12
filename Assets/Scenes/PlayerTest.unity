@@ -3291,6 +3291,9 @@ MonoBehaviour:
   - {fileID: 285950652}
   - {fileID: 491947630}
   - {fileID: 846274856}
+  firstPersonCamera: {fileID: 660060497}
+  lobbyUI: {fileID: 0}
+  gameUI: {fileID: 0}
 --- !u!114 &2062012811
 MonoBehaviour:
   m_ObjectHideFlags: 0

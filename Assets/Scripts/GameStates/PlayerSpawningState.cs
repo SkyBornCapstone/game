@@ -8,14 +8,16 @@ namespace GameStates
 {
     public class PlayerSpawningState : StateNode
     {
-        [SerializeField] private GameObject playerPrefab;
-        [SerializeField] private List<Transform> spawnPoints = new();
+        [SerializeField] public GameObject playerPrefab;
+        [SerializeField] public List<Transform> spawnPoints = new();
         [SerializeField] private CinemachineCamera firstPersonCamera;
         [SerializeField] private Canvas lobbyUI;
         [SerializeField] private Canvas gameUI;
 
-        public override void Enter()
+        public override void Enter(bool asServer)
         {
+            if (!asServer) return;
+
             SetupClientUI();
             networkManager.FlushBatchedRPCs();
 
