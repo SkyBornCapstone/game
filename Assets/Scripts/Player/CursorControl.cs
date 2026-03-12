@@ -7,10 +7,9 @@ namespace player
     {
         void Start()
         {
-            if (!isOwner) return;
-
-            Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Locked;
+            // if (!isOwner) return;
+            
+            HideCursor();
         }
 
         public void ShowCursor()

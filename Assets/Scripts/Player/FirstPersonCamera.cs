@@ -14,6 +14,7 @@ namespace Player
 
         private Transform _currentShipVisuals;
         private Transform _currentShipProxy;
+        private CinemachineInputAxisController _inputAxisController;
 
         protected override void OnSpawned()
         {
@@ -25,6 +26,7 @@ namespace Player
 
             var mainCamera = InstanceHandler.GetInstance<MainCamera>();
             mainCamera.TryGetComponent(out _panTilt);
+            mainCamera.TryGetComponent(out _inputAxisController);
             mainCamera.SetTarget(target);
         }
 
@@ -32,6 +34,7 @@ namespace Player
         {
             _mainCamera = Camera.main;
             _rb = GetComponent<Rigidbody>();
+            
         }
 
         private void Update()
@@ -85,6 +88,14 @@ namespace Player
         {
             _panTilt.PanAxis.Value += delta.y % 360f;
             _panTilt.TiltAxis.Value += delta.x % 360f;
+        }
+
+        public void SetMouseLookEnabled(bool value)
+        {
+            if (_panTilt)
+            {
+                _inputAxisController.enabled = value;
+            }
         }
     }
 }
