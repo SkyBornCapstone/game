@@ -1734,12 +1734,6 @@ MonoBehaviour:
   lockOnSystem: {fileID: 8769520980087233067}
   armIKController: {fileID: 3553259107749683339}
   animator: {fileID: 458774339894275911}
-  swingTriggerThreshold: -300
-  releaseThreshold: 300
-  cancelThreshold: 50
-  swingFreezeValue: 0.01
-  swingCompleteSpeed: 2
-  swingResetSpeed: 4
 --- !u!1 &6922589410682481098
 GameObject:
   m_ObjectHideFlags: 0
@@ -2958,7 +2952,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8917245581597148217}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1

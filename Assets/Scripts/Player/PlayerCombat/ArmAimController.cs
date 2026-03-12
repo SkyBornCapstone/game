@@ -10,7 +10,7 @@ namespace Player.PlayerCombat
         [SerializeField] public ArmIKController armIKController;
         [SerializeField] public Animator animator;
 
-        private static readonly int RightSwing = Animator.StringToHash("RightSwing");
+        private static readonly int RightSwing = Animator.StringToHash("LeftSwing");
 
         protected override void OnSpawned()
         {
