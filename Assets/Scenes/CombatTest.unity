@@ -2341,7 +2341,7 @@ Transform:
   m_GameObject: {fileID: 1857342248}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 50, z: 0}
+  m_LocalPosition: {x: 5.581601, y: 1.6100001, z: -10.416051}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2496,7 +2496,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  playerPrefab: {fileID: 8556194902096009755, guid: 4e29ae1e50474714594c4011a818b08d, type: 3}
+  playerPrefab: {fileID: 8556194902096009755, guid: 8fc501684ccfb1a449888f96bfb1d879, type: 3}
   spawnPoints:
   - {fileID: 1487013597}
   - {fileID: 2069634897}
@@ -2631,7 +2631,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 0}
-  _playerPrefab: {fileID: 8556194902096009755, guid: 4e29ae1e50474714594c4011a818b08d, type: 3}
+  _playerPrefab: {fileID: 8556194902096009755, guid: 8fc501684ccfb1a449888f96bfb1d879, type: 3}
   _ignoreNetworkRules: 0
   spawnPoints:
   - {fileID: 1487013597}
