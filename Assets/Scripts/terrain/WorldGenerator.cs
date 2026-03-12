@@ -5,9 +5,15 @@ namespace Terrain
 {
     public class WorldGenerator : MonoBehaviour
     {
-        [Header("World Settings")]
-        [Tooltip("The size of the world grid (square).")]
-        public int worldSize = 1000;
+        [Header("World Shape Settings")]
+        [Tooltip("Radius of the inner circular world.")]
+        public float innerRadius = 500f;
+
+        [Tooltip("Width of the empty ring outside the inner world.")]
+        public float emptyRingWidth = 100f;
+
+        [Tooltip("Width of the outermost ring where specific islands spawn.")]
+        public float outerRingWidth = 200f;
         
         [Tooltip("Probability of attempting to spawn an island at any given valid point (0.0 to 1.0).")]
         [Range(0f, 1f)]
@@ -17,7 +23,7 @@ namespace Terrain
         public float minHeight = -25f;
         public float maxHeight = 25f;
 
-        [Header("Island Configuration")]
+        [Header("Inner World Island Configuration")]
         [Tooltip("The specific island to always spawn at (0,0,0).")]
         public IslandData startingIsland;
         
@@ -26,6 +32,10 @@ namespace Terrain
 
         [Tooltip("List of island buckets. A bucket is chosen first by its weight, then an island within it is chosen by its local weight.")]
         public List<IslandBucket> islandBuckets;
+
+        [Header("Outer Ring Island Configuration")]
+        [Tooltip("The bucket of islands to use exclusively for the outer ring.")]
+        public IslandBucket outerRingBucket;
 
         // Internal list to track placed islands for exclusion checking
         private struct PlacedIsland
@@ -50,49 +60,66 @@ namespace Terrain
             ClearWorld();
 
             placedIslands.Clear();
-            List<Vector2Int> availablePoints = new List<Vector2Int>();
+            List<Vector2Int> innerPoints = new List<Vector2Int>();
+            List<Vector2Int> outerPoints = new List<Vector2Int>();
 
-            // Center the grid of possible island spawnpoints around 0,0. Range is [-worldSize/2, worldSize/2]
-            int halfSize = worldSize / 2;
-            for (int x = -halfSize; x <= halfSize; x++)
+            float maxRadius = innerRadius + emptyRingWidth + outerRingWidth;
+            int maxRadiusInt = Mathf.CeilToInt(maxRadius);
+
+            for (int x = -maxRadiusInt; x <= maxRadiusInt; x++)
             {
-                for (int z = -halfSize; z <= halfSize; z++)
+                for (int z = -maxRadiusInt; z <= maxRadiusInt; z++)
                 {
-                    availablePoints.Add(new Vector2Int(x, z));
+                    float dist = Mathf.Sqrt(x * x + z * z);
+                    if (dist <= innerRadius)
+                    {
+                        innerPoints.Add(new Vector2Int(x, z));
+                    }
+                    else if (dist > innerRadius + emptyRingWidth && dist <= maxRadius)
+                    {
+                        outerPoints.Add(new Vector2Int(x, z));
+                    }
                 }
             }
 
             // Place Starting Island at (0,0)
             SpawnIsland(startingIsland, Vector3.zero);
 
+            // Process Inner Points
             // Instead of looping through all points with a probability of spawning at each one,
             // we will shuffle the points and then trim the list to the number of attempts we want
             // Ex: instead of checking 100 points with a 10% spawn probability, we will check 10 random
             // points with a 100% spawn probability
-            Shuffle(availablePoints);
-            int totalWeight = GetTotalWeight();
-            int attempts = Mathf.RoundToInt(availablePoints.Count * spawnProbability);
-            for (int i = 0; i < attempts; i++)
+            Shuffle(innerPoints);
+            int innerTotalWeight = GetTotalWeight();
+            int innerAttempts = Mathf.RoundToInt(innerPoints.Count * spawnProbability);
+            for (int i = 0; i < innerAttempts; i++)
             {
-                Vector2Int point = availablePoints[i];
-
-                // Convert grid point to world position (on plane y=0 initially)
+                Vector2Int point = innerPoints[i];
                 Vector3 candidatePos = new Vector3(point.x, 0, point.y);
+                IslandData selectedIsland = SelectWeightedIsland(innerTotalWeight);
 
-                // Select Island Type
-                IslandData selectedIsland = SelectWeightedIsland(totalWeight);
-
-                // Check exclusion with the specific island's radius
                 if (IsPositionObstructed(candidatePos, selectedIsland.exclusionRadius))
-                {
-                    continue; 
-                }
+                    continue;
 
-                // Final Placement with height randomization
                 float height = Random.Range(minHeight, maxHeight);
                 Vector3 finalPos = candidatePos + Vector3.up * height;
-                
-                // Spawn Island handles rotation randomization
+                SpawnIsland(selectedIsland, finalPos);
+            }
+
+            // Process Outer Points
+            Shuffle(outerPoints);
+            for (int i = 0; i < outerPoints.Count; i++)
+            {
+                Vector2Int point = outerPoints[i];
+                Vector3 candidatePos = new Vector3(point.x, 0, point.y);
+                IslandData selectedIsland = SelectIslandFromBucket(outerRingBucket);
+
+                if (IsPositionObstructed(candidatePos, selectedIsland.exclusionRadius))
+                    continue;
+
+                float height = Random.Range(minHeight, maxHeight);
+                Vector3 finalPos = candidatePos + Vector3.up * height;
                 SpawnIsland(selectedIsland, finalPos);
             }
         }
