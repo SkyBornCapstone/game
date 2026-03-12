@@ -17,7 +17,9 @@ namespace Terrain
         
         [Tooltip("Probability of attempting to spawn an island at any given valid point (0.0 to 1.0).")]
         [Range(0f, 1f)]
-        public float spawnProbability = 0.01f;
+        public float innerSpawnProbability = 0.01f;
+        [Range(0f, 1f)]
+        public float outerSpawnProbability = 0.10f;
 
         [Header("Vertical Variation")]
         public float minHeight = -25f;
@@ -92,7 +94,7 @@ namespace Terrain
             // points with a 100% spawn probability
             Shuffle(innerPoints);
             int innerTotalWeight = GetTotalWeight();
-            int innerAttempts = Mathf.RoundToInt(innerPoints.Count * spawnProbability);
+            int innerAttempts = Mathf.RoundToInt(innerPoints.Count * innerSpawnProbability);
             for (int i = 0; i < innerAttempts; i++)
             {
                 Vector2Int point = innerPoints[i];
@@ -109,7 +111,8 @@ namespace Terrain
 
             // Process Outer Points
             Shuffle(outerPoints);
-            for (int i = 0; i < outerPoints.Count; i++)
+            int outerAttempts = Mathf.RoundToInt(outerPoints.Count * outerSpawnProbability);
+            for (int i = 0; i < outerAttempts; i++)
             {
                 Vector2Int point = outerPoints[i];
                 Vector3 candidatePos = new Vector3(point.x, 0, point.y);
