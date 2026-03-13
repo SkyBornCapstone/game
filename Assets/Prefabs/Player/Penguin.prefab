@@ -808,8 +808,13 @@ PrefabInstance:
       addedObject: {fileID: 4689210746386790960}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 0f1a852d00001b54289f1c1d1c6fb80f, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5093809255165831458}
+      addedObject: {fileID: 7447470533194366342}
   m_SourcePrefab: {fileID: 100100000, guid: 0f1a852d00001b54289f1c1d1c6fb80f, type: 3}
+--- !u!1 &1346919211759238789 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4454971416802579652, guid: 0f1a852d00001b54289f1c1d1c6fb80f, type: 3}
+  m_PrefabInstance: {fileID: 3414303585365109313}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2568004877570184976 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 0f1a852d00001b54289f1c1d1c6fb80f, type: 3}
@@ -838,13 +843,9 @@ MonoBehaviour:
   _visitiblityRules: {fileID: 0}
   animator: {fileID: 8323928931490228110}
   ikTransitionSpeed: 4
-  rightHandTargetSwing:
-    _value: {fileID: 3644015317935201178}
-    _ownerAuth: 0
-    _sendIntervalInSeconds: 0
-  rightHandTargetGrab:
-    _value: {fileID: 5683889897255429114}
-    _ownerAuth: 0
+  rightHandTarget:
+    _value: {fileID: 0}
+    _ownerAuth: 1
     _sendIntervalInSeconds: 0
 --- !u!114 &8323928931490228110
 MonoBehaviour:
@@ -895,7 +896,7 @@ MonoBehaviour:
   lockOnSystem: {fileID: 8769520980087233067}
   armIKController: {fileID: 2102238631850962067}
   animator: {fileID: 9081683112626690000}
---- !u!114 &5093809255165831458
+--- !u!114 &7447470533194366342
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -904,7 +905,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2568004877570184976}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0a4467678f2c16448a01f0d680449ae4, type: 3}
+  m_Script: {fileID: 11500000, guid: 39d5e4b97b1615f4aae984a3d5f4235f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _isSetup: 0
@@ -916,10 +917,31 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  renderersToHide: []
+  _components: []
+  _gameObjects:
+  - target: {fileID: 7971625614808099659}
+    activeAsOwner: 0
+  - target: {fileID: 1346919211759238789}
+    activeAsOwner: 0
+  - target: {fileID: 4525085858743475743}
+    activeAsOwner: 0
+  _toActivate: []
+  _toDeactivate: []
+  _toEnable: []
+  _toDisable: []
 --- !u!4 &2947802184977927594 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0f1a852d00001b54289f1c1d1c6fb80f, type: 3}
+  m_PrefabInstance: {fileID: 3414303585365109313}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &4525085858743475743 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -7949312283227982754, guid: 0f1a852d00001b54289f1c1d1c6fb80f, type: 3}
+  m_PrefabInstance: {fileID: 3414303585365109313}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &7971625614808099659 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -4484762486200008438, guid: 0f1a852d00001b54289f1c1d1c6fb80f, type: 3}
   m_PrefabInstance: {fileID: 3414303585365109313}
   m_PrefabAsset: {fileID: 0}
 --- !u!95 &9081683112626690000 stripped

@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using UnityEngine;
 using ProceduralTerrain;
+using UnityEngine;
+
 namespace Terrain
 {
     public class WorldGenerator : MonoBehaviour
     {
-        [Header("World Shape Settings")]
-        [Tooltip("Radius of the inner circular world.")]
+        [Header("World Shape Settings")] [Tooltip("Radius of the inner circular world.")]
         public float innerRadius = 500f;
 
         [Tooltip("Width of the empty ring outside the inner world.")]
@@ -14,25 +14,23 @@ namespace Terrain
 
         [Tooltip("Width of the outermost ring where specific islands spawn.")]
         public float outerRingWidth = 200f;
-        
-        [Tooltip("Probability of attempting to spawn an island at any given valid point (0.0 to 1.0).")]
-        [Range(0f, 1f)]
-        public float innerSpawnProbability = 0.01f;
-        [Range(0f, 1f)]
-        public float outerSpawnProbability = 0.10f;
 
-        [Header("Vertical Variation")]
-        public float minHeight = -25f;
+        [Tooltip("Probability of attempting to spawn an island at any given valid point (0.0 to 1.0).")] [Range(0f, 1f)]
+        public float innerSpawnProbability = 0.01f;
+
+        [Range(0f, 1f)] public float outerSpawnProbability = 0.10f;
+
+        [Header("Vertical Variation")] public float minHeight = -25f;
         public float maxHeight = 25f;
 
-        [Header("Inner World Island Configuration")]
-        [Tooltip("The specific island to always spawn at (0,0,0).")]
+        [Header("Inner World Island Configuration")] [Tooltip("The specific island to always spawn at (0,0,0).")]
         public IslandData startingIsland;
-        
+
         [Tooltip("List of individual island types to generate.")]
         public List<IslandData> individualIslands;
 
-        [Tooltip("List of island buckets. A bucket is chosen first by its weight, then an island within it is chosen by its local weight.")]
+        [Tooltip(
+            "List of island buckets. A bucket is chosen first by its weight, then an island within it is chosen by its local weight.")]
         public List<IslandBucket> islandBuckets;
 
         [Header("Outer Ring Island Configuration")]
@@ -46,10 +44,11 @@ namespace Terrain
             public float radius;
             public string name; // Debugging
         }
-        
+
         private List<PlacedIsland> placedIslands = new List<PlacedIsland>();
 
         private bool startingIslandSet = false;
+
         // Trigger worldgen on start
         private void Start()
         {
@@ -130,10 +129,10 @@ namespace Terrain
         private void SpawnIsland(IslandData data, Vector3 position)
         {
             if (data.prefab == null) return;
-            
+
             // Apply random rotation
             Quaternion rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
-            
+
             GameObject instance = Instantiate(data.prefab, position, rotation, this.transform);
             instance.name = $"{data.prefab.name}_{position}";
             GenerateTerrain(ref data.terrainData);
@@ -143,14 +142,15 @@ namespace Terrain
                 terrainGenerator.GenerateMap(data.terrainData, instance);
             }
 
-            if(!startingIslandSet ) startingIslandSet = true;
+            if (!startingIslandSet) startingIslandSet = true;
             TerrainNoiseData t = data.terrainData;
-            print($"[{data.prefab.name}_{position}] seed={t.seed} scale={t.noiseScale:F2} persistence={t.persistence:F2} lacunarity={t.lacunarity:F2} heightMult={t.heightMeshMultiplier:F2} octaves={t.octaves} offset={t.offset}");
+            // print($"[{data.prefab.name}_{position}] seed={t.seed} scale={t.noiseScale:F2} persistence={t.persistence:F2} lacunarity={t.lacunarity:F2} heightMult={t.heightMeshMultiplier:F2} octaves={t.octaves} offset={t.offset}");
             // Record placement
-            placedIslands.Add(new PlacedIsland { 
-                position = position, 
+            placedIslands.Add(new PlacedIsland
+            {
+                position = position,
                 radius = data.exclusionRadius,
-                name = instance.name 
+                name = instance.name
             });
         }
 
@@ -168,6 +168,7 @@ namespace Terrain
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -181,6 +182,7 @@ namespace Terrain
                     sum += island.weight;
                 }
             }
+
             if (islandBuckets != null)
             {
                 foreach (var bucket in islandBuckets)
@@ -188,6 +190,7 @@ namespace Terrain
                     sum += bucket.weight;
                 }
             }
+
             return sum;
         }
 
@@ -225,7 +228,7 @@ namespace Terrain
                     }
                 }
             }
-            
+
             return GetFallbackIsland();
         }
 
@@ -235,13 +238,14 @@ namespace Terrain
             {
                 island.exclusionRadius = bucketRadius;
             }
+
             return island;
         }
 
         private IslandData SelectIslandFromBucket(IslandBucket bucket)
         {
             if (bucket.islands == null || bucket.islands.Count == 0) return default;
-            
+
             int bucketTotalWeight = 0;
             foreach (var island in bucket.islands)
             {
@@ -250,7 +254,8 @@ namespace Terrain
 
             if (bucketTotalWeight <= 0)
             {
-                return ApplyBucketExclusionRadius(bucket.islands[Random.Range(0, bucket.islands.Count)], bucket.exclusionRadius);
+                return ApplyBucketExclusionRadius(bucket.islands[Random.Range(0, bucket.islands.Count)],
+                    bucket.exclusionRadius);
             }
 
             int randomValue = Random.Range(0, bucketTotalWeight);
@@ -263,7 +268,9 @@ namespace Terrain
                     return ApplyBucketExclusionRadius(island, bucket.exclusionRadius);
                 }
             }
-            return ApplyBucketExclusionRadius(bucket.islands[Random.Range(0, bucket.islands.Count)], bucket.exclusionRadius);
+
+            return ApplyBucketExclusionRadius(bucket.islands[Random.Range(0, bucket.islands.Count)],
+                bucket.exclusionRadius);
         }
 
         private IslandData GetFallbackIsland()
@@ -272,10 +279,13 @@ namespace Terrain
             {
                 return individualIslands[Random.Range(0, individualIslands.Count)];
             }
-            if (islandBuckets != null && islandBuckets.Count > 0 && islandBuckets[0].islands != null && islandBuckets[0].islands.Count > 0)
+
+            if (islandBuckets != null && islandBuckets.Count > 0 && islandBuckets[0].islands != null &&
+                islandBuckets[0].islands.Count > 0)
             {
                 return islandBuckets[0].islands[Random.Range(0, islandBuckets[0].islands.Count)];
             }
+
             return default;
         }
 
@@ -302,6 +312,7 @@ namespace Terrain
             {
                 DestroyImmediate(transform.GetChild(i).gameObject);
             }
+
             placedIslands.Clear();
         }
 
@@ -318,7 +329,6 @@ namespace Terrain
                 new Keyframe(0f, 0f),
                 new Keyframe(1f, 1f)
             );
-            
         }
 
         private void OnDrawGizmosSelected()
