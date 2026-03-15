@@ -1,20 +1,15 @@
-using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
+using System;
 using Terrain;
-using Unity.VisualScripting;
+using UnityEngine;
+using Random = System.Random;
 
 namespace ProceduralTerrain
 {
     public class TerrainGenerator : MonoBehaviour
     {
-
-
-
         public void GenerateMap(TerrainNoiseData terrainData, GameObject parentObject)
         {
-
-            System.Random prng = new System.Random(terrainData.seed);
+            Random prng = new Random(terrainData.seed);
             Vector2[] octaveOffsets = new Vector2[terrainData.octaves];
             for (int i = 0; i < terrainData.octaves; i++)
             {
@@ -31,13 +26,12 @@ namespace ProceduralTerrain
                 if (child.name == "islands_large__top_1")
                 {
                     TerrainTopMesh component = child.GetComponent<TerrainTopMesh>();
-                    print(component.GetType().Name);
-
+                    // print(component.GetType().Name);
                 }
             }
 
             TerrainTopMesh top = parent.GetComponentInChildren<TerrainTopMesh>(true);
-            print(top);
+            // print(top);
             MeshFilter topMeshFilter = top.MeshFilter;
             string terrainName = topMeshFilter.name + "Terrain";
 
@@ -66,7 +60,6 @@ namespace ProceduralTerrain
                 meshCollider = terrainObject.AddComponent<MeshCollider>();
                 meshCollider.sharedMesh = newMeshFilter.sharedMesh;
             }
-
 
 
             if (terrainData.material != null)
@@ -125,8 +118,6 @@ namespace ProceduralTerrain
             meshCollider.sharedMesh = null;
             meshCollider.sharedMesh = mesh;
             TextureGenerator.GenerateColors(mesh, minHeight, maxHeight, terrainData.colorGradient);
-
-
         }
 
 
@@ -147,7 +138,7 @@ namespace ProceduralTerrain
         // }
 
 
-        [System.Serializable]
+        [Serializable]
         public struct TerrainType
         {
             public string name;

@@ -1,15 +1,18 @@
 using PurrNet;
 using UnityEngine;
 
-public class LocalPlayerVisibility : NetworkBehaviour
+namespace Player
 {
-    [SerializeField] private Renderer[] renderersToHide;
-
-    protected override void OnSpawned()
+    public class LocalPlayerVisibility : NetworkBehaviour
     {
-        if (isOwner)
+        [SerializeField] private Renderer[] renderersToHide;
+
+        protected override void OnOwnerChanged(PlayerID? oldOwner, PlayerID? newOwner, bool asServer)
         {
-            Camera.main.cullingMask &= ~(1 << LayerMask.NameToLayer("PlayerBody"));
+            if (isOwner)
+            {
+                Camera.main.cullingMask &= ~(1 << LayerMask.NameToLayer("PlayerBody"));
+            }
         }
     }
 }

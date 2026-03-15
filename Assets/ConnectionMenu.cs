@@ -57,7 +57,7 @@ public class ConnectionMenu : MonoBehaviour
 
     private string GenerateRandomCode(int length)
     {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        const string chars = "ABCDEFGHJKMNPQRSTWXYZ23456789";
         char[] stringChars = new char[length];
         for (int i = 0; i < length; i++)
         {

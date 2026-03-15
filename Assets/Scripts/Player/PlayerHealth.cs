@@ -36,8 +36,7 @@ namespace player
             }
         }
 
-        //bind to the healthbar
-        private void Start()
+        protected override void OnSpawned()
         {
             if (!isOwner) return;
 
