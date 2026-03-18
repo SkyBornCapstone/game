@@ -2496,7 +2496,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  playerPrefab: {fileID: 8556194902096009755, guid: 8fc501684ccfb1a449888f96bfb1d879, type: 3}
+  playerPrefab: {fileID: 8556194902096009755, guid: 9bc743ab897bc8a4cbb7b979dd980239, type: 3}
   spawnPoints:
   - {fileID: 1487013597}
   - {fileID: 2069634897}

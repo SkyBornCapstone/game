@@ -11,6 +11,7 @@ namespace Player.PlayerCombat
         // [SerializeField] private float maxLockOnDistnce = 150f;
         [SerializeField] private LayerMask targetLayers;
         [SerializeField] private KeyCode lockOnKey = KeyCode.Q;
+        [SerializeField] private Transform playerBody;
 
         [Header("Camera Smoothing")] [SerializeField]
         private float lockOnRotationSpeed = 5f;
@@ -25,7 +26,7 @@ namespace Player.PlayerCombat
         private static readonly Collider[] _overlapBuffer = new Collider[32];
 
         private FirstPersonCamera _firstPersonCamera;
-
+        
         protected override void OnSpawned()
         {
             if (!isOwner)
@@ -107,7 +108,7 @@ namespace Player.PlayerCombat
         {
             _lockedTarget = target;
             _isLockedOn = true;
-
+            
             if (_panTilt != null)
             {
                 _firstPersonCamera?.SetMouseLookEnabled(false);

@@ -9,8 +9,12 @@ namespace Player.PlayerCombat
         [SerializeField] public LockOnSystem lockOnSystem;
         [SerializeField] public ArmIKController armIKController;
         [SerializeField] public Animator animator;
-
-        private static readonly int RightSwing = Animator.StringToHash("LeftSwing");
+        public string _side = "LEFT";
+        private static readonly int RightSwing = Animator.StringToHash("RightSwing");
+        private static readonly int LeftSwing = Animator.StringToHash("LeftSwing");
+        
+        private static readonly int LeftStance = Animator.StringToHash("LeftStance");
+        private static readonly int RightStance = Animator.StringToHash("RightStance");
 
         protected override void OnSpawned()
         {
@@ -19,9 +23,12 @@ namespace Player.PlayerCombat
 
         private void Update()
         {
-            bool isLockedOn = lockOnSystem.IsLockedOn;
 
+            bool isLockedOn = lockOnSystem.IsLockedOn;
+            
             float currentWeight = animator != null ? animator.GetLayerWeight(1) : 0f;
+            
+            
             animator?.SetLayerWeight(1, Mathf.MoveTowards(currentWeight, isLockedOn ? 1f : 0f, Time.deltaTime * 5f));
 
             if (!isLockedOn)
@@ -30,13 +37,28 @@ namespace Player.PlayerCombat
                 
                 return;
             }
-
             bool holdingLeftClick = Input.GetMouseButtonDown(0);
-            if (holdingLeftClick)
+            float mouseX = Input.GetAxis("Mouse X");
+            if (mouseX > 2f && _side == "LEFT")
             {
-                print("HERE");
+                _side = "RIGHT";
+                animator?.SetTrigger(RightStance);
+            }else if (mouseX < -2f &&  _side == "RIGHT")
+            {
+                _side = "LEFT";
+                animator?.SetTrigger(LeftStance);
+            }
+            
+            if (holdingLeftClick && _side == "RIGHT")
+            {
+                
                 animator?.SetTrigger(RightSwing);
             }
+            else if (holdingLeftClick && _side == "LEFT")
+            {
+                animator?.SetTrigger(LeftSwing);
+            }
+            
 
         }
     }
