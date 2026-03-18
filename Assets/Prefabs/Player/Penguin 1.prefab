@@ -78,8 +78,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   armAimController: {fileID: 3989593429189647604}
   lockOnSystem: {fileID: 8769520980087233067}
-  leftStanceAngle: -15
-  rightStanceAngle: 15
+  leftStanceAngle: -60
+  rightStanceAngle: -30
   rotationSpeed: 5
   rotationAxis: {x: 0, y: 1, z: 0}
 --- !u!1 &2217285116195920060
