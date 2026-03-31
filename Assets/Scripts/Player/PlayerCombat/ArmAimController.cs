@@ -26,6 +26,7 @@ namespace Player.PlayerCombat
         private static readonly int DownStance = Animator.StringToHash("DownStance");
         private String prevStance;
         private static readonly int DrawSword = Animator.StringToHash("DrawSword");
+        private static readonly int SheathSword = Animator.StringToHash("SheathSword");
         private bool _combatLayerActive = false;
         protected override void OnSpawned()
         {
@@ -48,7 +49,7 @@ namespace Player.PlayerCombat
             else if (!isLockedOn && _combatLayerActive)
             {
                 _combatLayerActive = false;
-                
+                animator?.SetTrigger(SheathSword);
             }
             
 
