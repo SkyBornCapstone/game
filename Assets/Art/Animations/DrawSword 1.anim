@@ -48584,4 +48584,11 @@ AnimationClip:
   m_EulerEditorCurves: []
   m_HasGenericRootTransform: 0
   m_HasMotionFloatCurves: 0
-  m_Events: []
+  m_Events:
+  - time: 0.33333334
+    functionName: ShowSword
+    data: 
+    objectReferenceParameter: {fileID: 8556194902096009755, guid: 9bc743ab897bc8a4cbb7b979dd980239, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
