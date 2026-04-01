@@ -129,7 +129,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5858649447733082338
 Transform:
   m_ObjectHideFlags: 0
@@ -761,6 +761,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 63c3a0509a456884bbc6dec0b07c4db6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6810465940671524860}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 63c3a0509a456884bbc6dec0b07c4db6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1957731707824780137}
   m_SourcePrefab: {fileID: 100100000, guid: 63c3a0509a456884bbc6dec0b07c4db6, type: 3}
 --- !u!4 &183357428072371122 stripped
 Transform:
@@ -851,6 +854,19 @@ MonoBehaviour:
   stanceSwitchThreshold: 1.5
   stanceSwitchCooldown: 0.4
   _side: LEFT
+--- !u!114 &1957731707824780137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 702766288960653576}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45b0a705a5fece244a70c16be2614147, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  swordPrefab: {fileID: 4045031402170981400}
 --- !u!4 &1063521899831326893 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 847715145593965812, guid: 63c3a0509a456884bbc6dec0b07c4db6, type: 3}

@@ -28,6 +28,7 @@ namespace Player.PlayerCombat
         private static readonly int DrawSword = Animator.StringToHash("DrawSword");
         private static readonly int SheathSword = Animator.StringToHash("SheathSword");
         private bool _combatLayerActive = false;
+        private bool _isSheathing = false;
         protected override void OnSpawned()
         {
             if (!isOwner) enabled = false;
@@ -38,18 +39,36 @@ namespace Player.PlayerCombat
             bool isLockedOn = lockOnSystem.IsLockedOn;
 
             float currentWeight = animator != null ? animator.GetLayerWeight(1) : 0f;
-            animator?.SetLayerWeight(1, Mathf.MoveTowards(currentWeight, isLockedOn ? 1f : 0f, Time.deltaTime * 5f));
+
+            if (_isSheathing)
+            {
+                
+                AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(1);
+                bool sheathDone = stateInfo.IsName("SheathSword") && stateInfo.normalizedTime >= 1f;
+                if (sheathDone)
+                {
+                    print("HERE");
+                    animator?.SetLayerWeight(1, Mathf.MoveTowards(currentWeight, 0f, Time.deltaTime * 5f));
+                    if (currentWeight <= 0f) _isSheathing = false;
+                }
+            }
+            else if (isLockedOn)
+            {
+                animator?.SetLayerWeight(1, Mathf.MoveTowards(currentWeight, 1f, Time.deltaTime * 5f));
+            }
+            
+            // animator?.SetLayerWeight(1, Mathf.MoveTowards(currentWeight, isLockedOn ? 1f : 0f, Time.deltaTime * 5f));
             if (isLockedOn && !_combatLayerActive)
             {
                 _combatLayerActive = true;
-                //animator?.SetLayerWeight(1, 1f);
                 animator?.SetTrigger(DrawSword);
-                print("HERHEHREHRE");
+                _isSheathing = false;
             }
             else if (!isLockedOn && _combatLayerActive)
             {
                 _combatLayerActive = false;
                 animator?.SetTrigger(SheathSword);
+                _isSheathing = true;
             }
             
 
