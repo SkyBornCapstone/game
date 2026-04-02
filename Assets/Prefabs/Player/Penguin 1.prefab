@@ -850,7 +850,8 @@ MonoBehaviour:
   _visitiblityRules: {fileID: 0}
   lockOnSystem: {fileID: 8769520980087233067}
   armIKController: {fileID: 7817222834423737407}
-  animator: {fileID: 6083033028862609864}
+  animator: {fileID: 1391151780715825994}
+  rawAnimator: {fileID: 6083033028862609864}
   stanceSwitchThreshold: 1.5
   stanceSwitchCooldown: 0.4
   _side: LEFT
