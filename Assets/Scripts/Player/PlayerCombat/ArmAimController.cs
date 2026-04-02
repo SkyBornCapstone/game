@@ -10,7 +10,7 @@ namespace Player.PlayerCombat
         [Header("References")]
         [SerializeField] public LockOnSystem lockOnSystem;
         [SerializeField] public ArmIKController armIKController;
-        [SerializeField] public Animator animator;
+        [SerializeField] public NetworkAnimator animator;
         
         [Header("Stance Settings")]
         [SerializeField] private float stanceSwitchThreshold = 1.5f;
