@@ -5,7 +5,7 @@ namespace Player.PlayerCombat
     public class StanceRotator : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private ArmAimController armAimController;
+        [SerializeField] private CombatController armAimController;
         [SerializeField] private LockOnSystem lockOnSystem;
 
         [Header("Rotation Settings")]
