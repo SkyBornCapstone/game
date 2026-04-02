@@ -4,6 +4,7 @@ using PurrNet;
 
 namespace Player.PlayerCombat
 {
+    [RequireComponent(typeof(AudioSource))]
     public class ArmAimController : NetworkBehaviour
     {
         [Header("References")]
@@ -15,6 +16,10 @@ namespace Player.PlayerCombat
         [SerializeField] private float stanceSwitchThreshold = 1.5f;
         [SerializeField] private float stanceSwitchCooldown = 0.4f;
         
+        [Header("Sound Effects")]
+        [SerializeField] private AudioClip swingSound;
+        private AudioSource _audioSource;
+
         public string _side = "LEFT";
         private float _lastStanceSwitchTime = -999f;
         
@@ -32,6 +37,10 @@ namespace Player.PlayerCombat
         protected override void OnSpawned()
         {
             if (!isOwner) enabled = false;
+        }
+        private void Awake()
+        {
+            _audioSource = GetComponent<AudioSource>();
         }
 
         private void Update()
@@ -115,6 +124,10 @@ namespace Player.PlayerCombat
 
             if (Input.GetMouseButtonDown(0))
             {
+                if (_audioSource != null && swingSound != null)
+                {
+                    _audioSource.PlayOneShot(swingSound);
+                }
                 if (_side == "RIGHT")
                 {
                     animator?.SetTrigger(RightSwing);
