@@ -19,3 +19,19 @@ Hiking Boot Footsteps on Stone by Fission9 -- https://freesound.org/s/521590/ --
 
 * Footsteps -> Snow
 Footsteps_Mountain_Boots_Snow_Walk_Mono.wav by Nox_Sound -- https://freesound.org/s/613849/ -- License: Creative Commons 0
+
+* Footsteps -> Wood
+Footsteps_Wood_Walk_Mono.wav by Nox_Sound -- https://freesound.org/s/543685/ -- License: Creative Commons 0
+
+* Footsteps -> Grass
+footsteps grass.wav by Yuval -- https://freesound.org/s/206030/ -- License: Creative Commons 0
+
+# Treasure Chest
+* chest_unlock.wav
+opening, closing, locking and unlocking  a roomdoor by launemax -- https://freesound.org/s/250024/ -- License: Creative Commons 0
+
+* chest_open.mp3
+Treasure Chest Open by steprock -- https://freesound.org/s/771164/ -- License: Creative Commons 0
+
+Door Squeak Handle Bang by steprock -- https://freesound.org/s/760393/ -- License: Creative Commons 0
+
