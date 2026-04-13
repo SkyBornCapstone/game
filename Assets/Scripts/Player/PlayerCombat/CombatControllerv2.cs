@@ -12,8 +12,8 @@ namespace Player.PlayerCombat
         [SerializeField] public NetworkAnimator animator;
 
         [Header("Stance Settings")]
-        [SerializeField] private float stanceSwitchThreshold = 1.5f;
-        [SerializeField] private float stanceSwitchCooldown = 0.4f;
+        // [SerializeField] private float stanceSwitchThreshold = 1.5f;
+        // [SerializeField] private float stanceSwitchCooldown = 0.4f;
         [SerializeField] private float blockBreakStunDuration = 1.5f;
 
         [SerializeField] public string _side = "RIGHT";
@@ -36,7 +36,8 @@ namespace Player.PlayerCombat
         private bool _swordInHand = false;
         private float _stunTimer = 0f;
 
-        public bool isBlocking = false;
+       
+        public SyncVar<bool> isBlocking = new SyncVar<bool>(false);
         public bool isStunned => _stunTimer > 0f;
 
         protected override void OnSpawned()
@@ -46,9 +47,9 @@ namespace Player.PlayerCombat
 
         public void BreakBlock()
         {
-            if (!isBlocking) return;
+            if (!isBlocking.value) return;
 
-            isBlocking = false;
+            isBlocking.value = false;
             animator?.SetBool(block, false);
             _stunTimer = blockBreakStunDuration;
         }
@@ -93,14 +94,20 @@ namespace Player.PlayerCombat
             
 
             if (!_swordInHand) return;
+            if (Input.GetKey(KeyCode.I))
+            {
+                isBlocking.value = true;
+                animator?.SetTrigger(block);
+            }
+                
             if (Input.GetMouseButtonDown(1))
             {
-                isBlocking = true;
+                isBlocking.value = true;
                 animator?.SetTrigger(block);
             }
             if (Input.GetMouseButtonUp(1) && isBlocking)
             {
-                isBlocking = false;
+                isBlocking.value = false;
                 animator?.SetBool(block, false);
 
                 if (_side == "LEFT")
@@ -113,12 +120,12 @@ namespace Player.PlayerCombat
                 return;
             }
             
-            if (Input.GetMouseButtonDown(0) && !isBlocking)
+            if (Input.GetMouseButtonDown(0) && !isBlocking.value)
             {
-                print(_side);
+                // print(_side);
                 if (_side == "RIGHT")
                 {
-                    print("HERE");
+                    // print("HERE");
                     animator?.SetTrigger(RightSwing);
                     _side = "LEFT";
                 }
