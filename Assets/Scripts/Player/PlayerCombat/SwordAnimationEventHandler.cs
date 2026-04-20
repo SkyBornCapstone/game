@@ -4,6 +4,7 @@ public class SwordAnimationEventHandler : MonoBehaviour
 {
     [SerializeField] private GameObject swordPrefab;
     [SerializeField] private GameObject swordDamage;
+    [SerializeField] private Collider punchCollider;
     
     private Collider[] colliders;
     private Collider triggerCollider;
@@ -39,6 +40,16 @@ public class SwordAnimationEventHandler : MonoBehaviour
     public void DeactivateSwordCollider()
     {
         if (solidCollider != null)  solidCollider.enabled  = false;
-        
+    }
+
+    public void ActivatePunchCollider()
+    {
+        if (punchCollider != null)  punchCollider.enabled  = true;
+        print("HERE");
+    }
+
+    public void DeactivatePunchCollider()
+    {
+        if (punchCollider != null)  punchCollider.enabled  = false;
     }
 }

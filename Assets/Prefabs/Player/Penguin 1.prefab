@@ -310,7 +310,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &5858649447733082338
 Transform:
   m_ObjectHideFlags: 0
@@ -483,6 +483,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2494711418347159275}
+  - component: {fileID: 2144728198078520648}
+  - component: {fileID: 6065494353158711709}
   m_Layer: 9
   m_Name: Punch
   m_TagString: Untagged
@@ -505,6 +507,40 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6105466459394027036}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &2144728198078520648
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5568884484367263960}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Radius: 0.4
+  m_Center: {x: -0.48, y: 0.24, z: 0}
+--- !u!114 &6065494353158711709
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5568884484367263960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16a4f7ba40d832a4db9c7d38148afa88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ownerCombat: {fileID: 6957689588439827122}
 --- !u!1 &5855628489639949662
 GameObject:
   m_ObjectHideFlags: 0
@@ -1027,7 +1063,10 @@ MonoBehaviour:
   animator: {fileID: 1391151780715825994}
   blockBreakStunDuration: 1.5
   _side: RIGHT
-  isBlocking: 0
+  isBlocking:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
 --- !u!1 &8299736797706306495
 GameObject:
   m_ObjectHideFlags: 0
@@ -1390,6 +1429,7 @@ MonoBehaviour:
   drawSound: {fileID: 8300000, guid: a9fd5b6e36eee4663a53a8ce1aaa357c, type: 3}
   sheathSound: {fileID: 8300000, guid: ac1b64c1a208c4201af4c92322abf565, type: 3}
   swordDamage: {fileID: 518173156343819278}
+  punchCollider: {fileID: 2144728198078520648}
 --- !u!82 &4152336718957288612
 AudioSource: 
 --- !u!114 &2527624460906440024
