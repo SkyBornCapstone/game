@@ -30,6 +30,7 @@ namespace Player.PlayerCombat
         private static readonly int block       = Animator.StringToHash("Block");
         private static readonly int leaveBlockRight = Animator.StringToHash("LeaveBlockRight");
         private static readonly int leaveBlockLeft  = Animator.StringToHash("LeaveBlockLeft");
+        private static readonly int stuned = Animator.StringToHash("Stunned");
 
         private bool _combatLayerActive = false;
         private bool _isSheathing = false;
@@ -37,7 +38,7 @@ namespace Player.PlayerCombat
         private float _stunTimer = 0f;
 
        
-        public SyncVar<bool> isBlocking = new SyncVar<bool>(false);
+        public SyncVar<bool> isBlocking = new SyncVar<bool>(false, ownerAuth: true);
         public bool isStunned => _stunTimer > 0f;
 
         protected override void OnSpawned()
@@ -150,6 +151,14 @@ namespace Player.PlayerCombat
         {
             AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(1);
             return (stateInfo.IsName("Armature_RightSwingAttack") || stateInfo.IsName("Armature_LeftSwingAttack") || stateInfo.IsName("Armature_DownSwingAttack"));
+        }
+        
+        public void handleStun()
+        {
+            isBlocking.value = false;
+            animator?.SetTrigger(stuned);
+            _side = "Right";
+
         }
     }
 }
