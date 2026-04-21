@@ -1,12 +1,15 @@
+using System.Collections.Generic;
 using PurrNet;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Player
 {
     public class FirstPersonCamera : NetworkBehaviour
     {
         [SerializeField] private Transform target;
+        [SerializeField] private List<SkinnedMeshRenderer> hide;
 
         private Camera _mainCamera;
         private CinemachinePanTilt _panTilt;
@@ -28,13 +31,17 @@ namespace Player
             mainCamera.TryGetComponent(out _panTilt);
             mainCamera.TryGetComponent(out _inputAxisController);
             mainCamera.SetTarget(target);
+
+            foreach (var part in hide)
+            {
+                part.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+            }
         }
 
         private void Start()
         {
             _mainCamera = Camera.main;
             _rb = GetComponent<Rigidbody>();
-            
         }
 
         private void Update()
