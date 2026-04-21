@@ -12,33 +12,32 @@ namespace Player.PlayerCombat
         [SerializeField] public NetworkAnimator animator;
 
         [Header("Stance Settings")]
-        // [SerializeField] private float stanceSwitchThreshold = 1.5f;
-        // [SerializeField] private float stanceSwitchCooldown = 0.4f;
         [SerializeField] private float blockBreakStunDuration = 1.5f;
 
         [SerializeField] public string _side = "RIGHT";
 
-        private static readonly int RightSwing  = Animator.StringToHash("RightSwing");
-        private static readonly int LeftSwing   = Animator.StringToHash("LeftSwing");
-        private static readonly int DownSwing   = Animator.StringToHash("DownSwing");
-        private static readonly int LeftStance  = Animator.StringToHash("LeftStance");
-        private static readonly int RightStance = Animator.StringToHash("RightStance");
-        private static readonly int DownStance  = Animator.StringToHash("DownStance");
-        private static readonly int DrawSword   = Animator.StringToHash("DrawSword");
-        private static readonly int SheathSword = Animator.StringToHash("SheathSword");
-        private static readonly int punch       = Animator.StringToHash("Punch");
-        private static readonly int block       = Animator.StringToHash("Block");
+        private static readonly int RightSwing     = Animator.StringToHash("RightSwing");
+        private static readonly int LeftSwing      = Animator.StringToHash("LeftSwing");
+        private static readonly int DownSwing      = Animator.StringToHash("DownSwing");
+        private static readonly int LeftStance     = Animator.StringToHash("LeftStance");
+        private static readonly int RightStance    = Animator.StringToHash("RightStance");
+        private static readonly int DownStance     = Animator.StringToHash("DownStance");
+        private static readonly int DrawSword      = Animator.StringToHash("DrawSword");
+        private static readonly int SheathSword    = Animator.StringToHash("SheathSword");
+        private static readonly int punch          = Animator.StringToHash("Punch");
+        private static readonly int block          = Animator.StringToHash("Block");
         private static readonly int leaveBlockRight = Animator.StringToHash("LeaveBlockRight");
         private static readonly int leaveBlockLeft  = Animator.StringToHash("LeaveBlockLeft");
-        private static readonly int stuned = Animator.StringToHash("Stunned");
+        private static readonly int stuned         = Animator.StringToHash("Stunned");
 
         private bool _combatLayerActive = false;
         private bool _isSheathing = false;
         private bool _swordInHand = false;
         private float _stunTimer = 0f;
 
-       
-        public SyncVar<bool> isBlocking = new SyncVar<bool>(false, ownerAuth: true);
+        // Renamed to _isBlocking, exposed via read-only property
+        private SyncVar<bool> _isBlocking = new SyncVar<bool>(false, ownerAuth: true);
+        public bool isBlocking => _isBlocking.value;
         public bool isStunned => _stunTimer > 0f;
 
         protected override void OnSpawned()
@@ -46,11 +45,19 @@ namespace Player.PlayerCombat
             if (!isOwner) enabled = false;
         }
 
+        // Only the owner can set this
+        private void SetBlocking(bool value)
+        {
+            if (!isOwner) return;
+            _isBlocking.value = value;
+        }
+
         public void BreakBlock()
         {
-            if (!isBlocking.value) return;
+            if (!isOwner) return;
+            if (!isBlocking) return;
 
-            isBlocking.value = false;
+            SetBlocking(false);
             animator?.SetBool(block, false);
             _stunTimer = blockBreakStunDuration;
         }
@@ -61,7 +68,6 @@ namespace Player.PlayerCombat
             {
                 _swordInHand = !_swordInHand;
             }
-            
 
             float currentWeight = animator != null ? animator.GetLayerWeight(1) : 0f;
             if (_isSheathing)
@@ -79,7 +85,7 @@ namespace Player.PlayerCombat
             {
                 animator?.SetLayerWeight(1, Mathf.MoveTowards(currentWeight, 1f, Time.deltaTime * 5f));
             }
-            
+
             if (_swordInHand && !_combatLayerActive)
             {
                 _combatLayerActive = true;
@@ -92,23 +98,24 @@ namespace Player.PlayerCombat
                 animator?.SetTrigger(SheathSword);
                 _isSheathing = true;
             }
-            
 
             if (!_swordInHand) return;
+
             if (Input.GetKey(KeyCode.I))
             {
-                isBlocking.value = true;
+                SetBlocking(true);
                 animator?.SetTrigger(block);
             }
-                
+
             if (Input.GetMouseButtonDown(1))
             {
-                isBlocking.value = true;
+                SetBlocking(true);
                 animator?.SetTrigger(block);
             }
+
             if (Input.GetMouseButtonUp(1) && isBlocking)
             {
-                isBlocking.value = false;
+                SetBlocking(false);
                 animator?.SetBool(block, false);
 
                 if (_side == "LEFT")
@@ -116,17 +123,13 @@ namespace Player.PlayerCombat
                 else if (_side == "RIGHT")
                     animator?.SetTrigger(leaveBlockRight);
             }
-            if (IsSwingPlaying())
+
+            if (IsSwingPlaying()) return;
+
+            if (Input.GetMouseButtonDown(0) && !isBlocking)
             {
-                return;
-            }
-            
-            if (Input.GetMouseButtonDown(0) && !isBlocking.value)
-            {
-                // print(_side);
                 if (_side == "RIGHT")
                 {
-                    // print("HERE");
                     animator?.SetTrigger(RightSwing);
                     _side = "LEFT";
                 }
@@ -150,15 +153,17 @@ namespace Player.PlayerCombat
         private bool IsSwingPlaying()
         {
             AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(1);
-            return (stateInfo.IsName("Armature_RightSwingAttack") || stateInfo.IsName("Armature_LeftSwingAttack") || stateInfo.IsName("Armature_DownSwingAttack"));
+            return stateInfo.IsName("Armature_RightSwingAttack")
+                || stateInfo.IsName("Armature_LeftSwingAttack")
+                || stateInfo.IsName("Armature_DownSwingAttack");
         }
-        
+
         public void handleStun()
         {
-            isBlocking.value = false;
+            if (!isOwner) return;
+            SetBlocking(false);
             animator?.SetTrigger(stuned);
-            _side = "Right";
-
+            _side = "RIGHT";
         }
     }
 }

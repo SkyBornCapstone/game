@@ -25,15 +25,15 @@ namespace Damage
             if (other.TryGetComponent(out SwordCollider sword))
             {
                 print("GOT SWORD COLLIDER");
-                if (sword.ownerCombat.isBlocking.value) return;
+                if (sword.ownerCombat.isBlocking) return;
                 return;
             }
         
             if (other.TryGetComponent(out PlayerHealth playerHealth))
             {
                 print("Got player health");
-                print(hitCombat.isBlocking.value);
-                if (other.TryGetComponent(out CombatControllerv2 combat) && combat.isBlocking.value)
+                print(hitCombat.isBlocking);
+                if (other.TryGetComponent(out CombatControllerv2 combat) && combat.isBlocking)
                 {
                     print("TAKING HALF DAMAGE");
                     playerHealth.TakeDamage(damage / 5);
