@@ -17,7 +17,7 @@ public class Punch : MonoBehaviour
         if (other.TryGetComponent(out CombatControllerv2 otherCombat))
         {
             print("PUNCH");
-            if(otherCombat.isBlocking.value == true)
+            if(otherCombat.isBlocking == true)
                 otherCombat.handleStun();
             else
             {
