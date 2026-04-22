@@ -1040,6 +1040,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   swordPrefab: {fileID: 4045031402170981400}
+  drawSound: {fileID: 8300000, guid: a9fd5b6e36eee4663a53a8ce1aaa357c, type: 3}
+  sheathSound: {fileID: 8300000, guid: ac1b64c1a208c4201af4c92322abf565, type: 3}
+--- !u!82 &4152336718957288612
+AudioSource:
 --- !u!114 &2527624460906440024
 MonoBehaviour:
   m_ObjectHideFlags: 0
