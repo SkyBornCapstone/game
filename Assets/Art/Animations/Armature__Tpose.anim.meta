@@ -1,12 +1,8 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Art/Animations/Armature__Tpose.anim.meta
 guid: b751c3305a13d814ab185d835d49377a
-========
-guid: e2f6d00c0bc0f47459133a656740ab9f
->>>>>>>> origin/main:Assets/Art/Animations/DrawSword 1.anim.meta
 NativeFormatImporter:
   externalObjects: {}
-  mainObjectFileID: 7400000
+  mainObjectFileID: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
