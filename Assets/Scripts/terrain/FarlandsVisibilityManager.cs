@@ -58,19 +58,22 @@ namespace Terrain
             }
 
             Vector3 camPos = _mainCamera.transform.position;
-            camPos.y = 0; // measure flat 2D distance to center of the world
-            float currentDist = camPos.magnitude;
+            camPos.y = 0; // measure flat 2D distance
 
+            // We reuse visibilityThresholdRadius (~350m) as the actual detection sphere around the camera.
             for (int i = 0; i < _farlandsIslands.Count; i++)
             {
                 var data = _farlandsIslands[i];
                 if (data.Island == null) continue;
 
+                Vector3 islandPos2D = new Vector3(data.Island.transform.position.x, 0, data.Island.transform.position.z);
+                float distToIsland = Vector3.Distance(camPos, islandPos2D);
+
                 float islandBaseThreshold = visibilityThresholdRadius + data.RandomThresholdOffset;
-                float islandFullyVisibleTarget = islandBaseThreshold + fadeDistanceBand;
+                float islandFullyVisibleTarget = islandBaseThreshold - fadeDistanceBand; // Closer distance = fully visible
                 
                 // If it is entirely too far away
-                if (currentDist < islandBaseThreshold)
+                if (distToIsland > islandBaseThreshold)
                 {
                     if (data.IsVisible)
                     {
@@ -87,7 +90,7 @@ namespace Terrain
                     }
 
                     // Calculate depth
-                    float depthLerp = Mathf.InverseLerp(islandBaseThreshold, islandFullyVisibleTarget, currentDist);
+                    float depthLerp = Mathf.InverseLerp(islandBaseThreshold, islandFullyVisibleTarget, distToIsland);
                     // Smoothstep for prettier rise
                     depthLerp = Mathf.SmoothStep(0f, 1f, depthLerp);
                     
