@@ -49,12 +49,28 @@ namespace Terrain
 
         private bool startingIslandSet = false;
 
+        private FarlandsVisibilityManager _visibilityManager;
+
         // Trigger worldgen on start
         private void Start()
         {
             if (gameObject.GetComponent<BoundaryWindManager>() == null)
             {
                 gameObject.AddComponent<BoundaryWindManager>();
+            }
+            if (gameObject.GetComponent<FarlandsVisibilityManager>() == null)
+            {
+                _visibilityManager = gameObject.AddComponent<FarlandsVisibilityManager>();
+            }
+            else
+            {
+                _visibilityManager = gameObject.GetComponent<FarlandsVisibilityManager>();
+            }
+            
+            // Set visibility threshold to 150m before the inner radius
+            if (_visibilityManager != null)
+            {
+                _visibilityManager.visibilityThresholdRadius = Mathf.Max(0, innerRadius - 150f);
             }
 
             GenerateWorld();
@@ -149,7 +165,16 @@ namespace Terrain
 
             if (!startingIslandSet) startingIslandSet = true;
             TerrainNoiseData t = data.terrainData;
-            // print($"[{data.prefab.name}_{position}] seed={t.seed} scale={t.noiseScale:F2} persistence={t.persistence:F2} lacunarity={t.lacunarity:F2} heightMult={t.heightMeshMultiplier:F2} octaves={t.octaves} offset={t.offset}");
+            
+            if (_visibilityManager != null)
+            {
+                // If it's placed out in the empty gap or outer farlands
+                if (new Vector3(position.x, 0, position.z).magnitude > innerRadius)
+                {
+                    _visibilityManager.RegisterFarlandsIsland(instance);
+                }
+            }
+            
             // Record placement
             placedIslands.Add(new PlacedIsland
             {
