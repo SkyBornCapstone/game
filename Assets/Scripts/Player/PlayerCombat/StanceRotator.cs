@@ -4,12 +4,14 @@ namespace Player.PlayerCombat
 {
     public class StanceRotator : MonoBehaviour
     {
-        [Header("References")]
-        [SerializeField] private ArmAimController armAimController;
+        [Header("References")] [SerializeField]
+        private CombatController armAimController;
+
         [SerializeField] private LockOnSystem lockOnSystem;
 
-        [Header("Rotation Settings")]
-        [SerializeField] private float leftStanceAngle = -15f;
+        [Header("Rotation Settings")] [SerializeField]
+        private float leftStanceAngle = -15f;
+
         [SerializeField] private float rightStanceAngle = 15f;
         [SerializeField] private float rotationSpeed = 5f;
         [SerializeField] private Vector3 rotationAxis = Vector3.up;

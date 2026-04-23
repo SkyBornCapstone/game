@@ -1,32 +1,35 @@
 using System;
-using UnityEngine;
 using PurrNet;
+using UnityEngine;
 
 namespace Player.PlayerCombat
 {
     [RequireComponent(typeof(AudioSource))]
-    public class ArmAimController : NetworkBehaviour
+    public class CombatController : NetworkBehaviour
     {
-        [Header("References")]
-        [SerializeField] public LockOnSystem lockOnSystem;
+        [Header("References")] [SerializeField]
+        public LockOnSystem lockOnSystem;
+
         [SerializeField] public ArmIKController armIKController;
         [SerializeField] public NetworkAnimator animator;
-        
-        [Header("Stance Settings")]
-        [SerializeField] private float stanceSwitchThreshold = 1.5f;
+
+        [Header("Stance Settings")] [SerializeField]
+        private float stanceSwitchThreshold = 1.5f;
+
         [SerializeField] private float stanceSwitchCooldown = 0.4f;
-        
-        [Header("Sound Effects")]
-        [SerializeField] private AudioClip swingSound;
+
+        [Header("Sound Effects")] [SerializeField]
+        private AudioClip swingSound;
+
         private AudioSource _audioSource;
-        
+
         public string _side = "LEFT";
         private float _lastStanceSwitchTime = -999f;
-        
-        private static readonly int RightSwing  = Animator.StringToHash("RightSwing");
-        private static readonly int LeftSwing   = Animator.StringToHash("LeftSwing");
-        private static readonly int DownSwing   = Animator.StringToHash("DownSwing");
-        private static readonly int LeftStance  = Animator.StringToHash("LeftStance");
+
+        private static readonly int RightSwing = Animator.StringToHash("RightSwing");
+        private static readonly int LeftSwing = Animator.StringToHash("LeftSwing");
+        private static readonly int DownSwing = Animator.StringToHash("DownSwing");
+        private static readonly int LeftStance = Animator.StringToHash("LeftStance");
         private static readonly int RightStance = Animator.StringToHash("RightStance");
         private static readonly int DownStance = Animator.StringToHash("DownStance");
         private String prevStance;
@@ -34,6 +37,7 @@ namespace Player.PlayerCombat
         private static readonly int SheathSword = Animator.StringToHash("SheathSword");
         private bool _combatLayerActive = false;
         private bool _isSheathing = false;
+
         protected override void OnSpawned()
         {
             if (!isOwner) enabled = false;
@@ -45,16 +49,18 @@ namespace Player.PlayerCombat
             bool isLockedOn = lockOnSystem.IsLockedOn;
 
             float currentWeight = animator != null ? animator.GetLayerWeight(1) : 0f;
-
+            //print(currentWeight);
             if (_isSheathing)
             {
-                
                 AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(1);
-                bool sheathDone = stateInfo.IsName("SheathSword") && stateInfo.normalizedTime >= 1f;
+                Debug.Log(
+                    $"Hash: {stateInfo.shortNameHash} | SheathHash: {SheathSword} | NormTime: {stateInfo.normalizedTime}");
+                bool sheathDone = stateInfo.IsName("SheathSword") && stateInfo.normalizedTime >= .7f;
+                print(sheathDone);
                 if (sheathDone)
                 {
-                    print("HERE");
                     animator?.SetLayerWeight(1, Mathf.MoveTowards(currentWeight, 0f, Time.deltaTime * 5f));
+                    print("HERE");
                     if (currentWeight <= 0f) _isSheathing = false;
                 }
             }
@@ -62,7 +68,7 @@ namespace Player.PlayerCombat
             {
                 animator?.SetLayerWeight(1, Mathf.MoveTowards(currentWeight, 1f, Time.deltaTime * 5f));
             }
-            
+
             // animator?.SetLayerWeight(1, Mathf.MoveTowards(currentWeight, isLockedOn ? 1f : 0f, Time.deltaTime * 5f));
             if (isLockedOn && !_combatLayerActive)
             {
@@ -76,18 +82,23 @@ namespace Player.PlayerCombat
                 animator?.SetTrigger(SheathSword);
                 _isSheathing = true;
             }
-            
+
 
             if (!isLockedOn) return;
+            if (IsSwingPlaying())
+            {
+                print("HEREASDDF SD FSDf");
+                return;
+            }
 
             bool canSwitch = Time.time - _lastStanceSwitchTime >= stanceSwitchCooldown;
-            float mouseX   = Input.GetAxis("Mouse X");
-            float mouseY =  Input.GetAxis("Mouse Y");
+            float mouseX = Input.GetAxis("Mouse X");
+            float mouseY = Input.GetAxis("Mouse Y");
             if (canSwitch)
             {
-                if ((Math.Abs(mouseY) > Math.Abs(mouseX) && mouseY > stanceSwitchThreshold) && (_side == "RIGHT"|| _side == "LEFT"))
+                if ((Math.Abs(mouseY) > Math.Abs(mouseX) && mouseY > stanceSwitchThreshold) &&
+                    (_side == "RIGHT" || _side == "LEFT"))
                 {
-                    print(mouseY);
                     prevStance = _side;
                     _side = "DOWN";
                     _lastStanceSwitchTime = Time.time;
@@ -95,12 +106,11 @@ namespace Player.PlayerCombat
                 }
                 else if ((Math.Abs(mouseY) > Math.Abs(mouseX) && mouseY < -stanceSwitchThreshold) && _side == "DOWN")
                 {
-                    print(mouseY);
                     _side = prevStance;
                     _lastStanceSwitchTime = Time.time;
                     animator?.SetTrigger(_side == "RIGHT" ? RightStance : LeftStance);
                 }
-                else if (mouseX > stanceSwitchThreshold && (_side == "LEFT" || _side == "DOWN") )
+                else if (mouseX > stanceSwitchThreshold && (_side == "LEFT" || _side == "DOWN"))
                 {
                     print(mouseX + "MOVE RIGHT");
                     prevStance = _side;
@@ -108,15 +118,14 @@ namespace Player.PlayerCombat
                     _lastStanceSwitchTime = Time.time;
                     animator?.SetTrigger(RightStance);
                 }
-                else if (mouseX < -stanceSwitchThreshold && (_side == "RIGHT"|| _side == "DOWN"))
+                else if (mouseX < -stanceSwitchThreshold && (_side == "RIGHT" || _side == "DOWN"))
                 {
-                    print(mouseX);
+                    print("MOVE LEFT");
                     prevStance = _side;
                     _side = "LEFT";
                     _lastStanceSwitchTime = Time.time;
                     animator?.SetTrigger(LeftStance);
                 }
-                
             }
 
             if (Input.GetMouseButtonDown(0))
@@ -133,12 +142,20 @@ namespace Player.PlayerCombat
                 {
                     animator?.SetTrigger(DownSwing);
                 }
+
                 //animator?.SetTrigger(_side == "RIGHT" ? RightSwing : LeftSwing);
                 if (_audioSource != null && swingSound != null)
                 {
                     _audioSource.PlayOneShot(swingSound);
                 }
             }
+        }
+
+        private bool IsSwingPlaying()
+        {
+            AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(1);
+            return (stateInfo.IsName("Armature_RightSwingAttack") || stateInfo.IsName("Armature_LeftSwingAttack") ||
+                    stateInfo.IsName("Armature_DownSwingAttack"));
         }
     }
 }
