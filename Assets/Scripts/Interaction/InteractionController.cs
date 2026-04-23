@@ -7,7 +7,6 @@ namespace Interaction
     {
         [SerializeField] private LayerMask interactableLayer;
         [SerializeField] private float interactionRange = 5f;
-        [SerializeField] private Transform rightHandTarget;
         [SerializeField] private Transform head;
 
         private Camera _cam;

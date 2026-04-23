@@ -1,34 +1,35 @@
-using System;
-using UnityEngine;
+using Interaction;
 using PurrNet;
+using UnityEngine;
 
 namespace Player.PlayerCombat
 {
     public class CombatControllerv2 : NetworkBehaviour
     {
-        [Header("References")]
-        [SerializeField] public LockOnSystem lockOnSystem;
-        [SerializeField] public ArmIKController armIKController;
+        [Header("References")] [SerializeField]
+        public LockOnSystem lockOnSystem;
+
+        [SerializeField] public GrabController grabController;
         [SerializeField] public NetworkAnimator animator;
 
-        [Header("Stance Settings")]
-        [SerializeField] private float blockBreakStunDuration = 1.5f;
+        [Header("Stance Settings")] [SerializeField]
+        private float blockBreakStunDuration = 1.5f;
 
         [SerializeField] public string _side = "RIGHT";
 
-        private static readonly int RightSwing     = Animator.StringToHash("RightSwing");
-        private static readonly int LeftSwing      = Animator.StringToHash("LeftSwing");
-        private static readonly int DownSwing      = Animator.StringToHash("DownSwing");
-        private static readonly int LeftStance     = Animator.StringToHash("LeftStance");
-        private static readonly int RightStance    = Animator.StringToHash("RightStance");
-        private static readonly int DownStance     = Animator.StringToHash("DownStance");
-        private static readonly int DrawSword      = Animator.StringToHash("DrawSword");
-        private static readonly int SheathSword    = Animator.StringToHash("SheathSword");
-        private static readonly int punch          = Animator.StringToHash("Punch");
-        private static readonly int block          = Animator.StringToHash("Block");
+        private static readonly int RightSwing = Animator.StringToHash("RightSwing");
+        private static readonly int LeftSwing = Animator.StringToHash("LeftSwing");
+        private static readonly int DownSwing = Animator.StringToHash("DownSwing");
+        private static readonly int LeftStance = Animator.StringToHash("LeftStance");
+        private static readonly int RightStance = Animator.StringToHash("RightStance");
+        private static readonly int DownStance = Animator.StringToHash("DownStance");
+        private static readonly int DrawSword = Animator.StringToHash("DrawSword");
+        private static readonly int SheathSword = Animator.StringToHash("SheathSword");
+        private static readonly int punch = Animator.StringToHash("Punch");
+        private static readonly int block = Animator.StringToHash("Block");
         private static readonly int leaveBlockRight = Animator.StringToHash("LeaveBlockRight");
-        private static readonly int leaveBlockLeft  = Animator.StringToHash("LeaveBlockLeft");
-        private static readonly int stuned         = Animator.StringToHash("Stunned");
+        private static readonly int leaveBlockLeft = Animator.StringToHash("LeaveBlockLeft");
+        private static readonly int stuned = Animator.StringToHash("Stunned");
 
         private bool _combatLayerActive = false;
         private bool _isSheathing = false;
@@ -74,7 +75,6 @@ namespace Player.PlayerCombat
             {
                 AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(1);
                 bool sheathDone = stateInfo.IsName("SheathSword") && stateInfo.normalizedTime >= .7f;
-                print(sheathDone);
                 if (sheathDone)
                 {
                     animator?.SetLayerWeight(1, Mathf.MoveTowards(currentWeight, 0f, Time.deltaTime * 5f));
@@ -84,6 +84,7 @@ namespace Player.PlayerCombat
             else if (_swordInHand)
             {
                 animator?.SetLayerWeight(1, Mathf.MoveTowards(currentWeight, 1f, Time.deltaTime * 5f));
+                grabController.Drop();
             }
 
             if (_swordInHand && !_combatLayerActive)
@@ -154,8 +155,8 @@ namespace Player.PlayerCombat
         {
             AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(1);
             return stateInfo.IsName("Armature_RightSwingAttack")
-                || stateInfo.IsName("Armature_LeftSwingAttack")
-                || stateInfo.IsName("Armature_DownSwingAttack");
+                   || stateInfo.IsName("Armature_LeftSwingAttack")
+                   || stateInfo.IsName("Armature_DownSwingAttack");
         }
 
         public void handleStun()

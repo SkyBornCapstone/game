@@ -10,6 +10,7 @@ namespace Interaction
         [SerializeField] private Transform rightHandTarget;
         [SerializeField] private TwoBoneIKConstraint rightHandIK;
         [SerializeField] private Transform rightIkTarget;
+        [SerializeField] private Transform rightHandVisualTarget;
 
         [SerializeField] private float ikTransitionSpeed = 4f;
 
@@ -29,14 +30,33 @@ namespace Interaction
 
             if (Input.GetKeyDown(KeyCode.Q) && isGrabbing.value)
             {
-                _currentGrabbed.Drop(this);
-                _currentGrabbed = null;
-                isGrabbing.value = false;
+                Drop();
             }
 
             if (Input.GetMouseButtonDown(0) && isGrabbing.value)
             {
                 _currentGrabbed.Use();
+            }
+        }
+
+        private void LateUpdate()
+        {
+            if (!isOwner) return;
+
+            if (isGrabbing.value)
+            {
+                Transform grabTransform = _currentGrabbed.transform;
+                Transform gripPoint = _currentGrabbed.rightHandGrip;
+
+                if (gripPoint)
+                {
+                    Quaternion inverseGripRot = Quaternion.Inverse(gripPoint.localRotation);
+                    grabTransform.rotation = rightHandVisualTarget.rotation * inverseGripRot;
+
+                    Vector3 offsetToRoot = grabTransform.position - gripPoint.position;
+
+                    grabTransform.position = rightHandVisualTarget.position + offsetToRoot;
+                }
             }
         }
 
@@ -54,7 +74,17 @@ namespace Interaction
             grabbable.GiveOwnership(owner);
             _currentGrabbed = grabbable;
             isGrabbing.value = true;
-            grabbable.SetConstraintSource(rightHandTarget);
+        }
+
+        public void Drop()
+        {
+            if (isGrabbing.value)
+            {
+                _currentGrabbed.Drop(this);
+                _currentGrabbed.transform.parent = null;
+                _currentGrabbed = null;
+                isGrabbing.value = false;
+            }
         }
     }
 }

@@ -6413,22 +6413,6 @@ PrefabInstance:
       propertyPath: swingSound
       value: 
       objectReference: {fileID: 8300000, guid: 1ed122a64899f4665b51df933b7ce8d8, type: 3}
-    - target: {fileID: 7507120169948284530, guid: 245d04d5813285841a9293375134c4f2, type: 3}
-      propertyPath: offsetPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7507120169948284530, guid: 245d04d5813285841a9293375134c4f2, type: 3}
-      propertyPath: offsetRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7507120169948284530, guid: 245d04d5813285841a9293375134c4f2, type: 3}
-      propertyPath: offsetRotation.y
-      value: -129.02
-      objectReference: {fileID: 0}
-    - target: {fileID: 7507120169948284530, guid: 245d04d5813285841a9293375134c4f2, type: 3}
-      propertyPath: offsetRotation.z
-      value: -85.78
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
