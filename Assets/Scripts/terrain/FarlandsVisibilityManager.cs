@@ -6,15 +6,29 @@ namespace Terrain
     public class FarlandsVisibilityManager : MonoBehaviour
     {
         public float visibilityThresholdRadius = 400f; 
-        private readonly List<GameObject> _farlandsIslands = new List<GameObject>();
-        private bool _isCurrentlyVisible = true;
+        public float randomOffsetRange = 100f; // Each island will pop in progressively slower
+
+        private class IslandData
+        {
+            public GameObject Island;
+            public float RandomThresholdOffset;
+            public bool IsVisible;
+        }
+
+        private readonly List<IslandData> _farlandsIslands = new List<IslandData>();
         private Camera _mainCamera;
 
         public void RegisterFarlandsIsland(GameObject island)
         {
-            _farlandsIslands.Add(island);
-            // Match the current state instantly
-            island.SetActive(_isCurrentlyVisible);
+            var data = new IslandData
+            {
+                Island = island,
+                RandomThresholdOffset = Random.Range(0f, randomOffsetRange),
+                IsVisible = false // Force update check to sync correctly
+            };
+            
+            _farlandsIslands.Add(data);
+            island.SetActive(false);
         }
 
         private void Start()
@@ -25,8 +39,8 @@ namespace Terrain
 
         private void Update()
         {
-            // Update twice a second for performance since it's just a distance check
-            if (Time.frameCount % 30 == 0)
+            // Checking periodically to stagger the pop in calculations
+            if (Time.frameCount % 10 == 0)
             {
                 UpdateVisibility();
             }
@@ -42,18 +56,20 @@ namespace Terrain
 
             Vector3 camPos = _mainCamera.transform.position;
             camPos.y = 0; // measure flat 2D distance to center of the world
-            
-            bool shouldBeVisible = camPos.magnitude > visibilityThresholdRadius;
+            float distSquared = camPos.sqrMagnitude;
+            float currentDist = Mathf.Sqrt(distSquared);
 
-            if (shouldBeVisible != _isCurrentlyVisible)
+            for (int i = 0; i < _farlandsIslands.Count; i++)
             {
-                _isCurrentlyVisible = shouldBeVisible;
-                for (int i = 0; i < _farlandsIslands.Count; i++)
+                var data = _farlandsIslands[i];
+                if (data.Island == null) continue;
+
+                bool shouldBeVisible = currentDist > (visibilityThresholdRadius + data.RandomThresholdOffset);
+
+                if (shouldBeVisible != data.IsVisible)
                 {
-                    if (_farlandsIslands[i] != null)
-                    {
-                        _farlandsIslands[i].SetActive(_isCurrentlyVisible);
-                    }
+                    data.IsVisible = shouldBeVisible;
+                    data.Island.SetActive(data.IsVisible);
                 }
             }
         }
