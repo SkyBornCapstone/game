@@ -9,7 +9,7 @@ namespace Terrain
         public static BoundaryWindManager Instance { get; private set; }
 
         public float maxInwardWindSpeed = 40f;
-        public float maxClockwiseWindSpeed = 3f;
+        public float maxClockwiseWindSpeed = 5f;
 
         private WorldGenerator _worldGenerator;
         private readonly List<IWindAffected> _windReceivers = new List<IWindAffected>();

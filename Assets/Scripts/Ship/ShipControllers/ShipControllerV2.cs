@@ -61,10 +61,13 @@ namespace Ship.ShipControllers
         private void ApplyForward()
         {
             Vector3 currentVelocity = mainShipRB.linearVelocity;
+            
+            // Subtract wind from the current velocity so we only track the ship's internal local momentum
+            Vector3 relativeVelocity = currentVelocity - WindVelocity;
 
             // Current speed along the ship's forward axis
             float currentForwardSpeed =
-                Vector3.Dot(currentVelocity, transform.right);
+                Vector3.Dot(relativeVelocity, transform.right);
 
             // Desired speed from throttle
             float targetForwardSpeed =
