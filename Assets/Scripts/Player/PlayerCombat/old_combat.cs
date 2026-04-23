@@ -9,6 +9,7 @@ namespace Player.PlayerCombat
         [Header("References")] [SerializeField]
         public LockOnSystem lockOnSystem;
 
+        [SerializeField] public ArmIKController armIKController;
         [SerializeField] public NetworkAnimator animator;
 
         [Header("Stance Settings")] [SerializeField]
