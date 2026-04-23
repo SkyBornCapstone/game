@@ -62,7 +62,10 @@ namespace Player
                     UpdateAnimatorParameters(isGrounded);
                 }
             }
+        }
 
+        private void LateUpdate()
+        {
             if (isOnShipDeck.value)
             {
                 return;

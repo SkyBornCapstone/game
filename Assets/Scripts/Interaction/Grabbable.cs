@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Animations;
 
 namespace Interaction
@@ -8,8 +7,7 @@ namespace Interaction
     [RequireComponent(typeof(ParentConstraint))]
     public class Grabbable : AInteractable
     {
-        [SerializeField] private Vector3 offsetPosition;
-        [SerializeField] private Vector3 offsetRotation;
+        public Transform rightHandGrip;
 
         private Rigidbody _rb;
         private ParentConstraint _parentConstraint;
@@ -39,8 +37,6 @@ namespace Interaction
 
         public virtual void Drop(GrabController grabController)
         {
-            _parentConstraint.constraintActive = false;
-            _parentConstraint.SetSources(new List<ConstraintSource>());
             SetPhysics(false);
         }
 
@@ -52,18 +48,6 @@ namespace Interaction
         public void SetPhysics(bool grabbed)
         {
             _rb.isKinematic = grabbed;
-        }
-
-
-        public void SetConstraintSource(Transform handTarget)
-        {
-            _parentConstraint.enabled = true;
-            _parentConstraint.constraintActive = true;
-            if (_parentConstraint.sourceCount != 0) return;
-            var source = new ConstraintSource { sourceTransform = handTarget, weight = 1f };
-            _parentConstraint.translationOffsets = new[] { offsetPosition };
-            _parentConstraint.rotationOffsets = new[] { offsetRotation };
-            _parentConstraint.AddSource(source);
         }
     }
 }
