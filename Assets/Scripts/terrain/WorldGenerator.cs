@@ -10,7 +10,7 @@ namespace Terrain
         public float innerRadius = 500f;
 
         [Tooltip("Width of the empty ring outside the inner world.")]
-        public float emptyRingWidth = 100f;
+        public float emptyRingWidth = 200f;
 
         [Tooltip("Width of the outermost ring where specific islands spawn.")]
         public float outerRingWidth = 200f;

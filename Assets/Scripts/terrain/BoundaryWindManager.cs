@@ -8,8 +8,8 @@ namespace Terrain
     {
         public static BoundaryWindManager Instance { get; private set; }
 
-        public float maxInwardWindSpeed = 100f;
-        public float maxClockwiseWindSpeed = 50f;
+        public float maxInwardWindSpeed = 40f;
+        public float maxClockwiseWindSpeed = 3f;
 
         private WorldGenerator _worldGenerator;
         private readonly List<IWindAffected> _windReceivers = new List<IWindAffected>();
@@ -55,20 +55,19 @@ namespace Terrain
                 if (dist > innerRadius)
                 {
                     // Scale from 0 at inner radius to 1 at outer radius
-                    // Using square curve so it starts weak and becomes very strong at the end
                     float tFactor = Mathf.Clamp01((dist - innerRadius) / (outerRadius - innerRadius));
-                    float strengthFactor = tFactor * tFactor;
+                    
+                    // Inward wind scales quadratically (to give some space for clockwise movement)
+                    float inwardStrength = tFactor * tFactor;
+                    
+                    // Clockwise wind ramps up linearly
+                    float clockwiseStrength = tFactor;
 
                     Vector3 inwardDir = -pos2D.normalized;
                     Vector3 clockwiseDir = Vector3.Cross(Vector3.up, pos2D.normalized);
 
-                    Vector3 wind = (inwardDir * maxInwardWindSpeed + clockwiseDir * maxClockwiseWindSpeed) * strengthFactor;
-
-                    // Absolute barrier beyond outer radius
-                    if (dist > outerRadius)
-                    {
-                        wind += inwardDir * (dist - outerRadius) * 200f;
-                    }
+                    Vector3 wind = inwardDir * (maxInwardWindSpeed * inwardStrength) 
+                                 + clockwiseDir * (maxClockwiseWindSpeed * clockwiseStrength);
 
                     receiver.WindVelocity = wind;
                 }
