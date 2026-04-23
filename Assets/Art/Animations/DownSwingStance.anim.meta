@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Art/Animations/DownSwingStance.anim.meta
 guid: 4c946a97fe2714746931ca36bd33e312
+========
+guid: 38d4838a25d6b0341812fcf69c17e84b
+>>>>>>>> origin/main:Assets/Art/Animations/SheathSword.anim.meta
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 7400000
