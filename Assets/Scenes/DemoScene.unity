@@ -6250,7 +6250,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 32055
+    m_Bits: 4294967295
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -6413,9 +6413,6 @@ PrefabInstance:
       propertyPath: swingSound
       value: 
       objectReference: {fileID: 8300000, guid: 1ed122a64899f4665b51df933b7ce8d8, type: 3}
-      propertyPath: offsetPosition.y
-      value: 0.03
-      objectReference: {fileID: 0}
     - target: {fileID: 7507120169948284530, guid: 245d04d5813285841a9293375134c4f2, type: 3}
       propertyPath: offsetPosition.z
       value: 0
