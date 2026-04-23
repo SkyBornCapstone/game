@@ -1159,8 +1159,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  offsetPosition: {x: 0, y: 0, z: 0}
-  offsetRotation: {x: 0, y: 0, z: 0}
+  rightHandGrip: {fileID: 0}
 --- !u!54 &752603662
 Rigidbody:
   m_ObjectHideFlags: 0

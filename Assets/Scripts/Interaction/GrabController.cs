@@ -30,10 +30,7 @@ namespace Interaction
 
             if (Input.GetKeyDown(KeyCode.Q) && isGrabbing.value)
             {
-                _currentGrabbed.Drop(this);
-                _currentGrabbed.transform.parent = null;
-                _currentGrabbed = null;
-                isGrabbing.value = false;
+                Drop();
             }
 
             if (Input.GetMouseButtonDown(0) && isGrabbing.value)
@@ -77,6 +74,17 @@ namespace Interaction
             grabbable.GiveOwnership(owner);
             _currentGrabbed = grabbable;
             isGrabbing.value = true;
+        }
+
+        public void Drop()
+        {
+            if (isGrabbing.value)
+            {
+                _currentGrabbed.Drop(this);
+                _currentGrabbed.transform.parent = null;
+                _currentGrabbed = null;
+                isGrabbing.value = false;
+            }
         }
     }
 }
