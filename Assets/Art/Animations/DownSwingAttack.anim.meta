@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Art/Animations/DownSwingAttack.anim.meta
 guid: 5a3d9b88b7be8ce439c598186f7d35ff
+========
+guid: b6f4e539a5cab2840901244d4f7ccf6a
+>>>>>>>> origin/main:Assets/Art/Animations/Right.anim.meta
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 7400000

@@ -2654,7 +2654,7 @@ MonoBehaviour:
   Lens:
     FieldOfView: 60.000004
     OrthographicSize: 5
-    NearClipPlane: 0.3
+    NearClipPlane: 0.08
     FarClipPlane: 1500
     Dutch: 0
     ModeOverride: 0
@@ -4553,10 +4553,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f17139f24e99d4825b29920d1b51b137, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backgroundMusic: {fileID: 8300000, guid: c72cd9014169745d7b8f9be2d802a6c6, type: 3}
-  combatIntro: {fileID: 8300000, guid: f75cdc6115a9752478357eb6c466905e, type: 3}
-  combatMain: {fileID: 8300000, guid: 5b243fcc6063a13418a6e9d6b152ad63, type: 3}
-  combatOutro: {fileID: 8300000, guid: b993b537a33e4ed42aa86eeeae5ebe3c, type: 3}
+  backgroundMusic: {fileID: 8300000, guid: c10b935ab60894c8ab6aed1e5ea87315, type: 3}
+  combatIntro: {fileID: 8300000, guid: a20a124c4b0f2489ebaa616f29879d06, type: 3}
+  combatMain: {fileID: 8300000, guid: 686b7f45360b244d98161a2b7ae20aa1, type: 3}
+  combatOutro: {fileID: 8300000, guid: 0f30bc722294f4222b5defd948ffecfe, type: 3}
   crossFadeDuration: 1
   outroCrossFadeDuration: 3
   musicVolume: 0.4
@@ -5896,7 +5896,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  playerPrefab: {fileID: 8556194902096009755, guid: 8fc501684ccfb1a449888f96bfb1d879, type: 3}
+  playerPrefab: {fileID: 8556194902096009755, guid: 9bc743ab897bc8a4cbb7b979dd980239, type: 3}
   spawnPoints:
   - {fileID: 1187244466}
   - {fileID: 285950652}
@@ -6250,7 +6250,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 32055
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -6404,6 +6404,33 @@ PrefabInstance:
     - target: {fileID: 7137822625472565427, guid: 245d04d5813285841a9293375134c4f2, type: 3}
       propertyPath: m_Name
       value: Sword
+      objectReference: {fileID: 0}
+    - target: {fileID: 7507120169948284530, guid: 245d04d5813285841a9293375134c4f2, type: 3}
+      propertyPath: hitSound
+      value: 
+      objectReference: {fileID: 8300000, guid: bab175cf589654a3380837fd934b29c8, type: 3}
+    - target: {fileID: 7507120169948284530, guid: 245d04d5813285841a9293375134c4f2, type: 3}
+      propertyPath: swingSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 1ed122a64899f4665b51df933b7ce8d8, type: 3}
+      propertyPath: offsetPosition.y
+      value: 0.03
+      objectReference: {fileID: 0}
+    - target: {fileID: 7507120169948284530, guid: 245d04d5813285841a9293375134c4f2, type: 3}
+      propertyPath: offsetPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7507120169948284530, guid: 245d04d5813285841a9293375134c4f2, type: 3}
+      propertyPath: offsetRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7507120169948284530, guid: 245d04d5813285841a9293375134c4f2, type: 3}
+      propertyPath: offsetRotation.y
+      value: -129.02
+      objectReference: {fileID: 0}
+    - target: {fileID: 7507120169948284530, guid: 245d04d5813285841a9293375134c4f2, type: 3}
+      propertyPath: offsetRotation.z
+      value: -85.78
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

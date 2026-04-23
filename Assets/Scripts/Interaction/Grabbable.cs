@@ -31,7 +31,7 @@ namespace Interaction
 
         public virtual void Grab(GrabController grabController)
         {
-            if (grabController == null || grabController.IsGrabbing) return;
+            if (grabController == null || grabController.isGrabbing.value) return;
 
             SetPhysics(true);
             grabController.Grab(this);

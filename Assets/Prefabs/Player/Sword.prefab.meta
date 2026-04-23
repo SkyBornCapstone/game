@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Prefabs/Player/Sword.prefab.meta
 guid: 225b3803ea603944283ed0b46b6305f2
+========
+guid: 9bc743ab897bc8a4cbb7b979dd980239
+>>>>>>>> origin/main:Assets/Prefabs/Player/Penguin 1.prefab.meta
 PrefabImporter:
   externalObjects: {}
   userData: 
