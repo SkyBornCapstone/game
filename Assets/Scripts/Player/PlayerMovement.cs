@@ -1,11 +1,12 @@
 using JetBrains.Annotations;
 using PurrNet;
 using Ship;
+using Terrain;
 using UnityEngine;
 
 namespace Player
 {
-    public class PlayerMovement : NetworkBehaviour, IShipProxyRider
+    public class PlayerMovement : NetworkBehaviour, IShipProxyRider, IWindAffected
     {
         [SerializeField] private Transform physicsRoot;
         [SerializeField] private Transform visualRoot;
@@ -34,6 +35,27 @@ namespace Player
         [Header("Ship Interaction Variables")] public SyncVar<bool> isOnShipDeck;
 
         private Transform _lockedPosition;
+
+        public Vector3 WindVelocity { get; set; }
+        public Transform TransformRoot => transform;
+
+        private void OnEnable()
+        {
+            if (BoundaryWindManager.Instance != null)
+                BoundaryWindManager.Instance.Register(this);
+        }
+
+        private void OnDisable()
+        {
+            if (BoundaryWindManager.Instance != null)
+                BoundaryWindManager.Instance.Unregister(this);
+        }
+
+        private void Start()
+        {
+            if (BoundaryWindManager.Instance != null)
+                BoundaryWindManager.Instance.Register(this);
+        }
 
         private void Update()
         {
@@ -93,15 +115,22 @@ namespace Player
 
             float currentSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : moveSpeed;
 
-            Vector3 targetVel =
+            Vector3 intendedVel =
                 (transform.forward * moveInput.y + transform.right * moveInput.x) *
                 currentSpeed;
+            Vector3 targetVel = intendedVel + WindVelocity;
+            
             rb.AddForce(targetVel * acceleration);
 
             var horizontal = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
             rb.AddForce(-horizontal * planarDamping);
-            if (horizontal.magnitude > currentSpeed)
-                rb.linearVelocity = new Vector3(targetVel.x, rb.linearVelocity.y, targetVel.z);
+
+            float maxAllowedSpeed = currentSpeed + WindVelocity.magnitude;
+            if (horizontal.magnitude > maxAllowedSpeed)
+            {
+                Vector3 clamped = horizontal.normalized * maxAllowedSpeed;
+                rb.linearVelocity = new Vector3(clamped.x, rb.linearVelocity.y, clamped.z);
+            }
         }
 
         public void SetLockedPosition([CanBeNull] Transform lockedPosition)

@@ -1,9 +1,10 @@
 using PurrNet;
+using Terrain;
 using UnityEngine;
 
 namespace Ship.ShipControllers
 {
-    public class ShipControllerV2 : NetworkBehaviour
+    public class ShipControllerV2 : NetworkBehaviour, IWindAffected
     {
         [Header("Main Ship Variables")] public Transform mainShip;
         public Rigidbody mainShipRB;
@@ -22,6 +23,27 @@ namespace Ship.ShipControllers
         private float liftThrottle;
         private float forwardThrottle;
         private float yawThrottle;
+
+        public Vector3 WindVelocity { get; set; }
+        public Transform TransformRoot => transform;
+
+        private void OnEnable()
+        {
+            if (BoundaryWindManager.Instance != null)
+                BoundaryWindManager.Instance.Register(this);
+        }
+
+        private void OnDisable()
+        {
+            if (BoundaryWindManager.Instance != null)
+                BoundaryWindManager.Instance.Unregister(this);
+        }
+
+        private void Start()
+        {
+            if (BoundaryWindManager.Instance != null)
+                BoundaryWindManager.Instance.Register(this);
+        }
 
         private void FixedUpdate()
         {
@@ -57,6 +79,7 @@ namespace Ship.ShipControllers
 
             // Rebuild velocity
             Vector3 forwardVelocity = transform.right * newForwardSpeed;
+            forwardVelocity += WindVelocity;
 
             mainShipRB.linearVelocity = new Vector3(
                 forwardVelocity.x,

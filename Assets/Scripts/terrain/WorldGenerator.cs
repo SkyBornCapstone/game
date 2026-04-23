@@ -52,6 +52,11 @@ namespace Terrain
         // Trigger worldgen on start
         private void Start()
         {
+            if (gameObject.GetComponent<BoundaryWindManager>() == null)
+            {
+                gameObject.AddComponent<BoundaryWindManager>();
+            }
+
             GenerateWorld();
         }
 
