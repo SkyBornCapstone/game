@@ -21,11 +21,11 @@ In *Skyborn Pirate Game*, you and your friends play as a crew of penguins flying
 
 Want to try the game out with your friends?
 
-1. **[Download the Source Code](https://github.com/SkyBornCapstone/game)**: Clone or download the repository from our GitHub page.
+1. **Download the Source Code**: Clone or download the repository from our [GitHub page](https://github.com/SkyBornCapstone/game).
 2. **System Requirements & Setup**: Ensure you are on a Windows or macOS machine with **Unity `6000.0.68f1`** installed.
 3. **Launch the Game**: Open the project in Unity and Press Play. To play with friends, have one player host a lobby from the main menu and let up to three friends connect via the provided **join code**.
 
-**Feedback & Issues:** Found a bug or have a suggestion? Please [open an issue on our GitHub repository](https://github.com/SkyBornCapstone/game/issues)!
+**Feedback & Issues:** Found a bug or have a suggestion? Please [open an issue](https://github.com/SkyBornCapstone/game/issues) on our GitHub repository!
 
 ---
 
