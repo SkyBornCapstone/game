@@ -94,24 +94,18 @@ namespace Player
 
             float currentSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : moveSpeed;
 
-            Vector3 currentWindVelocity = BoundaryWindManager.Instance != null 
-                ? BoundaryWindManager.Instance.GetWindAtPosition(transform.position) 
-                : Vector3.zero;
-
             Vector3 intendedVel =
                 (transform.forward * moveInput.y + transform.right * moveInput.x) *
                 currentSpeed;
-            Vector3 targetVel = intendedVel + currentWindVelocity;
             
-            rb.AddForce(targetVel * acceleration);
+            rb.AddForce(intendedVel * acceleration);
 
             var horizontal = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
             rb.AddForce(-horizontal * planarDamping);
 
-            float maxAllowedSpeed = currentSpeed + currentWindVelocity.magnitude;
-            if (horizontal.magnitude > maxAllowedSpeed)
+            if (horizontal.magnitude > currentSpeed)
             {
-                Vector3 clamped = horizontal.normalized * maxAllowedSpeed;
+                Vector3 clamped = horizontal.normalized * currentSpeed;
                 rb.linearVelocity = new Vector3(clamped.x, rb.linearVelocity.y, clamped.z);
             }
         }
