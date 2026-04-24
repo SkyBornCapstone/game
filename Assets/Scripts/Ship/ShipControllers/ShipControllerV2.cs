@@ -1,4 +1,5 @@
 using PurrNet;
+using Terrain;
 using UnityEngine;
 
 namespace Ship.ShipControllers
@@ -25,6 +26,8 @@ namespace Ship.ShipControllers
 
         private void FixedUpdate()
         {
+            if (!isServer) return;
+
             ApplyLift();
             ApplyForward();
             ApplyYaw();
@@ -39,10 +42,17 @@ namespace Ship.ShipControllers
         private void ApplyForward()
         {
             Vector3 currentVelocity = mainShipRB.linearVelocity;
+            
+            Vector3 currentWindVelocity = BoundaryWindManager.Instance != null 
+                ? BoundaryWindManager.Instance.GetWindAtPosition(transform.position) 
+                : Vector3.zero;
+            
+            // Subtract wind from the current velocity so we only track the ship's internal local momentum
+            Vector3 relativeVelocity = currentVelocity - currentWindVelocity;
 
             // Current speed along the ship's forward axis
             float currentForwardSpeed =
-                Vector3.Dot(currentVelocity, transform.right);
+                Vector3.Dot(relativeVelocity, transform.right);
 
             // Desired speed from throttle
             float targetForwardSpeed =
@@ -57,6 +67,7 @@ namespace Ship.ShipControllers
 
             // Rebuild velocity
             Vector3 forwardVelocity = transform.right * newForwardSpeed;
+            forwardVelocity += currentWindVelocity;
 
             mainShipRB.linearVelocity = new Vector3(
                 forwardVelocity.x,

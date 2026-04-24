@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using PurrNet;
 using Ship;
+using Terrain;
 using UnityEngine;
 
 namespace Player
@@ -93,15 +94,20 @@ namespace Player
 
             float currentSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : moveSpeed;
 
-            Vector3 targetVel =
+            Vector3 intendedVel =
                 (transform.forward * moveInput.y + transform.right * moveInput.x) *
                 currentSpeed;
-            rb.AddForce(targetVel * acceleration);
+            
+            rb.AddForce(intendedVel * acceleration);
 
             var horizontal = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
             rb.AddForce(-horizontal * planarDamping);
+
             if (horizontal.magnitude > currentSpeed)
-                rb.linearVelocity = new Vector3(targetVel.x, rb.linearVelocity.y, targetVel.z);
+            {
+                Vector3 clamped = horizontal.normalized * currentSpeed;
+                rb.linearVelocity = new Vector3(clamped.x, rb.linearVelocity.y, clamped.z);
+            }
         }
 
         public void SetLockedPosition([CanBeNull] Transform lockedPosition)
