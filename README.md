@@ -4,7 +4,7 @@
 
 **A 4 player co-op with friends game where players fly a ship through the sky to explore islands, find treasure, and fight enemies.**
 
-Are you looking for a robust sandbox co-op experience without the hassle of setting up complex dedicated servers? Who said flightless birds can't fly! *Skyborn Pirate Game* features complex client-server physics that keeps the action smooth and synchronized while players walk around and fight on moving platforms, utilizing a streamlined client-auth networking structure via an easy join-code lobby.
+In *Skyborn Pirate Game*, you and your friends play as a crew of penguins flying a pirate ship through the skies. The game features complex client-server physics that keep the action smooth and synchronized while players explore and fight enemies. It utilizes a streamlined client-auth networking structure via an easy join-code lobby for a seamless co-op experience.
 
 ---
 
@@ -27,9 +27,9 @@ Are you looking for a robust sandbox co-op experience without the hassle of sett
 
 ## Meet the Crew (Group 10 - CS.010)
 
-* **Michael Pflaging** - World Generation, Music, Sound Effects
 * **Taz Larson** - Combat, Modeling, Ship Controls
 * **Will Teyema** - Networking, Game States, Performance
+* **Michael Pflaging** - World Generation, Music, Sound Effects
 
 ---
-*Created for the Oregon State University CS Capstone Project.*
+*Created as part of the Oregon State University CS Capstone Project.*
