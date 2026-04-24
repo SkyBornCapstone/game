@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Ship.ShipControllers
 {
-    public class ShipControllerV2 : NetworkBehaviour, IWindAffected
+    public class ShipControllerV2 : NetworkBehaviour
     {
         [Header("Main Ship Variables")] public Transform mainShip;
         public Rigidbody mainShipRB;
@@ -24,29 +24,10 @@ namespace Ship.ShipControllers
         private float forwardThrottle;
         private float yawThrottle;
 
-        public Vector3 WindVelocity { get; set; }
-        public Transform TransformRoot => transform;
-
-        private void OnEnable()
-        {
-            if (BoundaryWindManager.Instance != null)
-                BoundaryWindManager.Instance.Register(this);
-        }
-
-        private void OnDisable()
-        {
-            if (BoundaryWindManager.Instance != null)
-                BoundaryWindManager.Instance.Unregister(this);
-        }
-
-        private void Start()
-        {
-            if (BoundaryWindManager.Instance != null)
-                BoundaryWindManager.Instance.Register(this);
-        }
-
         private void FixedUpdate()
         {
+            if (!isServer) return;
+
             ApplyLift();
             ApplyForward();
             ApplyYaw();
@@ -62,8 +43,12 @@ namespace Ship.ShipControllers
         {
             Vector3 currentVelocity = mainShipRB.linearVelocity;
             
+            Vector3 currentWindVelocity = BoundaryWindManager.Instance != null 
+                ? BoundaryWindManager.Instance.GetWindAtPosition(transform.position) 
+                : Vector3.zero;
+            
             // Subtract wind from the current velocity so we only track the ship's internal local momentum
-            Vector3 relativeVelocity = currentVelocity - WindVelocity;
+            Vector3 relativeVelocity = currentVelocity - currentWindVelocity;
 
             // Current speed along the ship's forward axis
             float currentForwardSpeed =
@@ -82,7 +67,7 @@ namespace Ship.ShipControllers
 
             // Rebuild velocity
             Vector3 forwardVelocity = transform.right * newForwardSpeed;
-            forwardVelocity += WindVelocity;
+            forwardVelocity += currentWindVelocity;
 
             mainShipRB.linearVelocity = new Vector3(
                 forwardVelocity.x,

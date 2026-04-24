@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Player
 {
-    public class PlayerMovement : NetworkBehaviour, IShipProxyRider, IWindAffected
+    public class PlayerMovement : NetworkBehaviour, IShipProxyRider
     {
         [SerializeField] private Transform physicsRoot;
         [SerializeField] private Transform visualRoot;
@@ -35,27 +35,6 @@ namespace Player
         [Header("Ship Interaction Variables")] public SyncVar<bool> isOnShipDeck;
 
         private Transform _lockedPosition;
-
-        public Vector3 WindVelocity { get; set; }
-        public Transform TransformRoot => transform;
-
-        private void OnEnable()
-        {
-            if (BoundaryWindManager.Instance != null)
-                BoundaryWindManager.Instance.Register(this);
-        }
-
-        private void OnDisable()
-        {
-            if (BoundaryWindManager.Instance != null)
-                BoundaryWindManager.Instance.Unregister(this);
-        }
-
-        private void Start()
-        {
-            if (BoundaryWindManager.Instance != null)
-                BoundaryWindManager.Instance.Register(this);
-        }
 
         private void Update()
         {
@@ -115,17 +94,21 @@ namespace Player
 
             float currentSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : moveSpeed;
 
+            Vector3 currentWindVelocity = BoundaryWindManager.Instance != null 
+                ? BoundaryWindManager.Instance.GetWindAtPosition(transform.position) 
+                : Vector3.zero;
+
             Vector3 intendedVel =
                 (transform.forward * moveInput.y + transform.right * moveInput.x) *
                 currentSpeed;
-            Vector3 targetVel = intendedVel + WindVelocity;
+            Vector3 targetVel = intendedVel + currentWindVelocity;
             
             rb.AddForce(targetVel * acceleration);
 
             var horizontal = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
             rb.AddForce(-horizontal * planarDamping);
 
-            float maxAllowedSpeed = currentSpeed + WindVelocity.magnitude;
+            float maxAllowedSpeed = currentSpeed + currentWindVelocity.magnitude;
             if (horizontal.magnitude > maxAllowedSpeed)
             {
                 Vector3 clamped = horizontal.normalized * maxAllowedSpeed;
