@@ -10,10 +10,10 @@ In *Skyborn Pirate Game*, you and your friends play as a crew of penguins flying
 
 ## Key Features
 
-* **Intense Aerial Combat:** Smooth melee and projectile combat where crews must coordinate to fight dynamic nav-mesh enemy AI, while simultaneously defending and navigating their ship. 
-* **Dynamic World Generation:** Experience infinite replayability with a robust procedural generation system that dynamically places terrain and islands, ensuring no two voyages are the same.
-* **Custom Ship Physics:** We decoupled the ship's 3D visual models from its underlying physics colliders, allowing players to navigate with realistic momentum and responsive handling effortlessly.
-* **Adaptive Audio Engine:** The game's atmosphere is driven by a reactive music system that smoothly crossfades between exploratory background melodies and intense combat tracks.
+* **Melee Combat:** Smooth sword fighting combat where crews must coordinate to defeat dynamic nav-mesh enemy AI.
+* **Procedural World Generation:** Experience infinite replayability with a procedural world generation system that dynamically places terrain and islands, ensuring no two voyages are the same.
+* **Co-op Ship Controls:** Ship navigation is intentionally split into three distinct stations (turning, ascending/descending, and forward/backward speed), making flying a true team effort that is much easier when friends work together.
+* **Adaptive Audio Engine:** The game features immersive sound effects and a reactive music system that smoothly crossfades between an exploratory background melodies and a combat track.
 
 ---
 
