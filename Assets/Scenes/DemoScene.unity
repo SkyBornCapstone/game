@@ -465,8 +465,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
-  offsetPosition: {x: 0, y: 0, z: 0}
-  offsetRotation: {x: 0, y: 0, z: 0}
+  rightHandGrip: {fileID: 0}
 --- !u!65 &237961925
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -648,6 +647,8 @@ GameObject:
   - component: {fileID: 269001127}
   - component: {fileID: 269001126}
   - component: {fileID: 269001125}
+  - component: {fileID: 269001129}
+  - component: {fileID: 269001128}
   m_Layer: 0
   m_Name: WorldGenerator
   m_TagString: Untagged
@@ -679,6 +680,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c12d03890543a4cef9f67bea2d91ba54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  worldSeed:
+    _value: 0
+    _ownerAuth: 0
+    _sendIntervalInSeconds: 0
   innerRadius: 750
   emptyRingWidth: 250
   outerRingWidth: 200
@@ -735,6 +749,7 @@ MonoBehaviour:
         m_RotationOrder: 4
     weight: 0
     exclusionRadius: 100
+    decorationProfile: {fileID: 11400000, guid: 92881abc9edddeb42bbaf6fd56206902, type: 2}
   individualIslands: []
   islandBuckets:
   - name: Small
@@ -807,6 +822,7 @@ MonoBehaviour:
           m_RotationOrder: 4
       weight: 0
       exclusionRadius: 10
+      decorationProfile: {fileID: 0}
     - prefab: {fileID: 4369642502283831528, guid: 003e3facc296c0947b9c3a582d718c1d, type: 3}
       terrainData:
         seed: 234763
@@ -873,6 +889,7 @@ MonoBehaviour:
           m_RotationOrder: 4
       weight: 0
       exclusionRadius: 1.56
+      decorationProfile: {fileID: 0}
     - prefab: {fileID: 1274440987770376288, guid: 8207c3def6873344c971ee2b8b9d76e8, type: 3}
       terrainData:
         seed: 234763
@@ -939,6 +956,7 @@ MonoBehaviour:
           m_RotationOrder: 4
       weight: 0
       exclusionRadius: 0
+      decorationProfile: {fileID: 0}
     - prefab: {fileID: 1776027010578781596, guid: 21127ecf81987594a9118074559d12b6, type: 3}
       terrainData:
         seed: 234763
@@ -1005,6 +1023,10 @@ MonoBehaviour:
           m_RotationOrder: 4
       weight: 0
       exclusionRadius: 0
+      decorationProfile: {fileID: 0}
+    decorationProfiles:
+    - profile: {fileID: 11400000, guid: b54359585d7e95a4e93e20a18a9ba0f7, type: 2}
+      weight: 0
   - name: Medium
     weight: 20
     exclusionRadius: 100
@@ -1075,6 +1097,7 @@ MonoBehaviour:
           m_RotationOrder: 4
       weight: 0
       exclusionRadius: 10
+      decorationProfile: {fileID: 0}
     - prefab: {fileID: 4369642502283831528, guid: 003e3facc296c0947b9c3a582d718c1d, type: 3}
       terrainData:
         seed: 234763
@@ -1141,6 +1164,7 @@ MonoBehaviour:
           m_RotationOrder: 4
       weight: 0
       exclusionRadius: 1.56
+      decorationProfile: {fileID: 0}
     - prefab: {fileID: 1274440987770376288, guid: 8207c3def6873344c971ee2b8b9d76e8, type: 3}
       terrainData:
         seed: 234763
@@ -1207,6 +1231,7 @@ MonoBehaviour:
           m_RotationOrder: 4
       weight: 0
       exclusionRadius: 0
+      decorationProfile: {fileID: 0}
     - prefab: {fileID: 1776027010578781596, guid: 21127ecf81987594a9118074559d12b6, type: 3}
       terrainData:
         seed: 234763
@@ -1273,6 +1298,10 @@ MonoBehaviour:
           m_RotationOrder: 4
       weight: 0
       exclusionRadius: 0
+      decorationProfile: {fileID: 0}
+    decorationProfiles:
+    - profile: {fileID: 11400000, guid: 6439e0e41c3e96c47bfae390a98f2bd9, type: 2}
+      weight: 0
   - name: Large
     weight: 20
     exclusionRadius: 150
@@ -1343,6 +1372,7 @@ MonoBehaviour:
           m_RotationOrder: 4
       weight: 0
       exclusionRadius: 0
+      decorationProfile: {fileID: 0}
     - prefab: {fileID: 6827968807762418011, guid: 6c560f242b2754f489b4d90033316a44, type: 3}
       terrainData:
         seed: 234763
@@ -1409,6 +1439,10 @@ MonoBehaviour:
           m_RotationOrder: 4
       weight: 0
       exclusionRadius: 0
+      decorationProfile: {fileID: 0}
+    decorationProfiles:
+    - profile: {fileID: 11400000, guid: 81b9fb785c815cc44b04bfb0bc5cadcd, type: 2}
+      weight: 0
   outerRingBucket:
     name: Farlands
     weight: 1
@@ -1480,6 +1514,9 @@ MonoBehaviour:
           m_RotationOrder: 4
       weight: 0
       exclusionRadius: 0
+      decorationProfile: {fileID: 0}
+    decorationProfiles: []
+  navMesh: {fileID: 989196690}
 --- !u!4 &269001127
 Transform:
   m_ObjectHideFlags: 0
@@ -1495,6 +1532,36 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &269001128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 269001124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef0bd67f185c14d6996e7c52aa1a3e0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxInwardWindSpeed: 40
+  maxClockwiseWindSpeed: 5
+--- !u!114 &269001129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 269001124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 812a0925c514d4e6a84f93e92b032439, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visibilityThresholdRadius: 400
+  randomOffsetRange: 100
+  fadeDistanceBand: 75
+  riseDepth: 250
 --- !u!1 &285950651
 GameObject:
   m_ObjectHideFlags: 0
@@ -2716,6 +2783,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 778879836946813054, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
     - target: {fileID: 1260969013464832982, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
       propertyPath: m_Name
       value: ShipV3
@@ -2760,6 +2831,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1943950683486350617, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 2848494042334923877, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 3371412980234537049, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 5277045245661281399, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 5282115401229261581, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 5967982851907873542, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
     - target: {fileID: 5990408370922185504, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
       propertyPath: m_LocalPosition.y
       value: -2.14
@@ -2767,6 +2862,46 @@ PrefabInstance:
     - target: {fileID: 5990408370922185504, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
       propertyPath: m_LocalPosition.z
       value: 13.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 6000716876624007029, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 6082834541012202607, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 6084296989209941929, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 6298615231647637086, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 6369695570901737935, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 7081664660914245081, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 7578308864567916383, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 7830293554039707735, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 8805049540064397081, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 9190980209013780158, guid: 4c15d0fc9bc762c409bc47d92d5775c3, type: 3}
+      propertyPath: m_Layer
+      value: 14
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

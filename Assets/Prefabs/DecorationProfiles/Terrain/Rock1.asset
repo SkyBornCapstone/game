@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac2ba5e5935451b408ef0cbc2572e2ab, type: 3}
+  m_Name: Rock1
+  m_EditorClassIdentifier: 
+  featurePrefab: {fileID: 6079733157243727383, guid: 76b331eacb8d9334ca7b6c922ec972e6, type: 3}
+  spawnProbability: 0.713
+  heightOffset: 0
+  alignToSurface: 1
+  maxSlopeAngle: 11.2
+  randomYRotation: 1
+  randomFullRotation: 0
+  randomizeScale: 1
+  scaleRange: {x: 0.8, y: 1.2}
+  allowClustering: 1
+  clusterSizeRange: {x: 1, y: 5}
+  clusterRadius: 5
