@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb2dd9cca286b32419c2a7784a6e4724, type: 3}
+  m_Name: TestEnemy
+  m_EditorClassIdentifier: 
+  enemyPrefab: {fileID: 8844227698515988951, guid: 1a5430f0f8fb48f48afc26ddd2887f1d, type: 3}
+  spawnProbability: 0.102
+  heightOffset: 0
+  maxSlopeAngle: 30
+  edgeBuffer: 2
+  randomYRotation: 1
+  requiresNavMesh: 1
+  patrolRadius: 10
+  spawnInGroups: 1
+  groupSizeRange: {x: 2, y: 4}
+  groupRadius: 5
