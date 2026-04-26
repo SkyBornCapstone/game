@@ -20,9 +20,12 @@ namespace Terrain
             islandRadius = radius;
             spawnedPositions.Clear();
 
-            // Spawn in order: terrain features first, then items, then enemies
             SpawnTerrainFeatures();
             SpawnItems();
+        }
+
+        public void SpawnEnemiesAfterNavMesh()
+        {
             SpawnEnemies();
         }
 

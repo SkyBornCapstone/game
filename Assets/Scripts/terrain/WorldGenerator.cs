@@ -59,6 +59,8 @@ namespace Terrain
 
         private FarlandsVisibilityManager _visibilityManager;
 
+        private List<IslandDecorator> _activeDecorators = new();
+
         // Trigger worldgen on start
         protected override void OnSpawned()
         {
@@ -75,15 +77,23 @@ namespace Terrain
             }
 
             GenerateWorld();
-            if (navMesh) navMesh.BuildNavMesh();
+
+            if (navMesh && isServer)
+            {
+                navMesh.BuildNavMesh();
+
+                foreach (var decorator in _activeDecorators)
+                {
+                    decorator.SpawnEnemiesAfterNavMesh();
+                }
+            }
         }
 
         [ContextMenu("Generate World")]
         public void GenerateWorld()
         {
             ClearWorld();
-
-            Random.InitState(worldSeed.value);
+            _activeDecorators.Clear();
             placedIslands.Clear();
             List<Vector2Int> innerPoints = new List<Vector2Int>();
             List<Vector2Int> outerPoints = new List<Vector2Int>();
@@ -189,6 +199,7 @@ namespace Terrain
 
                     IslandDecorator decorator = instance.AddComponent<IslandDecorator>();
                     decorator.DecorateIsland(data.decorationProfile, data.exclusionRadius);
+                    _activeDecorators.Add(decorator);
 
                     // Restore random state so server and clients stay in sync
                     Random.state = savedState;
