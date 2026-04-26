@@ -1179,6 +1179,14 @@ PrefabInstance:
       propertyPath: handPosition
       value: 
       objectReference: {fileID: 1063521899831326893}
+    - target: {fileID: 3395629318284841476, guid: 225b3803ea603944283ed0b46b6305f2, type: 3}
+      propertyPath: m_Radius
+      value: 0.57
+      objectReference: {fileID: 0}
+    - target: {fileID: 3395629318284841476, guid: 225b3803ea603944283ed0b46b6305f2, type: 3}
+      propertyPath: m_Center.x
+      value: -0.62
+      objectReference: {fileID: 0}
     - target: {fileID: 3399230343777372294, guid: 225b3803ea603944283ed0b46b6305f2, type: 3}
       propertyPath: ownerCombat
       value: 
