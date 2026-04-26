@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Tree3
   m_EditorClassIdentifier: 
   featurePrefab: {fileID: 5753540241688714022, guid: 97ed405565faf2849a8606ba344c18e3, type: 3}
-  spawnProbability: 1
+  spawnProbability: 0.642
   heightOffset: -0.12
   alignToSurface: 1
   maxSlopeAngle: 45

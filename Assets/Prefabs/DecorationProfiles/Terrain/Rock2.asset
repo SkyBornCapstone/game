@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac2ba5e5935451b408ef0cbc2572e2ab, type: 3}
   m_Name: Rock2
   m_EditorClassIdentifier: 
-  featurePrefab: {fileID: 919132149155446097, guid: d88ec4488dc346e4fb89e75ef2a4d34b, type: 3}
-  spawnProbability: 0.066
+  featurePrefab: {fileID: 8191189247780558055, guid: 63f79cd02b47e6a4b85372aed80b7320, type: 3}
+  spawnProbability: 0.702
   heightOffset: 0
   alignToSurface: 1
-  maxSlopeAngle: 20.6
+  maxSlopeAngle: 16.9
   randomYRotation: 1
   randomFullRotation: 0
   randomizeScale: 1
   scaleRange: {x: 0.8, y: 1.2}
-  allowClustering: 1
+  allowClustering: 0
   clusterSizeRange: {x: 2, y: 5}
   clusterRadius: 3

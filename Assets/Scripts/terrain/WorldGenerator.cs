@@ -1,11 +1,17 @@
 using System.Collections.Generic;
 using ProceduralTerrain;
+using PurrNet;
+using Unity.AI.Navigation;
 using UnityEngine;
 
 namespace Terrain
 {
-    public class WorldGenerator : MonoBehaviour
+    public class WorldGenerator : NetworkBehaviour
     {
+        [Header("Network Synchronization")]
+        [Tooltip("World seed for deterministic generation. Set by server, synced to clients.")]
+        public SyncVar<int> worldSeed = new(0);
+
         [Header("World Shape Settings")] [Tooltip("Radius of the inner circular world.")]
         public float innerRadius = 500f;
 
@@ -37,6 +43,8 @@ namespace Terrain
         [Tooltip("The bucket of islands to use exclusively for the outer ring.")]
         public IslandBucket outerRingBucket;
 
+        public NavMeshSurface navMesh;
+
         // Internal list to track placed islands for exclusion checking
         private struct PlacedIsland
         {
@@ -52,28 +60,22 @@ namespace Terrain
         private FarlandsVisibilityManager _visibilityManager;
 
         // Trigger worldgen on start
-        private void Start()
+        protected override void OnSpawned()
         {
-            if (gameObject.GetComponent<BoundaryWindManager>() == null)
-            {
-                gameObject.AddComponent<BoundaryWindManager>();
-            }
-            if (gameObject.GetComponent<FarlandsVisibilityManager>() == null)
-            {
-                _visibilityManager = gameObject.AddComponent<FarlandsVisibilityManager>();
-            }
-            else
-            {
-                _visibilityManager = gameObject.GetComponent<FarlandsVisibilityManager>();
-            }
-            
+            TryGetComponent(out _visibilityManager);
             // Set visibility threshold to 150m before the inner radius
             if (_visibilityManager != null)
             {
                 _visibilityManager.visibilityThresholdRadius = Mathf.Max(0, innerRadius - 150f);
             }
 
+            if (isServer)
+            {
+                worldSeed.value = Random.Range(int.MinValue, int.MaxValue);
+            }
+
             GenerateWorld();
+            if (navMesh) navMesh.BuildNavMesh();
         }
 
         [ContextMenu("Generate World")]
@@ -81,6 +83,7 @@ namespace Terrain
         {
             ClearWorld();
 
+            Random.InitState(worldSeed.value);
             placedIslands.Clear();
             List<Vector2Int> innerPoints = new List<Vector2Int>();
             List<Vector2Int> outerPoints = new List<Vector2Int>();
@@ -165,7 +168,7 @@ namespace Terrain
 
             if (!startingIslandSet) startingIslandSet = true;
             TerrainNoiseData t = data.terrainData;
-            
+
             if (_visibilityManager != null)
             {
                 // If it's placed out in the empty gap or outer farlands
@@ -174,7 +177,24 @@ namespace Terrain
                     _visibilityManager.RegisterFarlandsIsland(instance);
                 }
             }
-            
+
+            // Decorate island with items, terrain features, and enemies (SERVER ONLY)
+            // Decorations will be network-spawned and synced to clients
+            if (data.decorationProfile != null)
+            {
+                if (isServer)
+                {
+                    // Save current random state before decoration
+                    Random.State savedState = Random.state;
+
+                    IslandDecorator decorator = instance.AddComponent<IslandDecorator>();
+                    decorator.DecorateIsland(data.decorationProfile, data.exclusionRadius);
+
+                    // Restore random state so server and clients stay in sync
+                    Random.state = savedState;
+                }
+            }
+
             // Record placement
             placedIslands.Add(new PlacedIsland
             {
@@ -272,6 +292,55 @@ namespace Terrain
             return island;
         }
 
+        private IslandData ApplyBucketDefaults(IslandData island, IslandBucket bucket)
+        {
+            // Apply bucket exclusion radius if set
+            if (bucket.exclusionRadius > 0f)
+            {
+                island.exclusionRadius = bucket.exclusionRadius;
+            }
+
+            // Apply weighted decoration profile selection if island doesn't have one
+            if (island.decorationProfile == null && bucket.decorationProfiles != null &&
+                bucket.decorationProfiles.Count > 0)
+            {
+                island.decorationProfile = SelectWeightedDecorationProfile(bucket.decorationProfiles);
+            }
+
+            return island;
+        }
+
+        private IslandDecorationProfile SelectWeightedDecorationProfile(
+            List<IslandBucket.DecorationProfileEntry> profiles)
+        {
+            if (profiles == null || profiles.Count == 0) return null;
+
+            int totalWeight = 0;
+            foreach (var entry in profiles)
+            {
+                totalWeight += entry.weight;
+            }
+
+            if (totalWeight <= 0)
+            {
+                return profiles[Random.Range(0, profiles.Count)].profile;
+            }
+
+            int randomValue = Random.Range(0, totalWeight);
+            int currentSum = 0;
+
+            foreach (var entry in profiles)
+            {
+                currentSum += entry.weight;
+                if (randomValue < currentSum)
+                {
+                    return entry.profile;
+                }
+            }
+
+            return profiles[Random.Range(0, profiles.Count)].profile;
+        }
+
         private IslandData SelectIslandFromBucket(IslandBucket bucket)
         {
             if (bucket.islands == null || bucket.islands.Count == 0) return default;
@@ -284,8 +353,7 @@ namespace Terrain
 
             if (bucketTotalWeight <= 0)
             {
-                return ApplyBucketExclusionRadius(bucket.islands[Random.Range(0, bucket.islands.Count)],
-                    bucket.exclusionRadius);
+                return ApplyBucketDefaults(bucket.islands[Random.Range(0, bucket.islands.Count)], bucket);
             }
 
             int randomValue = Random.Range(0, bucketTotalWeight);
@@ -295,12 +363,11 @@ namespace Terrain
                 currentSum += island.weight;
                 if (randomValue < currentSum)
                 {
-                    return ApplyBucketExclusionRadius(island, bucket.exclusionRadius);
+                    return ApplyBucketDefaults(island, bucket);
                 }
             }
 
-            return ApplyBucketExclusionRadius(bucket.islands[Random.Range(0, bucket.islands.Count)],
-                bucket.exclusionRadius);
+            return ApplyBucketDefaults(bucket.islands[Random.Range(0, bucket.islands.Count)], bucket);
         }
 
         private IslandData GetFallbackIsland()

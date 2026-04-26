@@ -10,27 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 069f653060e94d1409338fe3af72c1f3, type: 3}
-  m_Name: BasicIsland
+  m_Name: BasicIslandMedium
   m_EditorClassIdentifier: 
-  profileName: BasicIsland
-  itemSpawnAttempts: 1
+  profileName: BasicIslandMedium
+  itemSpawnAttempts: 2
   items:
   - itemPrefab: {fileID: 7137822625472565427, guid: 245d04d5813285841a9293375134c4f2, type: 3}
     spawnProbability: 0.02
   terrainFeatures:
   - preset: {fileID: 11400000, guid: b26f4bd44ef808142aecfb0ae53078ea, type: 2}
-    spawnCountRange: {x: 0, y: 2}
+    spawnCountRange: {x: 0, y: 4}
   - preset: {fileID: 11400000, guid: 0dad7f8399675da46a0f64bfbde465a8, type: 2}
-    spawnCountRange: {x: 0, y: 2}
+    spawnCountRange: {x: 0, y: 4}
   - preset: {fileID: 11400000, guid: d34d87ed380b7854fa6c4ba1af09cd63, type: 2}
     spawnCountRange: {x: 0, y: 2}
   - preset: {fileID: 11400000, guid: 6fa48131beeeba64485689e37f683272, type: 2}
-    spawnCountRange: {x: 0, y: 1}
+    spawnCountRange: {x: 0, y: 2}
   - preset: {fileID: 11400000, guid: c8bd859d229d24d47bbe155bc01d2c6c, type: 2}
-    spawnCountRange: {x: 0, y: 1}
+    spawnCountRange: {x: 0, y: 2}
   enemies:
   - preset: {fileID: 11400000, guid: e68b39c2cbac3e740b2d4ddbfd8ab26f, type: 2}
-    spawnCountRange: {x: 0, y: 1}
-  densityMultiplier: 0.755
+    spawnCountRange: {x: 0, y: 2}
+  densityMultiplier: 1
   minSpacing: 1
   maxSpawnAttempts: 100
