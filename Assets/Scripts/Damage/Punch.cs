@@ -4,7 +4,7 @@ using UnityEngine;
 public class Punch : MonoBehaviour
 {
     [SerializeField] private CombatControllerv2 ownerCombat;
-
+    [SerializeField] private float knockback = 1;
     private void OnTriggerEnter(Collider other)
     {
 
@@ -23,11 +23,19 @@ public class Punch : MonoBehaviour
             {
                 print("no block");
             }
+            ApplyKnockback(other);
             return;
         }
-
+        
     }
-
+    private void ApplyKnockback(Collider other)
+    {
+        if (other.TryGetComponent(out Rigidbody rb))
+        {
+            Vector3 knockbackDir = -other.transform.forward;
+            rb.AddForce(knockbackDir * knockback, ForceMode.VelocityChange);
+        }
+    }
 
 
 }
