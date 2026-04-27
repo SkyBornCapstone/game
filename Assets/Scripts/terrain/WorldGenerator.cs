@@ -95,6 +95,7 @@ namespace Terrain
             ClearWorld();
             _activeDecorators.Clear();
             placedIslands.Clear();
+            Random.InitState(worldSeed.value);
             List<Vector2Int> innerPoints = new List<Vector2Int>();
             List<Vector2Int> outerPoints = new List<Vector2Int>();
 
