@@ -38,6 +38,17 @@ namespace Player
         private void Update()
         {
             Vector3 currentPosition = transform.position;
+
+            // Check if grounded (Raycast from 0.5m above feet, straight down, distance 0.7m to allow a tiny buffer)
+            bool isGrounded = Physics.Raycast(currentPosition + Vector3.up * 0.5f, Vector3.down, 0.7f);
+
+            if (!isGrounded)
+            {
+                _distanceAccumulator = 0f;
+                _lastPosition = currentPosition;
+                return;
+            }
+
             // Calculate distance moved on the XZ plane (ignore vertical movement like jumping/falling)
             float distanceMoved = Vector3.Distance(new Vector3(currentPosition.x, 0, currentPosition.z), new Vector3(_lastPosition.x, 0, _lastPosition.z));
             
@@ -68,8 +79,8 @@ namespace Player
             // Raycast down slightly from above the player's feet
             if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out RaycastHit hit, 2.0f))
             {
-                // Check if we hit the ship
-                if (hit.collider.CompareTag("Ship") || hit.collider.name.ToLower().Contains("ship"))
+                // Check if we hit the ship (by name because tag isn't defined)
+                if (hit.collider.name.ToLower().Contains("ship"))
                 {
                     currentFootsteps = woodFootstepSounds;
                 }
