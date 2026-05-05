@@ -50,11 +50,15 @@ namespace Player
         }
 
         [ObserversRpc(runLocally: true)]
-        public void PlaySwordSwing()
+        public async void PlaySwordSwing()
         {
             if (_audioSource == null || swordSwingSound == null) return;
             _lastSwingSoundTime = Time.time;
-            _audioSource.PlayOneShot(swordSwingSound);
+            
+            await System.Threading.Tasks.Task.Delay(100);
+            
+            if (this != null && _audioSource != null && swordSwingSound != null)
+                _audioSource.PlayOneShot(swordSwingSound);
         }
 
         [ObserversRpc(runLocally: true)]
