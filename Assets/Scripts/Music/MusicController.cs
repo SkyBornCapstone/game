@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class MusicController : MonoBehaviour
 {
+    public static MusicController Instance { get; private set; }
+
     [Header("Audio Clips")]
     public AudioClip backgroundMusic;
     public AudioClip combatIntro;
@@ -21,9 +23,18 @@ public class MusicController : MonoBehaviour
     private Coroutine _transitionCoroutine;
     private bool _inCombat = false;
     private Coroutine _exitDelayCoroutine;
+    private float _damageCombatTimer = 0f;
+    private bool _isSwordUnsheathed = false;
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
         _sourceA = gameObject.AddComponent<AudioSource>();
         _sourceB = gameObject.AddComponent<AudioSource>();
         ConfigureSource(_sourceA);
@@ -42,6 +53,50 @@ public class MusicController : MonoBehaviour
         if (backgroundMusic != null)
         {
             PlayMusic(backgroundMusic, true, 0.01f);
+        }
+    }
+
+    private void Update()
+    {
+        if (_damageCombatTimer > 0)
+        {
+            _damageCombatTimer -= Time.deltaTime;
+            if (_damageCombatTimer <= 0)
+            {
+                CheckCombatState();
+            }
+        }
+    }
+
+    public void OnSwordUnsheathed()
+    {
+        _isSwordUnsheathed = true;
+        CheckCombatState();
+    }
+
+    public void OnSwordSheathed()
+    {
+        _isSwordUnsheathed = false;
+        CheckCombatState();
+    }
+
+    public void OnPlayerTookDamage()
+    {
+        _damageCombatTimer = 20f;
+        CheckCombatState();
+    }
+
+    private void CheckCombatState()
+    {
+        bool shouldBeInCombat = _isSwordUnsheathed || _damageCombatTimer > 0f;
+
+        if (shouldBeInCombat)
+        {
+            EnterCombat();
+        }
+        else
+        {
+            ExitCombat();
         }
     }
 

@@ -26,6 +26,9 @@ namespace Player
         {
             if (_audioSource == null || swordUnsheatheSound == null) return;
             
+            if (isOwner && MusicController.Instance != null)
+                MusicController.Instance.OnSwordUnsheathed();
+            
             await System.Threading.Tasks.Task.Delay(100);
             
             if (this != null && _audioSource != null && swordUnsheatheSound != null)
@@ -36,6 +39,9 @@ namespace Player
         public async void PlaySwordSheathe()
         {
             if (_audioSource == null || swordSheatheSound == null) return;
+            
+            if (isOwner && MusicController.Instance != null)
+                MusicController.Instance.OnSwordSheathed();
             
             await System.Threading.Tasks.Task.Delay(250);
             

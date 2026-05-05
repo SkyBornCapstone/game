@@ -52,6 +52,16 @@ namespace player
         {
             health.value -= amount;
             _timeSinceLastDamage = 0;
+            RpcOnTookDamage();
+        }
+
+        [ObserversRpc(runLocally: true)]
+        private void RpcOnTookDamage()
+        {
+            if (isOwner && MusicController.Instance != null)
+            {
+                MusicController.Instance.OnPlayerTookDamage();
+            }
         }
 
         [ServerRpc]
