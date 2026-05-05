@@ -20,6 +20,7 @@ public class MusicController : MonoBehaviour
     private bool _usingSourceA = true;
     private Coroutine _transitionCoroutine;
     private bool _inCombat = false;
+    private Coroutine _exitDelayCoroutine;
 
     private void Awake()
     {
@@ -47,6 +48,13 @@ public class MusicController : MonoBehaviour
     [ContextMenu("Enter Combat")]
     public void EnterCombat()
     {
+        if (_exitDelayCoroutine != null)
+        {
+            StopCoroutine(_exitDelayCoroutine);
+            _exitDelayCoroutine = null;
+            return;
+        }
+
         if (_inCombat) return;
         _inCombat = true;
         StartTransition(EnterCombatRoutine());
@@ -56,7 +64,16 @@ public class MusicController : MonoBehaviour
     public void ExitCombat()
     {
         if (!_inCombat) return;
+        if (_exitDelayCoroutine != null) return;
+
+        _exitDelayCoroutine = StartCoroutine(ExitDelayRoutine());
+    }
+
+    private IEnumerator ExitDelayRoutine()
+    {
+        yield return new WaitForSeconds(10f);
         _inCombat = false;
+        _exitDelayCoroutine = null;
         StartTransition(ExitCombatRoutine());
     }
 
