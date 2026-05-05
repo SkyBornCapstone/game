@@ -41,6 +41,13 @@ namespace Player.PlayerCombat
         public bool isBlocking => _isBlocking.value;
         public bool isStunned => _stunTimer > 0f;
 
+        private PlayerSounds _playerSounds;
+
+        private void Awake()
+        {
+            _playerSounds = GetComponent<PlayerSounds>();
+        }
+
         protected override void OnSpawned()
         {
             if (!isOwner) enabled = false;
@@ -92,12 +99,16 @@ namespace Player.PlayerCombat
                 _combatLayerActive = true;
                 animator?.SetTrigger(DrawSword);
                 _isSheathing = false;
+                
+                if (_playerSounds != null) _playerSounds.PlaySwordUnsheathe();
             }
             else if (!_swordInHand && _combatLayerActive)
             {
                 _combatLayerActive = false;
                 animator?.SetTrigger(SheathSword);
                 _isSheathing = true;
+
+                if (_playerSounds != null) _playerSounds.PlaySwordSheathe();
             }
 
             if (!_swordInHand) return;
@@ -143,6 +154,8 @@ namespace Player.PlayerCombat
                 {
                     animator?.SetTrigger(DownSwing);
                 }
+
+                if (_playerSounds != null) _playerSounds.PlaySwordSwing();
             }
 
             if (Input.GetKeyDown(KeyCode.F))
