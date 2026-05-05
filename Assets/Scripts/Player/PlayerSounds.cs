@@ -12,13 +12,61 @@ namespace Player
         [SerializeField] private AudioClip swordSwingSound;
         [SerializeField] private AudioClip swordHitSound;
 
+        [Header("Footstep Sounds")]
+        [SerializeField] private AudioClip[] footstepSounds;
+        [SerializeField] private float baseStepDistance = 1.5f;
+        [SerializeField] private float minimumSpeedToStep = 0.5f;
+        [SerializeField] [Range(0f, 1f)] private float footstepVolume = 0.3f;
+
         private AudioSource _audioSource;
         private float _lastHitSoundTime;
         private float _lastSwingSoundTime = -1f;
+        private Vector3 _lastPosition;
+        private float _distanceAccumulator;
 
         private void Awake()
         {
             _audioSource = GetComponent<AudioSource>();
+        }
+
+        private void Start()
+        {
+            _lastPosition = transform.position;
+        }
+
+        private void Update()
+        {
+            Vector3 currentPosition = transform.position;
+            // Calculate distance moved on the XZ plane (ignore vertical movement like jumping/falling)
+            float distanceMoved = Vector3.Distance(new Vector3(currentPosition.x, 0, currentPosition.z), new Vector3(_lastPosition.x, 0, _lastPosition.z));
+            
+            // Only count distance if moving faster than the threshold
+            float speed = distanceMoved / Time.deltaTime;
+            if (speed > minimumSpeedToStep)
+            {
+                _distanceAccumulator += distanceMoved;
+
+                if (_distanceAccumulator >= baseStepDistance)
+                {
+                    PlayFootstepSound();
+                    _distanceAccumulator -= baseStepDistance; // Keep remainder for smooth continuous movement
+                }
+            }
+            else
+            {
+                _distanceAccumulator = 0f;
+            }
+
+            _lastPosition = currentPosition;
+        }
+
+        private void PlayFootstepSound()
+        {
+            if (_audioSource == null || footstepSounds == null || footstepSounds.Length == 0) return;
+            
+            AudioClip clip = footstepSounds[Random.Range(0, footstepSounds.Length)];
+            if (clip != null)
+                _audioSource.PlayOneShot(clip, footstepVolume);
         }
 
         [ObserversRpc(runLocally: true)]
