@@ -13,6 +13,8 @@ namespace Player
         [SerializeField] private AudioClip swordHitSound;
 
         private AudioSource _audioSource;
+        private float _lastHitSoundTime;
+        private float _lastSwingSoundTime = -1f;
 
         private void Awake()
         {
@@ -45,6 +47,7 @@ namespace Player
         public void PlaySwordSwing()
         {
             if (_audioSource == null || swordSwingSound == null) return;
+            _lastSwingSoundTime = Time.time;
             _audioSource.PlayOneShot(swordSwingSound);
         }
 
@@ -52,6 +55,11 @@ namespace Player
         public void PlaySwordHit()
         {
             if (_audioSource == null || swordHitSound == null) return;
+            
+            if (Time.time - _lastSwingSoundTime > 0.5f) return;
+            if (Time.time - _lastHitSoundTime < 0.5f) return;
+            
+            _lastHitSoundTime = Time.time;
             _audioSource.PlayOneShot(swordHitSound);
         }
     }
