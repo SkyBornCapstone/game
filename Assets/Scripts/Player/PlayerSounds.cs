@@ -20,17 +20,25 @@ namespace Player
         }
 
         [ObserversRpc(runLocally: true)]
-        public void PlaySwordUnsheathe()
+        public async void PlaySwordUnsheathe()
         {
             if (_audioSource == null || swordUnsheatheSound == null) return;
-            _audioSource.PlayOneShot(swordUnsheatheSound);
+            
+            await System.Threading.Tasks.Task.Delay(100);
+            
+            if (this != null && _audioSource != null && swordUnsheatheSound != null)
+                _audioSource.PlayOneShot(swordUnsheatheSound);
         }
 
         [ObserversRpc(runLocally: true)]
-        public void PlaySwordSheathe()
+        public async void PlaySwordSheathe()
         {
             if (_audioSource == null || swordSheatheSound == null) return;
-            _audioSource.PlayOneShot(swordSheatheSound);
+            
+            await System.Threading.Tasks.Task.Delay(250);
+            
+            if (this != null && _audioSource != null && swordSheatheSound != null)
+                _audioSource.PlayOneShot(swordSheatheSound);
         }
 
         [ObserversRpc(runLocally: true)]
