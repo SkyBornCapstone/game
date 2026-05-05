@@ -13,7 +13,8 @@ namespace Player
         [SerializeField] private AudioClip swordHitSound;
 
         [Header("Footstep Sounds")]
-        [SerializeField] private AudioClip[] footstepSounds;
+        [SerializeField] private AudioClip[] woodFootstepSounds;
+        [SerializeField] private AudioClip[] grassFootstepSounds;
         [SerializeField] private float baseStepDistance = 1.5f;
         [SerializeField] private float minimumSpeedToStep = 0.5f;
         [SerializeField] [Range(0f, 1f)] private float footstepVolume = 0.3f;
@@ -62,9 +63,25 @@ namespace Player
 
         private void PlayFootstepSound()
         {
-            if (_audioSource == null || footstepSounds == null || footstepSounds.Length == 0) return;
+            AudioClip[] currentFootsteps = grassFootstepSounds; // Default to grass
+
+            // Raycast down slightly from above the player's feet
+            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out RaycastHit hit, 2.0f))
+            {
+                // Check if we hit the ship
+                if (hit.collider.CompareTag("Ship") || hit.collider.name.ToLower().Contains("ship"))
+                {
+                    currentFootsteps = woodFootstepSounds;
+                }
+                else
+                {
+                    currentFootsteps = grassFootstepSounds;
+                }
+            }
+
+            if (currentFootsteps == null || currentFootsteps.Length == 0) return;
             
-            AudioClip clip = footstepSounds[Random.Range(0, footstepSounds.Length)];
+            AudioClip clip = currentFootsteps[Random.Range(0, currentFootsteps.Length)];
             if (clip != null)
                 _audioSource.PlayOneShot(clip, footstepVolume);
         }
