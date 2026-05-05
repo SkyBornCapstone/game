@@ -20,8 +20,12 @@ namespace Damage
                 print("Own Collider");
                 return;
             }
+            
+            if (ownerCombat != null && ownerCombat.TryGetComponent(out Player.PlayerSounds playerSounds))
+            {
+                playerSounds.PlaySwordHit();
+            }
                 
-        
             if (other.TryGetComponent(out SwordCollider sword))
             {
                 print("GOT SWORD COLLIDER");
