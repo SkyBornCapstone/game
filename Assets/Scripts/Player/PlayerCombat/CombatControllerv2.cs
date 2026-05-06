@@ -35,6 +35,7 @@ namespace Player.PlayerCombat
         private bool _isSheathing = false;
         private bool _swordInHand = false;
         private float _stunTimer = 0f;
+        private float _lastSwingTriggerTime = 0f;
 
         // Renamed to _isBlocking, exposed via read-only property
         private SyncVar<bool> _isBlocking = new SyncVar<bool>(false, ownerAuth: true);
@@ -138,8 +139,12 @@ namespace Player.PlayerCombat
 
             if (IsSwingPlaying()) return;
 
+            // 1s cooldown on swinging sword, prevents spam clicking
+            if (Time.time - _lastSwingTriggerTime < 1.0f) return;
+
             if (Input.GetMouseButtonDown(0) && !isBlocking)
             {
+                _lastSwingTriggerTime = Time.time;
                 if (_side == "RIGHT")
                 {
                     animator?.SetTrigger(RightSwing);
@@ -166,6 +171,7 @@ namespace Player.PlayerCombat
 
         private bool IsSwingPlaying()
         {
+            if (animator.IsInTransition(1)) return true;
             AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(1);
             return stateInfo.IsName("Armature_RightSwingAttack")
                    || stateInfo.IsName("Armature_LeftSwingAttack")

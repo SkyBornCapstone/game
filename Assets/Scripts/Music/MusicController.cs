@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class MusicController : MonoBehaviour
 {
+    public static MusicController Instance { get; private set; }
+
     [Header("Audio Clips")]
     public AudioClip backgroundMusic;
     public AudioClip combatIntro;
@@ -20,9 +22,19 @@ public class MusicController : MonoBehaviour
     private bool _usingSourceA = true;
     private Coroutine _transitionCoroutine;
     private bool _inCombat = false;
+    private Coroutine _exitDelayCoroutine;
+    private float _damageCombatTimer = 0f;
+    private bool _isSwordUnsheathed = false;
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
         _sourceA = gameObject.AddComponent<AudioSource>();
         _sourceB = gameObject.AddComponent<AudioSource>();
         ConfigureSource(_sourceA);
@@ -44,9 +56,60 @@ public class MusicController : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (_damageCombatTimer > 0)
+        {
+            _damageCombatTimer -= Time.deltaTime;
+            if (_damageCombatTimer <= 0)
+            {
+                CheckCombatState();
+            }
+        }
+    }
+
+    public void OnSwordUnsheathed()
+    {
+        _isSwordUnsheathed = true;
+        CheckCombatState();
+    }
+
+    public void OnSwordSheathed()
+    {
+        _isSwordUnsheathed = false;
+        CheckCombatState();
+    }
+
+    public void OnPlayerTookDamage()
+    {
+        _damageCombatTimer = 20f;
+        CheckCombatState();
+    }
+
+    private void CheckCombatState()
+    {
+        bool shouldBeInCombat = _isSwordUnsheathed || _damageCombatTimer > 0f;
+
+        if (shouldBeInCombat)
+        {
+            EnterCombat();
+        }
+        else
+        {
+            ExitCombat();
+        }
+    }
+
     [ContextMenu("Enter Combat")]
     public void EnterCombat()
     {
+        if (_exitDelayCoroutine != null)
+        {
+            StopCoroutine(_exitDelayCoroutine);
+            _exitDelayCoroutine = null;
+            return;
+        }
+
         if (_inCombat) return;
         _inCombat = true;
         StartTransition(EnterCombatRoutine());
@@ -56,7 +119,16 @@ public class MusicController : MonoBehaviour
     public void ExitCombat()
     {
         if (!_inCombat) return;
+        if (_exitDelayCoroutine != null) return;
+
+        _exitDelayCoroutine = StartCoroutine(ExitDelayRoutine());
+    }
+
+    private IEnumerator ExitDelayRoutine()
+    {
+        yield return new WaitForSeconds(10f);
         _inCombat = false;
+        _exitDelayCoroutine = null;
         StartTransition(ExitCombatRoutine());
     }
 

@@ -849,6 +849,26 @@ MonoBehaviour:
   swordSheatheSound: {fileID: 8300000, guid: ac1b64c1a208c4201af4c92322abf565, type: 3}
   swordSwingSound: {fileID: 8300000, guid: 1ed122a64899f4665b51df933b7ce8d8, type: 3}
   swordHitSound: {fileID: 8300000, guid: bab175cf589654a3380837fd934b29c8, type: 3}
+  woodFootstepSounds:
+  - {fileID: 8300000, guid: 6e11914b177b84d97b76d799abe583df, type: 3}
+  - {fileID: 8300000, guid: 47b8976c3bd704220ad89a3b49f6b9a7, type: 3}
+  - {fileID: 8300000, guid: 3d7fcab0a17f042538a0857446f01858, type: 3}
+  - {fileID: 8300000, guid: f6d20719ba811498ca3ec9c3d79ec542, type: 3}
+  - {fileID: 8300000, guid: f8990f1f75d7d47159eb3aac9d23b68b, type: 3}
+  - {fileID: 8300000, guid: 93b9ca8ff5698417186f02184c54c31a, type: 3}
+  grassFootstepSounds:
+  - {fileID: 8300000, guid: 7ff3b17286d104024be5706b2e686e9b, type: 3}
+  - {fileID: 8300000, guid: c2303e15934034cab807a75955324228, type: 3}
+  - {fileID: 8300000, guid: 60417ce702fdf45758c19044617ae285, type: 3}
+  - {fileID: 8300000, guid: da6eb2d5ce9f94f76bf5bc93eca87e7a, type: 3}
+  - {fileID: 8300000, guid: 710f14e61df434cb2b6b915407da49cd, type: 3}
+  - {fileID: 8300000, guid: 5edfad3dfd0c546478ba200193143375, type: 3}
+  - {fileID: 8300000, guid: 5a95c3bedfe2d4e9aa40e615d63a8376, type: 3}
+  - {fileID: 8300000, guid: 895fb184fe0c5404b8cca409ea058eff, type: 3}
+  - {fileID: 8300000, guid: 905d0e12c66b64689ae94bddac18f5f9, type: 3}
+  baseStepDistance: 1.5
+  minimumSpeedToStep: 0.5
+  footstepVolume: 0.3
 --- !u!1 &8299736797706306495
 GameObject:
   m_ObjectHideFlags: 0
