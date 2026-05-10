@@ -1,4 +1,5 @@
-﻿using PurrNet;
+﻿using System.Collections;
+using PurrNet;
 using PurrNet.Transports;
 using TMPro;
 using UnityEngine;
@@ -12,6 +13,7 @@ namespace UI
         public TextMeshProUGUI joinCodeText;
         public TextMeshProUGUI playerCountText;
         public Button startGameButton;
+        public Animator transition;
 
         private NetworkManager _networkManager;
         private PurrTransport _purrTransport;
@@ -67,7 +69,28 @@ namespace UI
 
         public void StartGame()
         {
-            networkManager.sceneModule.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex + 1);
+            StartTransitionServerRpc();
+        }
+
+        [ServerRpc(requireOwnership: false)]
+        private void StartTransitionServerRpc()
+        {
+            PlayTransitionObserversRpc();
+        }
+
+        [ObserversRpc]
+        private void PlayTransitionObserversRpc()
+        {
+            StartCoroutine(LoadSceneAfterTransition());
+        }
+
+        IEnumerator LoadSceneAfterTransition()
+        {
+            transition.SetTrigger("Start");
+            yield return new WaitForSeconds(1f);
+
+            if (isServer)
+                networkManager.sceneModule.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex + 1);
         }
     }
 }
