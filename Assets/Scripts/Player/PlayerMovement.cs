@@ -1,7 +1,6 @@
 using JetBrains.Annotations;
 using PurrNet;
 using Ship;
-using Terrain;
 using UnityEngine;
 
 namespace Player
@@ -97,7 +96,7 @@ namespace Player
             Vector3 intendedVel =
                 (transform.forward * moveInput.y + transform.right * moveInput.x) *
                 currentSpeed;
-            
+
             rb.AddForce(intendedVel * acceleration);
 
             var horizontal = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
@@ -122,7 +121,7 @@ namespace Player
         private bool IsGrounded()
         {
             var hit = Physics.OverlapSphereNonAlloc(transform.position, groundCheckRadius, _groundCheckColliders,
-                groundLayer);
+                groundLayer, QueryTriggerInteraction.Ignore);
             return hit > 0;
         }
 

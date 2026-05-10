@@ -27,6 +27,11 @@ namespace player
                 health.value = Mathf.Min(health.value + healthRegen * Time.deltaTime, maxHealth);
             }
 
+            if (transform.position.y < -100)
+            {
+                TakeDamage(5f);
+            }
+
             // Check for death
             if (health.value <= 0)
             {
