@@ -2,11 +2,14 @@ using System.Collections.Generic;
 using player;
 using PurrNet;
 using PurrNet.StateMachine;
+using UnityEngine;
 
 namespace GameStates
 {
     public class RoundRunningState : StateNode
     {
+        [SerializeField] private bool respawns = true;
+
         private PlayerSpawningState _spawningState;
         private List<PlayerID> _currentPlayers;
 
@@ -54,11 +57,21 @@ namespace GameStates
             if (!owner.HasValue)
                 return;
 
-            _currentPlayers.Remove(owner.Value);
-
-            if (_currentPlayers.Count <= 0)
+            if (respawns)
             {
-                machine.Next();
+                var spawnPoint = _spawningState.spawnPoints[_currentPlayers.Count % _spawningState.spawnPoints.Count];
+                var spawnedPlayer = Instantiate(_spawningState.playerPrefab, spawnPoint.position, spawnPoint.rotation);
+                spawnedPlayer.TryGetComponent(out NetworkIdentity networkIdentity);
+                networkIdentity.GiveOwnership(owner.Value);
+            }
+            else
+            {
+                _currentPlayers.Remove(owner.Value);
+
+                if (_currentPlayers.Count <= 0)
+                {
+                    machine.Next();
+                }
             }
         }
     }
