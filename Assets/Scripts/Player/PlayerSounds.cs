@@ -60,7 +60,8 @@ namespace Player
 
                 if (_distanceAccumulator >= baseStepDistance)
                 {
-                    PlayFootstepSound();
+                    if (isOwner)
+                        PlayFootstepSound();
                     _distanceAccumulator -= baseStepDistance; // Keep remainder for smooth continuous movement
                 }
             }
@@ -72,6 +73,7 @@ namespace Player
             _lastPosition = currentPosition;
         }
 
+        [ObserversRpc(runLocally: true)]
         private void PlayFootstepSound()
         {
             AudioClip[] currentFootsteps = grassFootstepSounds; // Default to grass
