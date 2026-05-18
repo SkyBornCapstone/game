@@ -33,7 +33,10 @@ namespace Player.PlayerCombat
 
         private bool _combatLayerActive = false;
         private bool _isSheathing = false;
-        private bool _swordInHand = false;
+        
+        private SyncVar<bool> _swordInHand = new SyncVar<bool>(false, ownerAuth: true);
+        public bool swordInHand => _swordInHand.value;
+
         private float _stunTimer = 0f;
         private float _lastSwingTriggerTime = 0f;
 
@@ -47,11 +50,6 @@ namespace Player.PlayerCombat
         private void Awake()
         {
             _playerSounds = GetComponent<PlayerSounds>();
-        }
-
-        protected override void OnSpawned()
-        {
-            if (!isOwner) enabled = false;
         }
 
         // Only the owner can set this
@@ -73,9 +71,9 @@ namespace Player.PlayerCombat
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.T))
+            if (isOwner && Input.GetKeyDown(KeyCode.T))
             {
-                _swordInHand = !_swordInHand;
+                _swordInHand.value = !_swordInHand.value;
             }
 
             float currentWeight = animator != null ? animator.GetLayerWeight(1) : 0f;
@@ -89,30 +87,30 @@ namespace Player.PlayerCombat
                     if (currentWeight <= 0f) _isSheathing = false;
                 }
             }
-            else if (_swordInHand)
+            else if (_swordInHand.value)
             {
                 animator?.SetLayerWeight(1, Mathf.MoveTowards(currentWeight, 1f, Time.deltaTime * 5f));
-                grabController.Drop();
+                if (isOwner) grabController.Drop();
             }
 
-            if (_swordInHand && !_combatLayerActive)
+            if (_swordInHand.value && !_combatLayerActive)
             {
                 _combatLayerActive = true;
                 animator?.SetTrigger(DrawSword);
                 _isSheathing = false;
                 
-                if (_playerSounds != null) _playerSounds.PlaySwordUnsheathe();
+                if (isOwner && _playerSounds != null) _playerSounds.PlaySwordUnsheathe();
             }
-            else if (!_swordInHand && _combatLayerActive)
+            else if (!_swordInHand.value && _combatLayerActive)
             {
                 _combatLayerActive = false;
                 animator?.SetTrigger(SheathSword);
                 _isSheathing = true;
 
-                if (_playerSounds != null) _playerSounds.PlaySwordSheathe();
+                if (isOwner && _playerSounds != null) _playerSounds.PlaySwordSheathe();
             }
 
-            if (!_swordInHand) return;
+            if (!isOwner || !_swordInHand.value) return;
 
             if (Input.GetKey(KeyCode.I))
             {

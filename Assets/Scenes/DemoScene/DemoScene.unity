@@ -2185,7 +2185,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1554767636}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -4634,7 +4634,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 970836389}
-  - {fileID: 1554767636}
   - {fileID: 2036591716}
   - {fileID: 1395822014}
   - {fileID: 1137105209}
@@ -4858,8 +4857,8 @@ MonoBehaviour:
   combatOutro: {fileID: 8300000, guid: 0f30bc722294f4222b5defd948ffecfe, type: 3}
   crossFadeDuration: 1
   outroCrossFadeDuration: 3
-  musicVolume: 0
-  outroVolumeScale: 0
+  musicVolume: 0.12
+  outroVolumeScale: 0.06
 --- !u!4 &1475497389
 Transform:
   m_ObjectHideFlags: 0
@@ -6189,6 +6188,7 @@ MonoBehaviour:
   _directChildren: []
   _networkRules: {fileID: 0}
   _visitiblityRules: {fileID: 0}
+  respawns: 1
 --- !u!114 &2062012812
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6773,3 +6773,4 @@ SceneRoots:
   - {fileID: 1015910903}
   - {fileID: 75917848}
   - {fileID: 840902738}
+  - {fileID: 456386222}
