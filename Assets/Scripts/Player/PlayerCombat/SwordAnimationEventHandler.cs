@@ -5,23 +5,26 @@ public class SwordAnimationEventHandler : MonoBehaviour
     [SerializeField] private GameObject swordPrefab;
     [SerializeField] private GameObject swordDamage;
     [SerializeField] private Collider punchCollider;
-    
+
     private Collider[] colliders;
     private Collider triggerCollider;
     private Collider solidCollider;
 
     private void Awake()
     {
-        colliders = swordDamage.GetComponents<Collider>();
-        
-        foreach (var col in colliders)
+        if (swordDamage)
         {
-            if (col.isTrigger)
-                triggerCollider = col;
-            else
-                solidCollider = col;
+            colliders = swordDamage.GetComponents<Collider>();
+            foreach (var col in colliders)
+            {
+                if (col.isTrigger)
+                    triggerCollider = col;
+                else
+                    solidCollider = col;
+            }
         }
     }
+
     public void ShowSword()
     {
         swordPrefab.SetActive(true);
@@ -34,22 +37,21 @@ public class SwordAnimationEventHandler : MonoBehaviour
 
     public void ActivateSwordCollider()
     {
-        if (solidCollider != null)  solidCollider.enabled  = true;
+        if (solidCollider != null) solidCollider.enabled = true;
     }
 
     public void DeactivateSwordCollider()
     {
-        if (solidCollider != null)  solidCollider.enabled  = false;
+        if (solidCollider != null) solidCollider.enabled = false;
     }
 
     public void ActivatePunchCollider()
     {
-        if (punchCollider != null)  punchCollider.enabled  = true;
-        print("HERE");
+        if (punchCollider != null) punchCollider.enabled = true;
     }
 
     public void DeactivatePunchCollider()
     {
-        if (punchCollider != null)  punchCollider.enabled  = false;
+        if (punchCollider != null) punchCollider.enabled = false;
     }
 }

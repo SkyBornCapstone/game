@@ -22,6 +22,8 @@ namespace Enemy
         public float sightRange, attackRange;
         private bool _playerInSightRange, _playerInAttackRange;
 
+        public NetworkAnimator animator;
+
         private void Awake()
         {
             agent = GetComponent<NavMeshAgent>();
@@ -47,6 +49,9 @@ namespace Enemy
             if (!_playerInSightRange && !_playerInAttackRange) Patrolling();
             if (_playerInSightRange && !_playerInAttackRange) ChasePlayer(health);
             if (_playerInSightRange && _playerInAttackRange) AttackPlayer(health);
+
+            float speed = agent.velocity.magnitude / agent.speed;
+            animator.SetFloat("Speed", speed);
         }
 
         private void Patrolling()
@@ -80,11 +85,12 @@ namespace Enemy
         private void AttackPlayer(PlayerHealth health)
         {
             agent.SetDestination(transform.position);
-            transform.LookAt(health.transform);
+            // transform.LookAt(health.transform);
             if (Time.time > _nextAttack)
             {
                 _nextAttack = Time.time + timeBetweenAttacks;
                 health.TakeDamage(attackDamage);
+                animator.SetTrigger("Attack");
             }
         }
 
@@ -94,6 +100,14 @@ namespace Enemy
             Gizmos.DrawWireSphere(transform.position, attackRange);
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, sightRange);
+        }
+
+        public void ActivatePunchCollider()
+        {
+        }
+
+        public void DeactivatePunchCollider()
+        {
         }
     }
 }

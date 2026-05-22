@@ -1385,22 +1385,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Sword
       objectReference: {fileID: 0}
-    - target: {fileID: 792350487160378196, guid: 225b3803ea603944283ed0b46b6305f2, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2380599423328065010, guid: 225b3803ea603944283ed0b46b6305f2, type: 3}
-      propertyPath: handPosition
-      value: 
-      objectReference: {fileID: 1063521899831326893}
-    - target: {fileID: 3395629318284841476, guid: 225b3803ea603944283ed0b46b6305f2, type: 3}
-      propertyPath: m_Radius
-      value: 0.57
-      objectReference: {fileID: 0}
-    - target: {fileID: 3395629318284841476, guid: 225b3803ea603944283ed0b46b6305f2, type: 3}
-      propertyPath: m_Center.x
-      value: -0.62
-      objectReference: {fileID: 0}
     - target: {fileID: 3399230343777372294, guid: 225b3803ea603944283ed0b46b6305f2, type: 3}
       propertyPath: ownerCombat
       value: 
@@ -1457,8 +1441,7 @@ PrefabInstance:
       propertyPath: ownerCombat
       value: 
       objectReference: {fileID: 6957689588439827122}
-    m_RemovedComponents:
-    - {fileID: 2380599423328065010, guid: 225b3803ea603944283ed0b46b6305f2, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
