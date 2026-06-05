@@ -1,6 +1,4 @@
 using PurrNet;
-
-
 using Terrain;
 using UnityEngine;
 
@@ -33,6 +31,7 @@ namespace Ship.ShipControllers
             ApplyLift();
             ApplyForward();
             ApplyYaw();
+            LockPitchAndRoll();
         }
 
         private void ApplyYaw()
@@ -44,11 +43,11 @@ namespace Ship.ShipControllers
         private void ApplyForward()
         {
             Vector3 currentVelocity = mainShipRB.linearVelocity;
-            
-            Vector3 currentWindVelocity = BoundaryWindManager.Instance != null 
-                ? BoundaryWindManager.Instance.GetWindAtPosition(transform.position) 
+
+            Vector3 currentWindVelocity = BoundaryWindManager.Instance != null
+                ? BoundaryWindManager.Instance.GetWindAtPosition(transform.position)
                 : Vector3.zero;
-            
+
             // Subtract wind from the current velocity so we only track the ship's internal local momentum
             Vector3 relativeVelocity = currentVelocity - currentWindVelocity;
 
@@ -88,6 +87,15 @@ namespace Ship.ShipControllers
                 liftThrottle * maxLiftForce,
                 currentVelocity.z
             );
+        }
+
+        private void LockPitchAndRoll()
+        {
+            Vector3 currentEuler = transform.eulerAngles;
+            transform.eulerAngles = new Vector3(0f, currentEuler.y, 0f);
+
+            Vector3 currentAngularVel = mainShipRB.angularVelocity;
+            mainShipRB.angularVelocity = new Vector3(0f, currentAngularVel.y, 0f);
         }
 
         [ServerRpc]

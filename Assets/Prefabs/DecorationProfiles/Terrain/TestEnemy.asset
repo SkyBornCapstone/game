@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TestEnemy
   m_EditorClassIdentifier: 
   enemyPrefab: {fileID: 8844227698515988951, guid: 1a5430f0f8fb48f48afc26ddd2887f1d, type: 3}
-  spawnProbability: 0.102
+  spawnProbability: 0.431
   heightOffset: 0
   maxSlopeAngle: 30
   edgeBuffer: 2

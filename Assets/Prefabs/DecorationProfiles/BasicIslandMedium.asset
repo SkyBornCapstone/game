@@ -15,8 +15,8 @@ MonoBehaviour:
   profileName: BasicIslandMedium
   itemSpawnAttempts: 2
   items:
-  - itemPrefab: {fileID: 7137822625472565427, guid: 245d04d5813285841a9293375134c4f2, type: 3}
-    spawnProbability: 0.02
+  - itemPrefab: {fileID: 9216974360905813597, guid: 0adfa8b4b3b3b3c47925a7c86f85ece2, type: 3}
+    spawnProbability: 0.189
   terrainFeatures:
   - preset: {fileID: 11400000, guid: b26f4bd44ef808142aecfb0ae53078ea, type: 2}
     spawnCountRange: {x: 0, y: 4}
@@ -30,7 +30,7 @@ MonoBehaviour:
     spawnCountRange: {x: 0, y: 2}
   enemies:
   - preset: {fileID: 11400000, guid: e68b39c2cbac3e740b2d4ddbfd8ab26f, type: 2}
-    spawnCountRange: {x: 0, y: 2}
+    spawnCountRange: {x: 0, y: 4}
   densityMultiplier: 1
   minSpacing: 1
   maxSpawnAttempts: 100
